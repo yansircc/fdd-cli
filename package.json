@@ -34,13 +34,18 @@
 		"pitfall",
 		"experience-compiler"
 	],
-	"author": "",
+	"author": "yansircc",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/yansircc/fdd-cli.git"
+	},
+	"bugs": {
+		"url": "https://github.com/yansircc/fdd-cli/issues"
+	},
+	"homepage": "https://github.com/yansircc/fdd-cli#readme",
 	"engines": {
 		"node": ">=18"
 	},
-	"files": [
-		"dist",
-		"templates"
-	]
+	"files": ["dist", "templates"]
 }
