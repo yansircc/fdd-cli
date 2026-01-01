@@ -1,6 +1,6 @@
 {
 	"name": "fdd-cli",
-	"version": "0.1.2",
+	"version": "0.1.3",
 	"description": "Feedback-Driven Development CLI - Compile fixes into triggerable pitfalls",
 	"type": "module",
 	"bin": {
