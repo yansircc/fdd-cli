@@ -22,6 +22,11 @@ detect:
     exclude: []
     strength: strong
 
+replay:
+  root_cause: "[Root cause of the issue - required]"
+  trigger_condition: ""
+  affected_scope: []
+
 remedy:
   - level: low
     kind: transform

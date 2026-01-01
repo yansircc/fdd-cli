@@ -54,6 +54,83 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 		}
 	}
 
+	// Gate 5: Detect field validation
+	if (pitfall.detect && pitfall.detect.length > 0) {
+		for (let i = 0; i < pitfall.detect.length; i++) {
+			const d = pitfall.detect[i];
+			const prefix = `Gate 5 failed: detect[${i}]`;
+
+			if (d.kind === "rule" && !d.pattern) {
+				errors.push(`${prefix} kind=rule requires pattern`);
+			}
+			if (d.kind === "dynamic" && (!d.must_run || d.must_run.length === 0)) {
+				errors.push(`${prefix} kind=dynamic requires must_run`);
+			}
+			if (
+				d.kind === "change" &&
+				(!d.when_changed || d.when_changed.length === 0)
+			) {
+				errors.push(`${prefix} kind=change requires when_changed`);
+			}
+		}
+	} else {
+		errors.push("Gate 5 failed: at least one detector is required");
+	}
+
+	// Gate 6: Replay required
+	if (!pitfall.replay) {
+		errors.push("Gate 6 failed: replay is required");
+	} else if (
+		!pitfall.replay.root_cause ||
+		pitfall.replay.root_cause.trim() === ""
+	) {
+		errors.push("Gate 6 failed: replay.root_cause is required");
+	}
+
+	// Gate 7: Remedy content validation
+	if (!pitfall.remedy || pitfall.remedy.length === 0) {
+		errors.push("Gate 7 failed: at least one remedy is required");
+	} else {
+		for (let i = 0; i < pitfall.remedy.length; i++) {
+			const r = pitfall.remedy[i];
+			const prefix = `Gate 7 failed: remedy[${i}]`;
+
+			// action or steps must exist
+			const hasAction = r.action && r.action.trim() !== "";
+			const hasSteps = r.steps && r.steps.length > 0;
+			const hasDoc = r.doc && r.doc.trim() !== "";
+
+			if (!hasAction && !hasSteps && !hasDoc) {
+				errors.push(`${prefix} requires action, steps, or doc`);
+			}
+		}
+	}
+
+	// Gate 8: Verify level-checks consistency
+	if (pitfall.verify) {
+		const level = pitfall.verify.level;
+		const hasChecks = pitfall.verify.checks && pitfall.verify.checks.length > 0;
+		const hasFallback =
+			pitfall.verify.fallback?.self_proof &&
+			pitfall.verify.fallback.self_proof.length > 0;
+
+		// V0/V1 require executable checks
+		if ((level === "V0" || level === "V1") && !hasChecks) {
+			errors.push(
+				`Gate 8 failed: verify.level=${level} requires checks commands`,
+			);
+		}
+
+		// V3 requires fallback.self_proof
+		if (level === "V3" && !hasFallback) {
+			errors.push(
+				"Gate 8 failed: verify.level=V3 requires fallback.self_proof",
+			);
+		}
+	} else {
+		errors.push("Gate 8 failed: verify is required");
+	}
+
 	return {
 		passed: errors.length === 0,
 		errors,

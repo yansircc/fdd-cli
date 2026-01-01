@@ -9,8 +9,10 @@ import type {
 	Pitfall,
 	Regression,
 	RemedyPath,
+	Replay,
 	Severity,
 	Verify,
+	VerifyLevel,
 } from "../types/index.js";
 
 interface RecordOptions {
@@ -186,19 +188,73 @@ export async function record(
 			},
 		];
 
+		// Replay (root cause analysis)
+		console.log(chalk.yellow("\n🔄 Replay (root cause analysis)\n"));
+
+		const rootCause = await input({
+			message: "Root cause (why did this happen?)",
+			validate: (v) => (v.length > 0 ? true : "Root cause is required"),
+		});
+
+		const triggerCondition = await input({
+			message: "Trigger condition (optional)",
+			default: "",
+		});
+
+		const affectedScopeInput = await input({
+			message: "Affected scope (comma-separated, optional)",
+			default: "",
+		});
+
+		const replay: Replay = {
+			root_cause: rootCause,
+			trigger_condition: triggerCondition || undefined,
+			affected_scope: affectedScopeInput
+				? affectedScopeInput.split(",").map((s) => s.trim())
+				: undefined,
+		};
+
 		// Verification
 		console.log(chalk.yellow("\n✅ Verification\n"));
 
-		const defaultVerifyHooks = config.defaults.verify_hooks.join(", ");
-		const verifyCheck = await input({
-			message: "Verify check command",
-			default: defaultVerifyHooks,
-		});
+		const verifyLevel = (await select({
+			message: "Verify level",
+			choices: [
+				{ value: "V0", name: "V0 - Test/Type/Build (strongest)" },
+				{ value: "V1", name: "V1 - Lint/Grep/AST" },
+				{ value: "V2", name: "V2 - Evidence existence" },
+				{ value: "V3", name: "V3 - Self-proof (weakest)" },
+			],
+			default: "V0",
+		})) as VerifyLevel;
 
-		const verify: Verify = {
-			level: "V1",
-			checks: verifyCheck ? [verifyCheck] : config.defaults.verify_hooks,
-		};
+		const defaultVerifyHooks = config.defaults.verify_hooks.join(", ");
+
+		let verify: Verify;
+		if (verifyLevel === "V3") {
+			const selfProof = await input({
+				message: "Self-proof statement",
+				validate: (v) =>
+					v.length > 0 ? true : "Self-proof is required for V3",
+			});
+			verify = {
+				level: "V3",
+				fallback: {
+					level: "V3",
+					self_proof: [selfProof],
+				},
+			};
+		} else {
+			const verifyCheck = await input({
+				message: "Verify check command",
+				default: defaultVerifyHooks,
+				validate: (v) => (v.length > 0 ? true : "Check command is required"),
+			});
+			verify = {
+				level: verifyLevel,
+				checks: verifyCheck ? [verifyCheck] : config.defaults.verify_hooks,
+			};
+		}
 
 		// Regression
 		console.log(chalk.yellow("\n🔄 Regression test\n"));
@@ -278,6 +334,7 @@ export async function record(
 			tags,
 			evidence,
 			detect,
+			replay,
 			remedy,
 			verify,
 			regression,

@@ -78,6 +78,15 @@ export interface Edge {
 }
 
 /**
+ * Replay - root cause analysis
+ */
+export interface Replay {
+	root_cause: string;
+	trigger_condition?: string;
+	affected_scope?: string[];
+}
+
+/**
  * Complete Pitfall structure
  */
 export interface Pitfall {
@@ -88,6 +97,7 @@ export interface Pitfall {
 	created: string;
 	evidence: Evidence;
 	detect: DetectRule[];
+	replay: Replay;
 	remedy: RemedyPath[];
 	related_rule?: string;
 	verify: Verify;
