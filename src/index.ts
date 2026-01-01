@@ -32,6 +32,7 @@ program
 		"medium",
 	)
 	.option("-t, --tags <tags>", "Tags (comma-separated)")
+	.option("--json <data>", "Non-interactive mode: pass pitfall data as JSON")
 	.action((title, options) => record(title, options));
 
 program

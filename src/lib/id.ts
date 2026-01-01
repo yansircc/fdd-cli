@@ -26,7 +26,7 @@ export async function generateRuleId(rulesDir: string): Promise<string> {
 async function getExistingIds(dir: string, prefix: string): Promise<number[]> {
 	try {
 		const files = await readdir(dir);
-		const pattern = new RegExp(`^${prefix}-(\\d+)`);
+		const pattern = new RegExp(`^${prefix}-(\\d+)`, "i"); // Case-insensitive
 
 		return files
 			.map((file) => {

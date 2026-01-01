@@ -16,6 +16,40 @@ import type {
 interface RecordOptions {
 	severity?: Severity;
 	tags?: string;
+	json?: string;
+}
+
+/**
+ * Record pitfall from JSON (non-interactive mode for AI agents)
+ */
+async function recordFromJson(
+	pitfallsDir: string,
+	jsonInput: string,
+): Promise<void> {
+	try {
+		const data = JSON.parse(jsonInput) as Omit<Pitfall, "id" | "created">;
+
+		const result = await createPitfall(pitfallsDir, data);
+
+		console.log(chalk.green("✓ Pitfall recorded successfully!"));
+		console.log(
+			JSON.stringify({
+				success: true,
+				id: result.id,
+				path: result.path,
+				warnings: result.gateResult.warnings,
+			}),
+		);
+	} catch (error) {
+		console.error(chalk.red("Failed to record pitfall:"));
+		console.log(
+			JSON.stringify({
+				success: false,
+				error: (error as Error).message,
+			}),
+		);
+		process.exitCode = 1;
+	}
 }
 
 export async function record(
@@ -31,6 +65,12 @@ export async function record(
 
 	const paths = getPaths(cwd);
 	const config = await loadConfig(cwd);
+
+	// Non-interactive JSON mode for AI agents
+	if (options.json) {
+		await recordFromJson(paths.pitfalls, options.json);
+		return;
+	}
 
 	console.log(chalk.blue("\n📝 Recording a new pitfall\n"));
 	console.log(
