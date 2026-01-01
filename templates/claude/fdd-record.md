@@ -31,7 +31,39 @@ Extract from current conversation:
 
 If critical info is missing, ask **1-2 clarifying questions max**.
 
-### Step 2: Build JSON Structure
+### Step 2: Design Detector (THINK FIRST)
+
+**Before writing the detector, answer these questions:**
+
+#### Q1: What code pattern causes this bug?
+- What specific syntax/API usage is problematic?
+- Is it a naming pattern? An import? A function call?
+
+#### Q2: Where can this pattern appear?
+- Which directories contain code at risk?
+- Don't just use `src/routes/` — think about `components/`, `hooks/`, `lib/`, etc.
+- **Err on the side of broader scope** — false positives are better than missed bugs.
+
+#### Q3: How early can I catch it?
+| Method | When to use |
+|--------|-------------|
+| `rule` (grep/lint) | Pattern is statically detectable |
+| `change` | Trigger check when related files change |
+| `dynamic` | Only detectable at runtime |
+
+#### Q4: Will this detector miss cases? (False Negatives)
+- Is the regex pattern too specific?
+- Are there variations of the same bug?
+- **Design 2+ detectors** that complement each other.
+
+#### Q5: Will this detector false alarm? (False Positives)
+- What similar code is VALID?
+- Add `exclude` patterns or narrow `scope` if needed.
+- But **don't over-narrow** — catching the bug matters more.
+
+---
+
+### Step 3: Build JSON Structure
 
 ```json
 {
@@ -47,7 +79,14 @@ If critical info is missing, ask **1-2 clarifying questions max**.
       "kind": "rule",
       "tool": "grep",
       "pattern": "regex pattern",
-      "scope": ["src/**/*.tsx"],
+      "scope": ["src/**/*.tsx", "src/**/*.ts"],
+      "exclude": ["**/*.test.*", "**/*.spec.*"],
+      "strength": "strong"
+    },
+    {
+      "kind": "change",
+      "when_changed": ["src/db/**", "src/lib/**"],
+      "must_run": ["rg 'pattern' src/"],
       "strength": "strong"
     }
   ],
@@ -74,7 +113,7 @@ If critical info is missing, ask **1-2 clarifying questions max**.
 }
 ```
 
-### Step 3: Execute CLI Command
+### Step 4: Execute CLI Command
 
 ```bash
 fdd record --json '<your JSON here>'
@@ -83,10 +122,10 @@ fdd record --json '<your JSON here>'
 **Example:**
 
 ```bash
-fdd record --json '{"title":"Collection.state.values() not reactive","severity":"high","tags":["tanstack-db","react"],"evidence":{"error_snippet":"Page shows empty data but DB has records"},"detect":[{"kind":"rule","tool":"grep","pattern":"\\.state\\.values\\(\\)","scope":["src/routes/**/*.tsx"],"strength":"strong"}],"remedy":[{"level":"low","kind":"transform","action":"Use useLiveQuery instead","steps":["Import useLiveQuery","Replace state.values() call"]}],"verify":{"level":"V1","checks":["rg state.values src/routes/"]},"regression":{"repro":["Create component using .state.values()","Refresh page"],"expected":"Empty data displayed"},"edge":{"negative_case":["Using .state.values() in non-React code"],"expected":"Valid use case, should not trigger"}}'
+fdd record --json '{"title":"Collection.state.values() not reactive","severity":"high","tags":["tanstack-db","react"],"evidence":{"error_snippet":"Page shows empty data but DB has records"},"detect":[{"kind":"rule","tool":"grep","pattern":"\\.state\\.values\\(\\)","scope":["src/**/*.tsx","src/**/*.ts"],"exclude":["**/*.test.*"],"strength":"strong"},{"kind":"change","when_changed":["src/db/**"],"must_run":["rg .state.values src/"],"strength":"strong"}],"remedy":[{"level":"low","kind":"transform","action":"Use useLiveQuery instead","steps":["Import useLiveQuery","Replace state.values() call"]}],"verify":{"level":"V1","checks":["rg state.values src/"]},"regression":{"repro":["Create component using .state.values()","Refresh page"],"expected":"Empty data displayed"},"edge":{"negative_case":["Using .state.values() in non-React code"],"expected":"Valid use case, should not trigger"}}'
 ```
 
-### Step 4: Verify Output
+### Step 5: Verify Output
 
 CLI returns:
 ```json
