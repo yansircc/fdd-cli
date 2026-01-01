@@ -2,66 +2,52 @@
 description: Compile the recently completed fix into a triggerable pitfall (one-click, while context is warm)
 ---
 
+# STOP - READ THIS FIRST
+
+> **YOU MUST USE `fdd record --json '...'` COMMAND.**
+>
+> **DO NOT WRITE FILES DIRECTLY. DO NOT USE Write/Edit TOOLS FOR PITFALL FILES.**
+>
+> The CLI handles ID generation, gate validation, and formatting automatically.
+
+---
+
 ## Task
 
-You just helped the user complete a fix. Now compile this fix into a triggerable, regression-testable pitfall.
-
-**IMPORTANT: You MUST use the `fdd record --json` command to create the pitfall. Do NOT write files directly.**
+Compile the recently completed fix into a triggerable, regression-testable pitfall.
 
 ## Execution Protocol
 
-### A. Collect Warm Context
+### Step 1: Collect Context
 
-Extract automatically from current context:
-- Error symptoms (logs/screenshots/description) → `evidence.error_snippet`
-- Root cause analysis → Replay section
-- Fix diff → `evidence.diff_summary`
-- Fix command → `evidence.command`
-- Commit hash → `evidence.commit`
+Extract from current conversation:
 
-If critical information is missing, **ask only 1-2 clarifying questions**.
+| Field | Source |
+|-------|--------|
+| `evidence.error_snippet` | Error logs/symptoms |
+| `evidence.diff_summary` | Fix diff |
+| `evidence.command` | Triggering command |
+| `evidence.commit` | Commit hash (if available) |
 
-### B. Generate DRRV
+If critical info is missing, ask **1-2 clarifying questions max**.
 
-- **Detect**: At least 2 strategies (ordered by cost-effectiveness)
-  - If only string matching is possible, mark `strength: weak`
-- **Replay**: Minimal text describing root cause
-- **Remedy**: 1-3 paths, ordered by risk level
-- **Verify**: Assign the highest achievable V-level (V0 > V1 > V2 > V3)
+### Step 2: Build JSON Structure
 
-### C. Regression Test (Required)
-
-Provide reproduction steps or waiver:
-- Ideal: Executable repro steps
-- If not possible: Set `waiver: true` + `waiver_reason`
-
-### D. Edge Test (Required)
-
-Provide at least one negative case or waiver:
-- Ideal: Similar situation that should NOT trigger
-- If not possible: Set `waiver: true` + `waiver_reason`
-
-### E. Create Pitfall Using CLI
-
-**MUST use this command format:**
-
-```bash
-fdd record --json '{
-  "title": "Your pitfall title",
-  "severity": "medium",
-  "tags": ["tag1", "tag2"],
+```json
+{
+  "title": "Short descriptive title",
+  "severity": "high",
+  "tags": ["category1", "category2"],
   "evidence": {
-    "error_snippet": "Error message or symptoms",
-    "command": "command that triggered it",
-    "commit": "commit hash if available",
-    "diff_summary": "what changed"
+    "error_snippet": "What went wrong",
+    "diff_summary": "What changed to fix it"
   },
   "detect": [
     {
       "kind": "rule",
       "tool": "grep",
-      "pattern": "pattern to match",
-      "scope": ["src/**"],
+      "pattern": "regex pattern",
+      "scope": ["src/**/*.tsx"],
       "strength": "strong"
     }
   ],
@@ -69,52 +55,94 @@ fdd record --json '{
     {
       "level": "low",
       "kind": "transform",
-      "action": "What to do",
-      "steps": ["step 1", "step 2"]
+      "action": "How to fix",
+      "steps": ["Step 1", "Step 2"]
     }
   ],
   "verify": {
     "level": "V1",
-    "checks": ["verification command"]
+    "checks": ["command to verify fix"]
   },
   "regression": {
-    "repro": ["step 1", "step 2"],
-    "expected": "expected result"
+    "repro": ["Step to reproduce"],
+    "expected": "What happens when bug exists"
   },
   "edge": {
-    "negative_case": ["case that should NOT trigger"],
-    "expected": "expected behavior"
+    "negative_case": ["Similar case that should NOT trigger"],
+    "expected": "Why it's different"
   }
-}'
+}
 ```
 
-### F. Verify Result
+### Step 3: Execute CLI Command
 
-After running `fdd record --json`, the CLI will output:
-- `success: true/false`
-- `id`: The generated pitfall ID
-- `warnings`: Any gate warnings
+```bash
+fdd record --json '<your JSON here>'
+```
 
-If creation fails, fix the issues and retry.
+**Example:**
 
-## Gate Checks (Automatic)
+```bash
+fdd record --json '{"title":"Collection.state.values() not reactive","severity":"high","tags":["tanstack-db","react"],"evidence":{"error_snippet":"Page shows empty data but DB has records"},"detect":[{"kind":"rule","tool":"grep","pattern":"\\.state\\.values\\(\\)","scope":["src/routes/**/*.tsx"],"strength":"strong"}],"remedy":[{"level":"low","kind":"transform","action":"Use useLiveQuery instead","steps":["Import useLiveQuery","Replace state.values() call"]}],"verify":{"level":"V1","checks":["rg state.values src/routes/"]},"regression":{"repro":["Create component using .state.values()","Refresh page"],"expected":"Empty data displayed"},"edge":{"negative_case":["Using .state.values() in non-React code"],"expected":"Valid use case, should not trigger"}}'
+```
 
-The CLI automatically validates:
-- [ ] Evidence exists (error_snippet or command)
-- [ ] Regression exists (or has waiver + reason)
-- [ ] Edge exists (or has waiver + reason)
-- [ ] Weak detectors are marked
+### Step 4: Verify Output
 
-## Why Use CLI Instead of Direct File Write?
+CLI returns:
+```json
+{
+  "success": true,
+  "id": "PIT-003",
+  "path": ".fdd/pitfalls/pit-003-short-title.md",
+  "warnings": []
+}
+```
 
-1. **Automatic ID generation** - Ensures unique, sequential IDs
-2. **Gate validation** - Catches missing required fields immediately
-3. **Consistent formatting** - Correct YAML frontmatter structure
-4. **JSON output** - Easy to verify success/failure
+If `success: false`, fix the errors and retry.
 
-## Verify Levels
+---
 
-- V0 (test/type/build) → highest priority
-- V1 (rules: lint/grep/AST)
-- V2 (evidence existence)
-- V3 (structured self-proof) → last resort
+## Field Reference
+
+### severity
+`critical` | `high` | `medium` | `low`
+
+### detect[].kind
+`rule` (static analysis) | `change` (git-based) | `dynamic` (runtime)
+
+### detect[].strength
+`strong` (reliable) | `weak` (may have false positives)
+
+### remedy[].level
+`low` (safe) | `medium` (moderate risk) | `high` (risky)
+
+### remedy[].kind
+`transform` (code change) | `read` (documentation) | `run` (command)
+
+### verify.level
+`V0` (test/type/build) | `V1` (lint/grep) | `V2` (evidence) | `V3` (self-proof)
+
+### Waivers
+
+If regression or edge cannot be provided:
+```json
+{
+  "regression": {
+    "repro": [],
+    "expected": "",
+    "waiver": true,
+    "waiver_reason": "Why reproduction is not possible"
+  }
+}
+```
+
+---
+
+## Why CLI, Not Direct File Write?
+
+| Direct Write | CLI |
+|--------------|-----|
+| ❌ Manual ID generation | ✅ Automatic sequential ID |
+| ❌ No validation | ✅ Gate checks before write |
+| ❌ Format errors | ✅ Correct YAML frontmatter |
+| ❌ Silent failures | ✅ Clear success/error output |
