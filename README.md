@@ -78,6 +78,18 @@ fdd validate [--id PIT-001]
 Options:
 - `-i, --id` — Validate a specific pitfall by ID
 
+### `fdd check`
+
+Run detectors to find potential issues in the codebase.
+
+```bash
+fdd check [--id PIT-001] [--verbose]
+```
+
+Options:
+- `-i, --id` — Check a specific pitfall by ID
+- `-v, --verbose` — Show detailed match information
+
 ## Claude Integration
 
 Use the `/fdd-record` command in Claude to compile pitfalls while the context is still warm:

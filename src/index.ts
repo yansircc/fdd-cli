@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import pkg from "../package.json";
+import { check } from "./commands/check.js";
 import { init } from "./commands/init.js";
 import { list } from "./commands/list.js";
 import { record } from "./commands/record.js";
@@ -48,5 +49,12 @@ program
 	.description("Validate pitfalls against gate checks")
 	.option("-i, --id <id>", "Validate specific pitfall by ID")
 	.action((options) => validate(options));
+
+program
+	.command("check")
+	.description("Run detectors to find potential issues")
+	.option("-i, --id <id>", "Check specific pitfall by ID")
+	.option("-v, --verbose", "Show detailed match information")
+	.action((options) => check(options));
 
 program.parse();
