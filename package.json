@@ -7,7 +7,7 @@
 		"fdd": "./dist/index.js"
 	},
 	"scripts": {
-		"build": "bun build src/index.ts --outdir dist --target node && cp -r src/templates templates",
+		"build": "bun build src/index.ts --outdir dist --target node && rm -rf templates && cp -r src/templates templates",
 		"dev": "bun run src/index.ts",
 		"test": "bun test",
 		"lint": "biome check .",
