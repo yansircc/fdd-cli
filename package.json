@@ -38,8 +38,5 @@
 	"engines": {
 		"node": ">=18"
 	},
-	"files": [
-		"dist",
-		"templates"
-	]
+	"files": ["dist", "templates"]
 }

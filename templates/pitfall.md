@@ -1,18 +1,18 @@
 ---
 id: PIT-XXX
-title: "[坑位标题]"
+title: "[Pitfall title]"
 severity: medium
 tags: []
 created: YYYY-MM-DD
 
 evidence:
   error_snippet: |
-    [粘贴错误日志]
+    [Paste error log here]
   commit: ""
   command: ""
   env_fingerprint: {}
   diff_summary: |
-    [变更摘要]
+    [Summary of changes]
 
 detect:
   - kind: rule
@@ -48,18 +48,18 @@ edge:
   # waiver_reason: ""
 ---
 
-# Detect（抓现行）
+# Detect
 
-[描述如何检测这个问题]
+[Describe how to detect this issue]
 
-# Replay（放回放）
+# Replay
 
-[描述问题是如何发生的，根因是什么]
+[Describe how the issue occurred and its root cause]
 
-# Remedy（给方案）
+# Remedy
 
-[描述修复步骤]
+[Describe the fix steps]
 
-# Verify（过安检）
+# Verify
 
-[描述如何验证修复成功]
+[Describe how to verify the fix succeeded]

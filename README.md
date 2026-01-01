@@ -1,110 +1,130 @@
 # FDD CLI
 
-> **Feedback-Driven Development** - Compile fixes into triggerable pitfalls
+> **Feedback-Driven Development** — Compile fixes into triggerable, regression-testable pitfalls.
 
-趁 AI 还记得，把一次修复编译成"可触发、可回归"的坑位。
+Capture fix knowledge while the AI context is still warm, transforming ephemeral debugging sessions into persistent, actionable records.
 
-## 安装
+## Installation
 
 ```bash
 npm install -g fdd-cli
 ```
 
-## 快速开始
+## Quick Start
 
 ```bash
-# 1. 在项目中初始化 FDD
+# 1. Initialize FDD in your project
 fdd init
 
-# 2. 完成一次修复后，记录坑位
-fdd record "修复了 QueryClient 直接实例化的问题"
+# 2. After completing a fix, record the pitfall
+fdd record "Fixed QueryClient direct instantiation issue"
 
-# 3. 查看所有坑位
+# 3. List all recorded pitfalls
 fdd list
+
+# 4. Validate pitfalls against gate checks
+fdd validate
 ```
 
-## 命令
+## Commands
 
 ### `fdd init`
 
-初始化 FDD 目录结构。
+Initialize the FDD directory structure.
 
 ```bash
 fdd init [--force]
 ```
 
-创建：
-- `.fdd/pitfalls/` - 坑位条目
-- `.fdd/rules/` - 长期不变量
-- `.fdd/config.yaml` - 全局策略
-- `.claude/commands/fdd-record.md` - Claude 斜杠命令
-- `.claude/rules/fdd.md` - FDD 硬门禁规则
+Creates:
+- `.fdd/pitfalls/` — Pitfall entries (DRRV protocol)
+- `.fdd/rules/` — Long-term invariants (architectural contracts)
+- `.fdd/config.yaml` — Global configuration
+- `.claude/commands/fdd-record.md` — Claude slash command
+- `.claude/rules/fdd.md` — FDD gate rules
 
 ### `fdd record [title]`
 
-记录一个新的坑位。
+Record a new pitfall entry.
 
 ```bash
-fdd record "标题" [-s high] [-t api,security]
+fdd record "Title" [-s high] [-t api,security]
 ```
 
-选项：
-- `-s, --severity` - 严重度 (critical/high/medium/low)
-- `-t, --tags` - 标签 (逗号分隔)
+Options:
+- `-s, --severity` — Severity level (critical/high/medium/low)
+- `-t, --tags` — Tags (comma-separated)
 
 ### `fdd list`
 
-列出所有坑位。
+List all recorded pitfalls.
 
 ```bash
 fdd list [-s high] [-t api]
 ```
 
-选项：
-- `-s, --severity` - 按严重度过滤
-- `-t, --tag` - 按标签过滤
+Options:
+- `-s, --severity` — Filter by severity
+- `-t, --tag` — Filter by tag
 
-## Claude 集成
+### `fdd validate`
 
-在 Claude 中使用 `/fdd-record` 命令可以趁上下文还热时一键编译坑位：
-
-1. 与 Claude 协作完成修复
-2. 输入 `/fdd-record`
-3. Claude 自动提取上下文，生成 DRRV，执行回归测试
-4. 坑位直接写入 `.fdd/pitfalls/`
-
-## DRRV 协议
-
-每个坑位必须包含：
-
-- **Detect（抓现行）**：如何检测到这个问题
-- **Replay（放回放）**：问题是怎么发生的
-- **Remedy（给方案）**：如何修复
-- **Verify（过安检）**：如何验证修复成功
-
-## 硬门禁
-
-坑位必须包含：
-- `evidence`：原始证据 (error_snippet 或 command)
-- `regression`：回归测试 (或 waiver + reason)
-- `edge`：误诊边界测试 (或 waiver + reason)
-
-缺失任一项将无法写入。
-
-## 开发
+Validate pitfalls against gate checks.
 
 ```bash
-# 安装依赖
+fdd validate [--id PIT-001]
+```
+
+Options:
+- `-i, --id` — Validate a specific pitfall by ID
+
+## Claude Integration
+
+Use the `/fdd-record` command in Claude to compile pitfalls while the context is still warm:
+
+1. Complete a fix with Claude's assistance
+2. Execute `/fdd-record`
+3. Claude automatically extracts context, generates DRRV, and runs regression tests
+4. Pitfall is written to `.fdd/pitfalls/`
+
+## DRRV Protocol
+
+Each pitfall must contain:
+
+- **Detect** — How to detect this issue
+- **Replay** — How the issue occurred (root cause)
+- **Remedy** — How to fix it
+- **Verify** — How to verify the fix succeeded
+
+## Gate Checks
+
+Pitfalls must include:
+- `evidence` — Original evidence (error_snippet or command)
+- `regression` — Regression test (or waiver + reason)
+- `edge` — False positive boundary test (or waiver + reason)
+
+Missing any required field will prevent the pitfall from being written.
+
+## Development
+
+```bash
+# Install dependencies
 bun install
 
-# 运行开发版本
-bun run src/index.ts <command>
+# Run development version
+bun run dev <command>
 
-# 构建
+# Build
 bun run build
 
-# 类型检查
-bun run typecheck
+# Run tests
+bun test
+
+# Type check
+bun typecheck
+
+# Lint
+bun lint
 ```
 
 ## License

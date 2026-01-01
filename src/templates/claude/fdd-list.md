@@ -1,25 +1,25 @@
 ---
-description: 列出所有已记录的 FDD 坑位
+description: List all recorded FDD pitfalls
 argument-hint: "[--severity critical|high|medium|low] [--tag xxx]"
 ---
 
-## 任务
+## Task
 
-列出 `.fdd/pitfalls/` 中的所有坑位。
+List all pitfalls in `.fdd/pitfalls/`.
 
-## 过滤选项
+## Filter Options
 
-- `--severity`：按严重度过滤（critical/high/medium/low）
-- `--tag`：按标签过滤
+- `--severity` — Filter by severity (critical/high/medium/low)
+- `--tag` — Filter by tag
 
-## 输出格式
+## Output Format
 
-| ID | 标题 | 严重度 | 标签 | 创建日期 |
-|----|------|--------|------|----------|
+| ID | Title | Severity | Tags | Created |
+|----|-------|----------|------|---------|
 
-## 执行
+## Execution
 
-1. 读取 `.fdd/pitfalls/*.md` 文件
-2. 解析 frontmatter
-3. 应用过滤条件
-4. 格式化输出表格
+1. Read `.fdd/pitfalls/*.md` files
+2. Parse frontmatter
+3. Apply filter conditions
+4. Format output as table

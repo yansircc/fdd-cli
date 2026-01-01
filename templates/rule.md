@@ -1,37 +1,37 @@
 ---
 id: RULE-XXX
-title: "[规则标题]"
+title: "[Rule title]"
 severity: high
 tags: []
 created: YYYY-MM-DD
 
 constraint: |
-  [描述约束条件]
+  [Describe the constraint]
 
 verify:
-  - "[验证命令]"
+  - "[Verification command]"
 
 related_pitfalls: []
 ---
 
-# 背景
+# Background
 
-[为什么需要这个规则]
+[Why this rule is needed]
 
-# 约束
+# Constraint
 
-[具体的约束内容]
+[Specific constraint details]
 
-# 示例
+# Examples
 
-## 正确做法
+## Correct
 
 ```typescript
-// 正确示例
+// Correct example
 ```
 
-## 错误做法
+## Incorrect
 
 ```typescript
-// 错误示例
+// Incorrect example
 ```

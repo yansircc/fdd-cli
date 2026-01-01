@@ -1,57 +1,57 @@
-# FDD 规则（硬门禁）
+# FDD Rules (Gate Checks)
 
-## 核心原则
+## Core Principle
 
-> AI 会忘，但代码库不会。遇到错误时，趁热把修复编译成可触发的坑位。
+> AI context is ephemeral, but the codebase persists. When encountering errors, compile fixes into triggerable pitfalls while context is warm.
 
-## Gate 1: Evidence 必填
+## Gate 1: Evidence Required
 
-Pitfall 必须包含 `evidence` 区块，至少包含：
-- `error_snippet` 或 `command`
-- `commit`（如果有）
+Pitfall must contain an `evidence` block with at least:
+- `error_snippet` or `command`
+- `commit` (if available)
 
-缺少 evidence 的 pitfall **不允许写入**。
+Pitfalls missing evidence **will be rejected**.
 
-## Gate 2: Regression 必填
+## Gate 2: Regression Required
 
-Pitfall 必须包含 `regression` 区块。
-- 如果无法复现，必须显式声明 `waiver: true` + `waiver_reason`
+Pitfall must contain a `regression` block.
+- If reproduction is not possible, explicitly declare `waiver: true` + `waiver_reason`
 
-没有 regression 的 pitfall **不允许写入**。
+Pitfalls missing regression **will be rejected**.
 
-## Gate 3: Edge 必填
+## Gate 3: Edge Required
 
-Pitfall 必须包含 `edge` 区块（至少一个负样本）。
-- 如果确实无法设计负样本，必须 `waiver: true` + `waiver_reason`
+Pitfall must contain an `edge` block (at least one negative case).
+- If negative case design is not possible, use `waiver: true` + `waiver_reason`
 
-没有 edge 的 pitfall **不允许写入**。
+Pitfalls missing edge **will be rejected**.
 
-## Gate 4: 弱 Detector 标记
+## Gate 4: Weak Detector Marking
 
-如果 detect 只有字符串匹配（如 error log 关键词），必须：
-- 标记 `strength: weak`
-- 生成 TODO：如何升级到 rule/change/dynamic
+If detect only uses string matching (e.g., error log keywords), must:
+- Mark `strength: weak`
+- Generate TODO: how to upgrade to rule/change/dynamic
 
-## Verify 梯度
+## Verify Levels
 
-- V0（测试/类型/构建）→ 最优先
-- V1（规则：lint/grep/AST）
-- V2（证据存在性）
-- V3（结构化自证）→ 最后手段
+- V0 (test/type/build) → highest priority
+- V1 (rules: lint/grep/AST)
+- V2 (evidence existence)
+- V3 (structured self-proof) → last resort
 
-## Detect 优先级原则
+## Detect Priority Principle
 
-> **按"性价比"而不是按类别排序：最低成本且最高判定力优先。**
-> 静态/变更通常更便宜，但如果问题本质是动态契约，应优先动态。
+> **Order by cost-effectiveness, not by category: lowest cost + highest accuracy first.**
+> Static/change-based detection is usually cheaper, but if the issue is inherently about dynamic contracts, prioritize dynamic detection.
 
-## 命令提示
+## Command Reference
 
-- `/fdd-record` - 趁热编译坑位（一键完成）
-- `/fdd-list` - 列出所有坑位
+- `/fdd-record` — Compile pitfall while context is warm (one-click)
+- `/fdd-list` — List all pitfalls
 
-## 错误处理流程
+## Error Handling Workflow
 
-当遇到错误时：
-1. 先搜索 `.fdd/pitfalls/` 是否有相关记录
-2. 如果有：按 Remedy 步骤修复，完成 Verify 验证
-3. 如果没有：修复后立刻运行 `/fdd-record` 编译新坑位
+When encountering an error:
+1. First search `.fdd/pitfalls/` for related records
+2. If found: follow Remedy steps, complete Verify checks
+3. If not found: fix the issue, then immediately run `/fdd-record` to compile a new pitfall

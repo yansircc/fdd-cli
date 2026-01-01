@@ -1,43 +1,44 @@
 # FDD (Feedback-Driven Development)
 
-> **趁 AI 还记得，把一次修复编译成"可触发、可回归"的坑位**
+> Capture fix knowledge while AI context is warm, compiling it into triggerable, regression-testable pitfalls.
 
-## 黄金路径
+## Workflow
 
-1. 人类 + AI 协作完成一次修复（此时上下文还热）
-2. 立刻运行：`/fdd-record`（Claude 场景）或 `fdd record`（终端场景）
-3. AI 自动完成：DRRV 生成 → regression 测试 → edge 测试
-4. 坑位写入 `.fdd/pitfalls/`，从此成为 repo 的长期记忆
+1. Human + AI collaborate to complete a fix (context is warm)
+2. Immediately run: `/fdd-record` (Claude) or `fdd record` (terminal)
+3. AI automatically: generates DRRV → runs regression test → runs edge test
+4. Pitfall is written to `.fdd/pitfalls/`, becoming long-term repository memory
 
-## 目录结构
+## Directory Structure
 
 ```
 .fdd/
-├── pitfalls/     # 坑位条目（DRRV 协议）
-├── rules/        # 长期不变量（架构契约、禁令）
-└── config.yaml   # 全局策略
+├── pitfalls/     # Pitfall entries (DRRV protocol)
+├── rules/        # Long-term invariants (architectural contracts)
+└── config.yaml   # Global configuration
 ```
 
-## DRRV 协议
+## DRRV Protocol
 
-每个坑位必须包含：
+Each pitfall must contain:
 
-- **Detect（抓现行）**：如何检测到这个问题
-- **Replay（放回放）**：问题是怎么发生的
-- **Remedy（给方案）**：如何修复
-- **Verify（过安检）**：如何验证修复成功
+- **Detect** — How to detect this issue
+- **Replay** — How the issue occurred (root cause)
+- **Remedy** — How to fix it
+- **Verify** — How to verify the fix succeeded
 
-## 硬门禁
+## Gate Checks
 
-坑位必须包含：
-- `evidence`：原始证据（error_snippet 或 command）
-- `regression`：回归测试（或 waiver + reason）
-- `edge`：误诊边界测试（或 waiver + reason）
+Pitfalls must include:
+- `evidence` — Original evidence (error_snippet or command)
+- `regression` — Regression test (or waiver + reason)
+- `edge` — False positive boundary test (or waiver + reason)
 
-缺失任一项将无法写入。
+Missing any required field will prevent the pitfall from being written.
 
-## 命令
+## Commands
 
-- `/fdd-record`：在 Claude 中一键编译坑位
-- `fdd record`：在终端中记录坑位
-- `fdd list`：列出所有坑位
+- `/fdd-record` — Compile pitfall in Claude (one-click)
+- `fdd record` — Record pitfall in terminal
+- `fdd list` — List all pitfalls
+- `fdd validate` — Validate pitfalls against gate checks

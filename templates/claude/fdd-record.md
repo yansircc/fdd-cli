@@ -1,81 +1,81 @@
 ---
-description: 把刚完成的修复编译成可触发坑位（趁热，一键完成）
+description: Compile the recently completed fix into a triggerable pitfall (one-click, while context is warm)
 ---
 
-## 任务
+## Task
 
-你刚帮用户完成了一次修复。现在需要把这次修复"编译"成一个可触发、可回归的坑位。
+You just helped the user complete a fix. Now compile this fix into a triggerable, regression-testable pitfall.
 
-**必须一键完成，直接写入后通知用户。**
+**Complete in one action — write directly and notify the user.**
 
-## 执行协议
+## Execution Protocol
 
-### A. 收集热记忆材料
+### A. Collect Warm Context
 
-从当前上下文自动提取：
-- 错误现象（日志/截图/描述）→ 存入 `evidence.error_snippet`
-- 根因分析 → 存入 Replay
-- 修复 diff → 存入 `evidence.diff_summary`
-- 修复命令 → 存入 `evidence.command`
-- commit hash → 存入 `evidence.commit`
+Extract automatically from current context:
+- Error symptoms (logs/screenshots/description) → store in `evidence.error_snippet`
+- Root cause analysis → store in Replay section
+- Fix diff → store in `evidence.diff_summary`
+- Fix command → store in `evidence.command`
+- Commit hash → store in `evidence.commit`
 
-如果缺关键材料，**只问 1~2 个补充问题**。
+If critical information is missing, **ask only 1-2 clarifying questions**.
 
-### B. 生成 DRRV
+### B. Generate DRRV
 
-- **Detect**: 至少 2 条策略（按性价比排序，不按类别）
-  - 如果只能做字符串匹配，标记 `strength: weak`
-- **Replay**: 最少文字描述根因
-- **Remedy**: 1~3 条路径，按风险排序
-  - 如果有相关 Rule，引用它
-- **Verify**: 给最高可达的 V-level (V0 > V1 > V2 > V3)
+- **Detect**: At least 2 strategies (ordered by cost-effectiveness, not by category)
+  - If only string matching is possible, mark `strength: weak`
+- **Replay**: Minimal text describing root cause
+- **Remedy**: 1-3 paths, ordered by risk level
+  - Reference related Rules if applicable
+- **Verify**: Assign the highest achievable V-level (V0 > V1 > V2 > V3)
 
-### C. 故意复现（必须）
+### C. Regression Test (Required)
 
-提供方式"故意再犯一次"验证 detector 能命中。
-- 最理想：可执行的 repro 步骤/脚本
-- 次理想：模拟输入/最小改动触发 detector
-- 如果无法复现：
-  - 设置 `waiver: true` + `waiver_reason`
-  - 降级 verify 为 V3
-  - 标注"不可回归风险"
+Provide a way to "intentionally reproduce" the issue to verify detector effectiveness.
+- Ideal: Executable repro steps/script
+- Acceptable: Simulated input or minimal change to trigger detector
+- If reproduction is not possible:
+  - Set `waiver: true` + `waiver_reason`
+  - Downgrade verify to V3
+  - Note "non-regression risk"
 
-### D. 误诊边界（必须）
+### D. Edge Test (Required)
 
-至少一个负样本：相似但不应触发的情况。
-- 给出区分策略（scope/regex/路径白名单）
-- 如果无法设计：`waiver: true` + `waiver_reason`
+Provide at least one negative case: a similar situation that should NOT trigger the detector.
+- Provide differentiation strategy (scope/regex/path whitelist)
+- If design is not possible: `waiver: true` + `waiver_reason`
 
-### E. 直接写入并通知
+### E. Write and Notify
 
-1. 执行硬门禁检查
-2. 生成坑位文件
-3. 写入 `.fdd/pitfalls/`
-4. 输出通知：
-   - 坑位 ID 和标题
-   - 文件路径
-   - 关键信息摘要（severity, detect 策略, verify 级别）
-   - 如果有 waiver，高亮显示原因
-   - 如果有 warnings（如弱 detector），提示后续改进
+1. Execute gate checks
+2. Generate pitfall file
+3. Write to `.fdd/pitfalls/`
+4. Output notification:
+   - Pitfall ID and title
+   - File path
+   - Key information summary (severity, detect strategies, verify level)
+   - If waiver exists, highlight the reason
+   - If warnings exist (e.g., weak detector), suggest improvements
 
-## 硬门禁检查
+## Gate Checks
 
-写入前检查：
-- [ ] evidence 存在（error_snippet 或 command）
-- [ ] regression 存在（或有 waiver + reason）
-- [ ] edge 存在（或有 waiver + reason）
-- [ ] 弱 detector 已标记 strength: weak
+Before writing, verify:
+- [ ] Evidence exists (error_snippet or command)
+- [ ] Regression exists (or has waiver + reason)
+- [ ] Edge exists (or has waiver + reason)
+- [ ] Weak detectors are marked with `strength: weak`
 
-任一检查失败 → **拒绝写入**，提示补齐。
+If any check fails → **reject write**, prompt for completion.
 
-## Verify 梯度
+## Verify Levels
 
-- V0（测试/类型/构建）→ 最优先
-- V1（规则：lint/grep/AST）
-- V2（证据存在性）
-- V3（结构化自证）→ 最后手段
+- V0 (test/type/build) → highest priority
+- V1 (rules: lint/grep/AST)
+- V2 (evidence existence)
+- V3 (structured self-proof) → last resort
 
-## Detect 优先级原则
+## Detect Priority Principle
 
-> **按"性价比"而不是按类别排序：最低成本且最高判定力优先。**
-> 静态/变更通常更便宜，但如果问题本质是动态契约，应优先动态。
+> **Order by cost-effectiveness, not by category: lowest cost + highest accuracy first.**
+> Static/change-based detection is usually cheaper, but if the issue is inherently about dynamic contracts, prioritize dynamic detection.
