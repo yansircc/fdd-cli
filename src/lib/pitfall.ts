@@ -168,6 +168,10 @@ export async function listPitfalls(
 	for (const file of mdFiles) {
 		const content = await readFile(join(pitfallsDir, file), "utf-8");
 		const { data } = matter(content);
+		// Normalize created date to string (gray-matter parses dates as Date objects)
+		if (data.created instanceof Date) {
+			data.created = data.created.toISOString().split("T")[0];
+		}
 		pitfalls.push(data as Pitfall);
 	}
 

@@ -4,6 +4,7 @@ import { Command } from "commander";
 import { init } from "./commands/init.js";
 import { list } from "./commands/list.js";
 import { record } from "./commands/record.js";
+import { validate } from "./commands/validate.js";
 
 const program = new Command();
 
@@ -40,5 +41,11 @@ program
 	)
 	.option("-t, --tag <tag>", "Filter by tag")
 	.action((options) => list(options));
+
+program
+	.command("validate")
+	.description("Validate pitfalls against gate checks")
+	.option("-i, --id <id>", "Validate specific pitfall by ID")
+	.action((options) => validate(options));
 
 program.parse();
