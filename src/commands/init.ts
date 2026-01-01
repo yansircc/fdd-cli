@@ -42,11 +42,11 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	// Copy Claude commands
 	await copyTemplate(
 		"claude/fdd-record.md",
-		join(paths.claude.commands, "fdd-record.md")
+		join(paths.claude.commands, "fdd-record.md"),
 	);
 	await copyTemplate(
 		"claude/fdd-list.md",
-		join(paths.claude.commands, "fdd-list.md")
+		join(paths.claude.commands, "fdd-list.md"),
 	);
 	await copyTemplate("claude/fdd.md", join(paths.claude.rules, "fdd.md"));
 
@@ -70,7 +70,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log("Next steps:");
 	console.log(chalk.cyan("  1. Complete a fix with AI assistance"));
 	console.log(
-		chalk.cyan("  2. Run /fdd-record (in Claude) or fdd record (in terminal)")
+		chalk.cyan("  2. Run /fdd-record (in Claude) or fdd record (in terminal)"),
 	);
 }
 

@@ -28,7 +28,7 @@ export async function list(options: ListOptions = {}): Promise<void> {
 			console.log(chalk.gray("Try removing filters to see all pitfalls."));
 		} else {
 			console.log(
-				chalk.gray("Run /fdd-record (in Claude) or fdd record to create one.")
+				chalk.gray("Run /fdd-record (in Claude) or fdd record to create one."),
 			);
 		}
 		return;

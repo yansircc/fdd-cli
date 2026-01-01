@@ -20,7 +20,7 @@ interface RecordOptions {
 
 export async function record(
 	title: string | undefined,
-	options: RecordOptions = {}
+	options: RecordOptions = {},
 ): Promise<void> {
 	const cwd = process.cwd();
 
@@ -34,8 +34,8 @@ export async function record(
 	console.log(chalk.blue("Recording a new pitfall..."));
 	console.log(
 		chalk.gray(
-			"Tip: For best results, run /fdd-record in Claude while the context is hot."
-		)
+			"Tip: For best results, run /fdd-record in Claude while the context is hot.",
+		),
 	);
 	console.log();
 
@@ -51,7 +51,7 @@ export async function record(
 	const pitfallTitle = title || (await question(chalk.cyan("Title: ")));
 	const severity = (options.severity ||
 		((await question(
-			chalk.cyan("Severity (critical/high/medium/low) [medium]: ")
+			chalk.cyan("Severity (critical/high/medium/low) [medium]: "),
 		)) as Severity) ||
 		"medium") as Severity;
 	const tagsInput =
@@ -62,7 +62,7 @@ export async function record(
 	console.log(chalk.yellow("Evidence collection:"));
 
 	const errorSnippet = await question(
-		chalk.cyan("Error snippet (paste, then press Enter twice):\n")
+		chalk.cyan("Error snippet (paste, then press Enter twice):\n"),
 	);
 	const command = await question(chalk.cyan("Command that triggered it: "));
 	const commit = await question(chalk.cyan("Commit hash (optional): "));
@@ -79,7 +79,7 @@ export async function record(
 	console.log(chalk.yellow("Detection strategy:"));
 
 	const detectPattern = await question(
-		chalk.cyan("Detection pattern (grep regex): ")
+		chalk.cyan("Detection pattern (grep regex): "),
 	);
 	const detectScope = await question(chalk.cyan("Detection scope [src/**]: "));
 
@@ -98,7 +98,7 @@ export async function record(
 
 	const remedyAction = await question(chalk.cyan("Fix action: "));
 	const remedySteps = await question(
-		chalk.cyan("Fix steps (comma-separated): ")
+		chalk.cyan("Fix steps (comma-separated): "),
 	);
 
 	const remedy: RemedyPath[] = [
@@ -124,11 +124,11 @@ export async function record(
 	console.log(chalk.yellow("Regression test:"));
 
 	const regressionRepro = await question(
-		chalk.cyan("How to reproduce (comma-separated steps): ")
+		chalk.cyan("How to reproduce (comma-separated steps): "),
 	);
 	const regressionExpected = await question(chalk.cyan("Expected result: "));
 	const regressionWaiver = await question(
-		chalk.cyan("Waiver reason (if cannot reproduce, otherwise leave empty): ")
+		chalk.cyan("Waiver reason (if cannot reproduce, otherwise leave empty): "),
 	);
 
 	const regression: Regression = regressionWaiver
@@ -149,11 +149,11 @@ export async function record(
 	console.log(chalk.yellow("Edge case (negative sample):"));
 
 	const edgeNegative = await question(
-		chalk.cyan("Negative case (should NOT trigger): ")
+		chalk.cyan("Negative case (should NOT trigger): "),
 	);
 	const edgeExpected = await question(chalk.cyan("Expected behavior: "));
 	const edgeWaiver = await question(
-		chalk.cyan("Waiver reason (if cannot design, otherwise leave empty): ")
+		chalk.cyan("Waiver reason (if cannot design, otherwise leave empty): "),
 	);
 
 	const edge: Edge = edgeWaiver

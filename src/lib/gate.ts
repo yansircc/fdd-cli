@@ -13,7 +13,7 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 			pitfall.evidence.error_snippet || pitfall.evidence.command;
 		if (!hasContent) {
 			errors.push(
-				"Gate 1 failed: evidence must contain error_snippet or command"
+				"Gate 1 failed: evidence must contain error_snippet or command",
 			);
 		}
 	} else {
@@ -45,11 +45,11 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 
 		if (allWeak && pitfall.detect.length > 0) {
 			warnings.push(
-				"Gate 4 warning: all detectors are weak - consider upgrading to rule/change/dynamic"
+				"Gate 4 warning: all detectors are weak - consider upgrading to rule/change/dynamic",
 			);
 		} else if (hasWeakDetector) {
 			warnings.push(
-				"Gate 4 warning: some detectors are weak - marked for future upgrade"
+				"Gate 4 warning: some detectors are weak - marked for future upgrade",
 			);
 		}
 	}

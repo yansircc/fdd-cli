@@ -38,7 +38,7 @@ export function isInitialized(cwd: string = process.cwd()): boolean {
  * Load FDD config
  */
 export async function loadConfig(
-	cwd: string = process.cwd()
+	cwd: string = process.cwd(),
 ): Promise<FDDConfig> {
 	const configPath = join(getFddRoot(cwd), "config.yaml");
 

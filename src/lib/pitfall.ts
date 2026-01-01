@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import matter from "gray-matter";
 import type { Pitfall } from "../types/index.js";
@@ -12,7 +12,7 @@ import { generatePitfallId, pitfallFilename } from "./id.js";
  */
 export async function createPitfall(
 	pitfallsDir: string,
-	pitfall: Omit<Pitfall, "id" | "created">
+	pitfall: Omit<Pitfall, "id" | "created">,
 ): Promise<{
 	path: string;
 	id: string;
@@ -154,7 +154,7 @@ export async function listPitfalls(
 	filter?: {
 		severity?: string;
 		tag?: string;
-	}
+	},
 ): Promise<Pitfall[]> {
 	if (!existsSync(pitfallsDir)) {
 		return [];
@@ -179,7 +179,8 @@ export async function listPitfalls(
 	}
 
 	if (filter?.tag) {
-		result = result.filter((p) => p.tags?.includes(filter.tag!));
+		const tag = filter.tag;
+		result = result.filter((p) => p.tags?.includes(tag));
 	}
 
 	// Sort by ID
@@ -191,7 +192,7 @@ export async function listPitfalls(
  */
 export async function getPitfallById(
 	pitfallsDir: string,
-	id: string
+	id: string,
 ): Promise<Pitfall | null> {
 	if (!existsSync(pitfallsDir)) {
 		return null;
@@ -199,7 +200,7 @@ export async function getPitfallById(
 
 	const files = await readdir(pitfallsDir);
 	const matchingFile = files.find((f) =>
-		f.toLowerCase().startsWith(id.toLowerCase())
+		f.toLowerCase().startsWith(id.toLowerCase()),
 	);
 
 	if (!matchingFile) {

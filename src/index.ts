@@ -10,7 +10,7 @@ const program = new Command();
 program
 	.name("fdd")
 	.description(
-		"FDD CLI - Compile fixes into triggerable pitfalls (Feedback-Driven Development)"
+		"FDD CLI - Compile fixes into triggerable pitfalls (Feedback-Driven Development)",
 	)
 	.version("0.1.0");
 
@@ -26,7 +26,7 @@ program
 	.option(
 		"-s, --severity <level>",
 		"Severity level (critical/high/medium/low)",
-		"medium"
+		"medium",
 	)
 	.option("-t, --tags <tags>", "Tags (comma-separated)")
 	.action((title, options) => record(title, options));
@@ -36,7 +36,7 @@ program
 	.description("List all recorded pitfalls")
 	.option(
 		"-s, --severity <level>",
-		"Filter by severity (critical/high/medium/low)"
+		"Filter by severity (critical/high/medium/low)",
 	)
 	.option("-t, --tag <tag>", "Filter by tag")
 	.action((options) => list(options));
