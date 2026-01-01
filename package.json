@@ -1,6 +1,6 @@
 {
 	"name": "fdd-cli",
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"description": "Feedback-Driven Development CLI - Compile fixes into triggerable pitfalls",
 	"type": "module",
 	"bin": {
@@ -38,5 +38,8 @@
 	"engines": {
 		"node": ">=18"
 	},
-	"files": ["dist", "templates"]
+	"files": [
+		"dist",
+		"templates"
+	]
 }
