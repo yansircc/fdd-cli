@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import pkg from "../package.json";
 import { init } from "./commands/init.js";
 import { list } from "./commands/list.js";
 import { record } from "./commands/record.js";
@@ -13,7 +14,7 @@ program
 	.description(
 		"FDD CLI - Compile fixes into triggerable pitfalls (Feedback-Driven Development)",
 	)
-	.version("0.1.0");
+	.version(pkg.version);
 
 program
 	.command("init")

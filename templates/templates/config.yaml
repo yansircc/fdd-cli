@@ -1,0 +1,18 @@
+version: 1
+
+# 全局策略
+defaults:
+  scope: ["src/**"]
+  exclude: ["node_modules/**", "dist/**"]
+  verify_hooks: ["bun lint", "bun test"]
+  detector_tools: ["grep", "bun lint"]
+
+# 加载限制
+limits:
+  max_pitfalls_in_context: 5
+
+# waiver 策略
+waiver:
+  require_reason: true
+
+# 注意：具体 detect 规则只存在于 pitfall 条目里（单一事实来源）
