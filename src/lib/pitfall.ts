@@ -63,6 +63,7 @@ function generatePitfallContent(pitfall: Pitfall): string {
 		created: pitfall.created,
 		evidence: pitfall.evidence,
 		detect: pitfall.detect,
+		replay: pitfall.replay,
 		remedy: pitfall.remedy,
 		...(pitfall.related_rule && { related_rule: pitfall.related_rule }),
 		verify: pitfall.verify,
