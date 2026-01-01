@@ -1,0 +1,44 @@
+{
+  "name": "fdd-cli",
+  "version": "0.1.0",
+  "description": "Feedback-Driven Development CLI - Compile fixes into triggerable pitfalls",
+  "type": "module",
+  "bin": {
+    "fdd": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "bun build src/index.ts --outdir dist --target node && cp -r src/templates templates",
+    "dev": "bun run src/index.ts",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "commander": "^12.1.0",
+    "gray-matter": "^4.0.3",
+    "chalk": "^5.3.0",
+    "cli-table3": "^0.6.5",
+    "yaml": "^2.6.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/bun": "latest",
+    "typescript": "^5.7.2"
+  },
+  "keywords": [
+    "fdd",
+    "feedback-driven-development",
+    "ai",
+    "claude",
+    "pitfall",
+    "experience-compiler"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "files": [
+    "dist",
+    "templates"
+  ]
+}
