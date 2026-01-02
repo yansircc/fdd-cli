@@ -1,5 +1,5 @@
 ---
-description: 把刚完成的修复编译成可触发坑位（趁热，一键完成）
+description: 把刚完成的修复编译成可触发 PIT（pitfall 的缩写）（趁热，一键完成）
 ---
 
 # STOP - 必须使用 CLI
@@ -23,7 +23,7 @@ description: 把刚完成的修复编译成可触发坑位（趁热，一键完�
 | 文件变更触发 | `change` | schema 变更后验证 |
 | 危险命令拦截 | `command` | 阻止 `wrangler d1` |
 | 文件写入保护 | `protect` | 禁止直接写入 `.fdd/` |
-| AI 上下文提醒 | `ai-context` | 修改某文件时自动提醒历史坑位 |
+| AI 上下文提醒 | `ai-context` | 修改某文件时自动提醒历史PIT |
 
 **决策流程：**
 ```

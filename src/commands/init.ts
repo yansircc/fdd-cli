@@ -29,6 +29,17 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	if (isInitialized(cwd) && !options.force) {
 		console.log(chalk.yellow("FDD is already initialized in this directory."));
 		console.log(chalk.gray("Use --force to reinitialize."));
+
+		// Still check and install shell hook for new users who cloned the repo
+		if (!options.skipHook) {
+			const hookInstalled = installShellHook();
+			if (hookInstalled) {
+				console.log();
+				console.log(chalk.cyan("To activate command guard, run:"));
+				console.log(chalk.white("  source ~/.zshrc"));
+				console.log(chalk.gray("  (or open a new terminal)"));
+			}
+		}
 		return;
 	}
 

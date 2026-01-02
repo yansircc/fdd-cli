@@ -129,7 +129,7 @@ function processStopHook(input) {
 
   if (hasModification) {
     console.error(\`
-[FDD] 检测到文件修改，请反思是否值得记录坑位：
+[FDD] 检测到文件修改，请反思是否值得记录 PIT( Pitfall 的缩写)：
 
 修改的文件: \${modifiedFiles.slice(0, 5).join(", ")}\${modifiedFiles.length > 5 ? " ..." : ""}
 
