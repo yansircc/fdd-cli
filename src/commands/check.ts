@@ -1,7 +1,8 @@
 import chalk from "chalk";
 import { getPaths, isInitialized } from "../lib/config.js";
-import { type CheckResult, runDetectors } from "../lib/detector.js";
 import { listPitfalls } from "../lib/pitfall.js";
+import { type CheckResult, runTriggers } from "../lib/trigger/index.js";
+import { printPassedResult, printTriggeredResult } from "./check-output.js";
 
 interface CheckOptions {
 	id?: string;
@@ -35,14 +36,14 @@ export async function check(options: CheckOptions = {}): Promise<void> {
 	}
 
 	console.log(
-		chalk.blue(`Running detectors for ${toCheck.length} pitfall(s)...\n`),
+		chalk.blue(`Running triggers for ${toCheck.length} pitfall(s)...\n`),
 	);
 
 	const results: CheckResult[] = [];
 	let triggeredCount = 0;
 
 	for (const pitfall of toCheck) {
-		const result = await runDetectors(pitfall, cwd);
+		const result = await runTriggers(pitfall, cwd);
 		results.push(result);
 
 		if (result.triggered) {
@@ -71,71 +72,8 @@ export async function check(options: CheckOptions = {}): Promise<void> {
 			chalk.yellow("Triggered pitfalls may indicate recurring issues."),
 		);
 		console.log(
-			chalk.yellow("Review the Remedy section in each pitfall for fixes."),
+			chalk.yellow("Review the Action section in each pitfall for fixes."),
 		);
 		process.exitCode = 1;
-	}
-}
-
-function printTriggeredResult(result: CheckResult, verbose?: boolean): void {
-	const severityColor = getSeverityColor(result.severity);
-	console.log(
-		chalk.red("⚠ TRIGGERED: ") +
-			chalk.bold(result.pitfallId) +
-			chalk.gray(" — ") +
-			result.pitfallTitle,
-	);
-	console.log(chalk.gray("  Severity: ") + severityColor(result.severity));
-
-	for (const detector of result.detectors) {
-		if (detector.triggered) {
-			console.log(
-				chalk.red(
-					`  ├─ Detector ${detector.detectorIndex + 1} (${detector.kind}): TRIGGERED`,
-				),
-			);
-			if (verbose && detector.matches) {
-				for (const match of detector.matches.slice(0, 5)) {
-					console.log(chalk.gray(`  │  └─ ${match.slice(0, 80)}`));
-				}
-				if (detector.matches.length > 5) {
-					console.log(
-						chalk.gray(`  │  └─ ... and ${detector.matches.length - 5} more`),
-					);
-				}
-			}
-		} else if (detector.error) {
-			console.log(
-				chalk.yellow(
-					`  ├─ Detector ${detector.detectorIndex + 1} (${detector.kind}): ERROR`,
-				),
-			);
-			console.log(chalk.yellow(`  │  └─ ${detector.error}`));
-		}
-	}
-	console.log();
-}
-
-function printPassedResult(result: CheckResult): void {
-	console.log(
-		chalk.green("✓ ") +
-			chalk.dim(result.pitfallId) +
-			chalk.gray(" — ") +
-			chalk.dim(result.pitfallTitle),
-	);
-}
-
-function getSeverityColor(severity: string): (text: string) => string {
-	switch (severity) {
-		case "critical":
-			return chalk.red;
-		case "high":
-			return chalk.yellow;
-		case "medium":
-			return chalk.blue;
-		case "low":
-			return chalk.gray;
-		default:
-			return chalk.white;
 	}
 }

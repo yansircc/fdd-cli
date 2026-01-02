@@ -10,6 +10,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import chalk from "chalk";
 import { getPaths, isInitialized } from "../lib/config.js";
+import { syncProtectHooks } from "../lib/hooks-generator.js";
+import { HOOK_MARKER_START, ZSH_HOOK } from "../lib/shell-hooks.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const TEMPLATES_DIR = join(__dirname, "..", "templates");
@@ -46,31 +48,44 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	await copyTemplate("pitfall.md", join(paths.pitfalls, "_template.md"));
 	await copyTemplate("rule.md", join(paths.rules, "_template.md"));
 
+	// Copy example pitfall (demonstrates protect trigger)
+	await copyTemplate(
+		"pitfall-example.md",
+		join(paths.pitfalls, "pit-000-example-protect-pitfalls.md"),
+	);
+
 	// Copy Claude commands
 	await copyTemplate(
 		"claude/fdd-record.md",
 		join(paths.claude.commands, "fdd-record.md"),
 	);
-	await copyTemplate(
-		"claude/fdd-list.md",
-		join(paths.claude.commands, "fdd-list.md"),
-	);
 	await copyTemplate("claude/fdd.md", join(paths.claude.rules, "fdd.md"));
+
+	// Initialize protect hooks (will be empty if no pitfalls exist)
+	const hooksResult = await syncProtectHooks(cwd);
 
 	console.log(chalk.green("✓ FDD initialized successfully!"));
 	console.log();
 	console.log("Created:");
 	console.log(chalk.gray("  .fdd/"));
 	console.log(chalk.gray("    ├── pitfalls/"));
-	console.log(chalk.gray("    │   └── _template.md"));
+	console.log(chalk.gray("    │   ├── _template.md"));
+	console.log(
+		chalk.gray("    │   └── pit-000-example-protect-pitfalls.md ") +
+			chalk.dim("(示例，可删除)"),
+	);
 	console.log(chalk.gray("    ├── rules/"));
 	console.log(chalk.gray("    │   └── _template.md"));
 	console.log(chalk.gray("    ├── config.yaml"));
 	console.log(chalk.gray("    └── README.md"));
 	console.log(chalk.gray("  .claude/"));
 	console.log(chalk.gray("    ├── commands/"));
-	console.log(chalk.gray("    │   ├── fdd-record.md"));
-	console.log(chalk.gray("    │   └── fdd-list.md"));
+	console.log(chalk.gray("    │   └── fdd-record.md"));
+	if (hooksResult.generated) {
+		console.log(chalk.gray("    ├── hooks/"));
+		console.log(chalk.gray("    │   └── fdd-protect.js"));
+		console.log(chalk.gray("    ├── settings.json"));
+	}
 	console.log(chalk.gray("    └── rules/"));
 	console.log(chalk.gray("        └── fdd.md"));
 
@@ -94,50 +109,6 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	);
 }
 
-// Shell hook constants and installation
-const HOOK_MARKER_START = "# >>> FDD Command Guard >>>";
-const HOOK_MARKER_END = "# <<< FDD Command Guard <<<";
-
-const ZSH_HOOK = `${HOOK_MARKER_START}
-# FDD (Failure-Driven Development) command guard
-# Automatically blocks dangerous commands defined in .fdd/pitfalls/
-# Uninstall: fdd install-hook --uninstall
-
-__fdd_preexec() {
-  # Skip if command is empty or starts with space (private command)
-  [[ -z "$1" ]] && return 0
-  [[ "$1" == " "* ]] && return 0
-
-  # Skip fdd commands to avoid recursion
-  [[ "$1" == fdd* ]] && return 0
-
-  # Check if .fdd directory exists in current or parent directories
-  local dir="$PWD"
-  while [[ "$dir" != "/" ]]; do
-    if [[ -d "$dir/.fdd" ]]; then
-      # Run guard check
-      fdd guard "$1" 2>&1
-      local exit_code=$?
-
-      if [[ $exit_code -eq 1 ]]; then
-        # Blocked - return false to prevent command execution
-        return 1
-      elif [[ $exit_code -eq 2 ]]; then
-        # Warning - allow command but user saw warning
-        return 0
-      fi
-      break
-    fi
-    dir="$(dirname "$dir")"
-  done
-  return 0
-}
-
-# Add to preexec hook array (works with other hooks)
-autoload -Uz add-zsh-hook
-add-zsh-hook preexec __fdd_preexec
-${HOOK_MARKER_END}`;
-
 function installShellHook(): boolean {
 	// Detect shell from SHELL env or default to zsh (macOS default)
 	const shellPath = process.env.SHELL || "/bin/zsh";
@@ -147,9 +118,7 @@ function installShellHook(): boolean {
 		console.log(
 			chalk.yellow("⚠ Command guard hook only supports zsh for now."),
 		);
-		console.log(
-			chalk.gray("  For bash, manually add fdd guard to your workflow."),
-		);
+		console.log(chalk.gray("  For bash, run: fdd install-hook --shell bash"));
 		return false;
 	}
 

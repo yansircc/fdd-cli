@@ -1,20 +1,20 @@
 import chalk from "chalk";
 import { getPaths, isInitialized } from "../lib/config.js";
-import { checkCommandAgainstPitfalls } from "../lib/detector.js";
 import { listPitfalls } from "../lib/pitfall.js";
+import { checkCommandAgainstTriggers } from "../lib/trigger/index.js";
 
 interface GuardOptions {
 	quiet?: boolean;
 }
 
 /**
- * Check if a command should be blocked by any pitfall's command detector
+ * Check if a command should be blocked by any pitfall's command trigger
  * This is called by the shell hook before executing user commands
  *
  * Exit codes:
- *   0 - Command is allowed (no matching command detector)
- *   1 - Command is blocked (matching command detector with action=block)
- *   2 - Command has warning (matching command detector with action=warn)
+ *   0 - Command is allowed (no matching command trigger)
+ *   1 - Command is blocked (matching command trigger with action=block)
+ *   2 - Command has warning (matching command trigger with action=warn)
  */
 export async function guard(
 	command: string,
@@ -34,16 +34,16 @@ export async function guard(
 		process.exit(0);
 	}
 
-	const result = checkCommandAgainstPitfalls(command, pitfalls);
+	const result = checkCommandAgainstTriggers(command, pitfalls);
 
 	if (!result.blocked) {
 		process.exit(0);
 	}
 
-	// Command matched a detector
-	const { pitfall, detector, action, message } = result;
+	// Command matched a trigger
+	const { pitfall, trigger, action, message } = result;
 
-	if (!pitfall || !detector) {
+	if (!pitfall || !trigger) {
 		process.exit(0);
 	}
 
@@ -60,15 +60,15 @@ export async function guard(
 				console.error();
 			}
 
-			// Show remedy hints
-			if (pitfall.remedy && pitfall.remedy.length > 0) {
-				const remedy = pitfall.remedy[0];
-				console.error(chalk.gray("   Remedy:"));
-				if (remedy.action) {
-					console.error(chalk.gray(`   → ${remedy.action}`));
+			// Show action hints
+			if (pitfall.action && pitfall.action.length > 0) {
+				const act = pitfall.action[0];
+				console.error(chalk.gray("   Action:"));
+				if (act.action) {
+					console.error(chalk.gray(`   → ${act.action}`));
 				}
-				if (remedy.steps) {
-					for (const step of remedy.steps.slice(0, 3)) {
+				if (act.steps) {
+					for (const step of act.steps.slice(0, 3)) {
 						console.error(chalk.gray(`   • ${step}`));
 					}
 				}
@@ -90,15 +90,15 @@ export async function guard(
 			console.error();
 		}
 
-		// Show remedy
-		if (pitfall.remedy && pitfall.remedy.length > 0) {
-			console.error(chalk.cyan("   Remedy:"));
-			const remedy = pitfall.remedy[0];
-			if (remedy.action) {
-				console.error(chalk.cyan(`   → ${remedy.action}`));
+		// Show action
+		if (pitfall.action && pitfall.action.length > 0) {
+			console.error(chalk.cyan("   Action:"));
+			const act = pitfall.action[0];
+			if (act.action) {
+				console.error(chalk.cyan(`   → ${act.action}`));
 			}
-			if (remedy.steps) {
-				for (const step of remedy.steps) {
+			if (act.steps) {
+				for (const step of act.steps) {
 					console.error(chalk.white(`   • ${step}`));
 				}
 			}

@@ -26,9 +26,9 @@ Pitfall must contain an `edge` block (at least one negative case).
 
 Pitfalls missing edge **will be rejected**.
 
-## Gate 4: Weak Detector Marking
+## Gate 4: Weak Trigger Marking
 
-If detect only uses string matching (e.g., error log keywords), must:
+If trigger only uses string matching (e.g., error log keywords), must:
 - Mark `strength: weak`
 - Generate TODO: how to upgrade to rule/change/dynamic
 
@@ -39,19 +39,18 @@ If detect only uses string matching (e.g., error log keywords), must:
 - V2 (evidence existence)
 - V3 (structured self-proof) → last resort
 
-## Detect Priority Principle
+## Trigger Priority Principle
 
-> **Order by cost-effectiveness, not by category: lowest cost + highest accuracy first.**
-> Static/change-based detection is usually cheaper, but if the issue is inherently about dynamic contracts, prioritize dynamic detection.
+> **Order by cost-effectiveness: lowest cost + highest accuracy first.**
+> Static/change-based triggers are usually cheaper, but if the issue is inherently about dynamic contracts, prioritize dynamic triggers.
 
 ## Command Reference
 
 - `/fdd-record` — Compile pitfall while context is warm (one-click)
-- `/fdd-list` — List all pitfalls
 
 ## Error Handling Workflow
 
 When encountering an error:
 1. First search `.fdd/pitfalls/` for related records
-2. If found: follow Remedy steps, complete Verify checks
+2. If found: follow Action steps, complete Verify checks
 3. If not found: fix the issue, then immediately run `/fdd-record` to compile a new pitfall

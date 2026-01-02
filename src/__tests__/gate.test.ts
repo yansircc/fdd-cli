@@ -8,9 +8,9 @@ describe("checkGates", () => {
 		evidence: { error_snippet: "Error: something went wrong" },
 		regression: { repro: ["step 1", "step 2"], expected: "error occurs" },
 		edge: { negative_case: ["valid input"], expected: "no error" },
-		detect: [{ kind: "rule", pattern: "error", strength: "strong" }],
+		trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
 		replay: { root_cause: "Missing null check" },
-		remedy: [{ level: "low", kind: "transform", action: "Add null check" }],
+		action: [{ level: "low", kind: "transform", action: "Add null check" }],
 		verify: { level: "V0", checks: ["bun test"] },
 	};
 
@@ -156,39 +156,39 @@ describe("checkGates", () => {
 		});
 	});
 
-	describe("Gate 4: Weak detector warning", () => {
-		it("should warn when all detectors are weak", () => {
+	describe("Gate 4: Weak trigger warning", () => {
+		it("should warn when all triggers are weak", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [
+				trigger: [
 					{ kind: "rule", pattern: "a", strength: "weak" },
 					{ kind: "dynamic", must_run: ["test"], strength: "weak" },
 				],
 			});
 			expect(result.passed).toBe(true);
 			expect(result.warnings).toContain(
-				"Gate 4 warning: all detectors are weak - consider upgrading to rule/change/dynamic",
+				"Gate 4 warning: all triggers are weak - consider upgrading to rule/change/dynamic",
 			);
 		});
 
-		it("should warn when some detectors are weak", () => {
+		it("should warn when some triggers are weak", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [
+				trigger: [
 					{ kind: "rule", pattern: "a", strength: "strong" },
 					{ kind: "dynamic", must_run: ["test"], strength: "weak" },
 				],
 			});
 			expect(result.passed).toBe(true);
 			expect(result.warnings).toContain(
-				"Gate 4 warning: some detectors are weak - marked for future upgrade",
+				"Gate 4 warning: some triggers are weak - marked for future upgrade",
 			);
 		});
 
-		it("should not warn when all detectors are strong", () => {
+		it("should not warn when all triggers are strong", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [
+				trigger: [
 					{ kind: "rule", pattern: "a", strength: "strong" },
 					{ kind: "dynamic", must_run: ["test"], strength: "strong" },
 				],
@@ -198,73 +198,73 @@ describe("checkGates", () => {
 		});
 	});
 
-	describe("Gate 5: Detect field validation", () => {
-		it("should fail when rule detector missing pattern", () => {
+	describe("Gate 5: Trigger field validation", () => {
+		it("should fail when rule trigger missing pattern", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [{ kind: "rule", strength: "strong" }],
+				trigger: [{ kind: "rule", strength: "strong" }],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 5 failed: detect[0] kind=rule requires pattern",
+				"Gate 5 failed: trigger[0] kind=rule requires pattern",
 			);
 		});
 
-		it("should fail when dynamic detector missing must_run", () => {
+		it("should fail when dynamic trigger missing must_run", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [{ kind: "dynamic", strength: "strong" }],
+				trigger: [{ kind: "dynamic", strength: "strong" }],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 5 failed: detect[0] kind=dynamic requires must_run",
+				"Gate 5 failed: trigger[0] kind=dynamic requires must_run",
 			);
 		});
 
-		it("should fail when change detector missing when_changed", () => {
+		it("should fail when change trigger missing when_changed", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [{ kind: "change", strength: "strong" }],
+				trigger: [{ kind: "change", strength: "strong" }],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 5 failed: detect[0] kind=change requires when_changed",
+				"Gate 5 failed: trigger[0] kind=change requires when_changed",
 			);
 		});
 
-		it("should fail when no detectors", () => {
+		it("should fail when no triggers", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [],
+				trigger: [],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 5 failed: at least one detector is required",
+				"Gate 5 failed: at least one trigger is required",
 			);
 		});
 
-		it("should pass with valid rule detector", () => {
+		it("should pass with valid rule trigger", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [{ kind: "rule", pattern: "error", strength: "strong" }],
+				trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
 			});
 			expect(result.passed).toBe(true);
 		});
 
-		it("should pass with valid dynamic detector", () => {
+		it("should pass with valid dynamic trigger", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [
+				trigger: [
 					{ kind: "dynamic", must_run: ["bun test"], strength: "strong" },
 				],
 			});
 			expect(result.passed).toBe(true);
 		});
 
-		it("should pass with valid change detector", () => {
+		it("should pass with valid change trigger", () => {
 			const result = checkGates({
 				...validPitfall,
-				detect: [
+				trigger: [
 					{
 						kind: "change",
 						when_changed: ["src/**"],
@@ -316,11 +316,11 @@ describe("checkGates", () => {
 		});
 	});
 
-	describe("Gate 7: Remedy", () => {
+	describe("Gate 7: Action", () => {
 		it("should pass with action", () => {
 			const result = checkGates({
 				...validPitfall,
-				remedy: [{ level: "low", kind: "transform", action: "Fix it" }],
+				action: [{ level: "low", kind: "transform", action: "Fix it" }],
 			});
 			expect(result.passed).toBe(true);
 		});
@@ -328,7 +328,7 @@ describe("checkGates", () => {
 		it("should pass with steps", () => {
 			const result = checkGates({
 				...validPitfall,
-				remedy: [{ level: "low", kind: "transform", steps: ["step 1"] }],
+				action: [{ level: "low", kind: "transform", steps: ["step 1"] }],
 			});
 			expect(result.passed).toBe(true);
 		});
@@ -336,39 +336,39 @@ describe("checkGates", () => {
 		it("should pass with doc", () => {
 			const result = checkGates({
 				...validPitfall,
-				remedy: [{ level: "low", kind: "read", doc: "README.md" }],
+				action: [{ level: "low", kind: "read", doc: "README.md" }],
 			});
 			expect(result.passed).toBe(true);
 		});
 
-		it("should fail without remedy", () => {
-			const { remedy, ...noRemedy } = validPitfall;
-			const result = checkGates(noRemedy);
+		it("should fail without action", () => {
+			const { action, ...noAction } = validPitfall;
+			const result = checkGates(noAction);
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 7 failed: at least one remedy is required",
+				"Gate 7 failed: at least one action is required",
 			);
 		});
 
-		it("should fail with empty remedy", () => {
+		it("should fail with empty action", () => {
 			const result = checkGates({
 				...validPitfall,
-				remedy: [],
+				action: [],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 7 failed: at least one remedy is required",
+				"Gate 7 failed: at least one action is required",
 			);
 		});
 
-		it("should fail when remedy has no action/steps/doc", () => {
+		it("should fail when action has no action/steps/doc", () => {
 			const result = checkGates({
 				...validPitfall,
-				remedy: [{ level: "low", kind: "transform" }],
+				action: [{ level: "low", kind: "transform" }],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 7 failed: remedy[0] requires action, steps, or doc",
+				"Gate 7 failed: action[0] requires action, steps, or doc",
 			);
 		});
 	});
@@ -483,9 +483,9 @@ describe("formatGateResult", () => {
 		const result = formatGateResult({
 			passed: true,
 			errors: [],
-			warnings: ["Gate 4 warning: some detectors are weak"],
+			warnings: ["Gate 4 warning: some triggers are weak"],
 		});
 		expect(result).toContain("Warnings:");
-		expect(result).toContain("Gate 4 warning: some detectors are weak");
+		expect(result).toContain("Gate 4 warning: some triggers are weak");
 	});
 });

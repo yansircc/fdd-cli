@@ -62,9 +62,9 @@ function generatePitfallContent(pitfall: Pitfall): string {
 		tags: pitfall.tags,
 		created: pitfall.created,
 		evidence: pitfall.evidence,
-		detect: pitfall.detect,
+		trigger: pitfall.trigger,
 		replay: pitfall.replay,
-		remedy: pitfall.remedy,
+		action: pitfall.action,
 		...(pitfall.related_rule && { related_rule: pitfall.related_rule }),
 		verify: pitfall.verify,
 		regression: pitfall.regression,
@@ -72,21 +72,21 @@ function generatePitfallContent(pitfall: Pitfall): string {
 	};
 
 	const body = `
-# Detect（抓现行）
+# Trigger（触发条件）
 
-${formatDetectSection(pitfall)}
+${formatTriggerSection(pitfall)}
 
-# Replay（放回放）
+# Replay（问题回放）
 
 ${pitfall.evidence.error_snippet || "[Error details]"}
 
 ${pitfall.evidence.diff_summary ? `**变更摘要：**\n${pitfall.evidence.diff_summary}` : ""}
 
-# Remedy（给方案）
+# Action（修复方案）
 
-${formatRemedySection(pitfall)}
+${formatActionSection(pitfall)}
 
-# Verify（过安检）
+# Verify（验证检查）
 
 ${formatVerifySection(pitfall)}
 `.trim();
@@ -94,34 +94,34 @@ ${formatVerifySection(pitfall)}
 	return matter.stringify(body, frontmatter);
 }
 
-function formatDetectSection(pitfall: Pitfall): string {
-	return pitfall.detect
-		.map((d, i) => {
-			const lines = [`**策略 ${i + 1}** (${d.kind}, strength: ${d.strength})`];
-			if (d.tool) lines.push(`- 工具: \`${d.tool}\``);
-			if (d.pattern) lines.push(`- 模式: \`${d.pattern}\``);
-			if (d.scope) lines.push(`- 范围: ${d.scope.join(", ")}`);
-			if (d.exclude) lines.push(`- 排除: ${d.exclude.join(", ")}`);
-			if (d.when_changed)
-				lines.push(`- 变更触发: ${d.when_changed.join(", ")}`);
-			if (d.must_run) lines.push(`- 必须运行: ${d.must_run.join(", ")}`);
+function formatTriggerSection(pitfall: Pitfall): string {
+	return pitfall.trigger
+		.map((t, i) => {
+			const lines = [`**策略 ${i + 1}** (${t.kind}, strength: ${t.strength})`];
+			if (t.tool) lines.push(`- 工具: \`${t.tool}\``);
+			if (t.pattern) lines.push(`- 模式: \`${t.pattern}\``);
+			if (t.scope) lines.push(`- 范围: ${t.scope.join(", ")}`);
+			if (t.exclude) lines.push(`- 排除: ${t.exclude.join(", ")}`);
+			if (t.when_changed)
+				lines.push(`- 变更触发: ${t.when_changed.join(", ")}`);
+			if (t.must_run) lines.push(`- 必须运行: ${t.must_run.join(", ")}`);
 			return lines.join("\n");
 		})
 		.join("\n\n");
 }
 
-function formatRemedySection(pitfall: Pitfall): string {
-	return pitfall.remedy
-		.map((r, i) => {
-			const lines = [`**路径 ${i + 1}** (风险: ${r.level})`];
-			if (r.action) lines.push(`- 动作: ${r.action}`);
-			if (r.steps) {
+function formatActionSection(pitfall: Pitfall): string {
+	return pitfall.action
+		.map((a, i) => {
+			const lines = [`**路径 ${i + 1}** (风险: ${a.level})`];
+			if (a.action) lines.push(`- 动作: ${a.action}`);
+			if (a.steps) {
 				lines.push("- 步骤:");
-				for (const step of r.steps) {
+				for (const step of a.steps) {
 					lines.push(`  1. ${step}`);
 				}
 			}
-			if (r.doc) lines.push(`- 文档: ${r.doc}`);
+			if (a.doc) lines.push(`- 文档: ${a.doc}`);
 			return lines.join("\n");
 		})
 		.join("\n\n");

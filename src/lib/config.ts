@@ -10,7 +10,7 @@ const DEFAULT_CONFIG: FDDConfig = {
 		scope: ["src/**"],
 		exclude: ["node_modules/**", "dist/**"],
 		verify_hooks: ["bun lint", "bun test"],
-		detector_tools: ["grep", "bun lint"],
+		trigger_tools: ["grep", "bun lint"],
 	},
 	limits: {
 		max_pitfalls_in_context: 5,

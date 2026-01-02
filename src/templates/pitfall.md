@@ -14,7 +14,7 @@ evidence:
   diff_summary: |
     [Summary of changes]
 
-detect:
+trigger:
   - kind: rule
     tool: grep
     pattern: ""
@@ -27,7 +27,7 @@ replay:
   trigger_condition: ""
   affected_scope: []
 
-remedy:
+action:
   - level: low
     kind: transform
     action: ""
@@ -53,15 +53,15 @@ edge:
   # waiver_reason: ""
 ---
 
-# Detect
+# Trigger
 
-[Describe how to detect this issue]
+[Describe how to trigger/detect this issue]
 
 # Replay
 
 [Describe how the issue occurred and its root cause]
 
-# Remedy
+# Action
 
 [Describe the fix steps]
 

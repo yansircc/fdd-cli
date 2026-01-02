@@ -5,7 +5,7 @@ defaults:
   scope: ["src/**"]
   exclude: ["node_modules/**", "dist/**"]
   verify_hooks: ["bun lint", "bun test"]
-  detector_tools: ["grep", "bun lint"]
+  trigger_tools: ["grep", "bun lint"]
 
 # Context limits
 limits:
@@ -15,4 +15,4 @@ limits:
 waiver:
   require_reason: true
 
-# Note: Specific detect rules exist only in pitfall entries (single source of truth)
+# Note: Specific trigger rules exist only in pitfall entries (single source of truth)

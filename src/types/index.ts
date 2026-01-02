@@ -1,14 +1,16 @@
 /**
- * FDD CLI Types
+ * FDD CLI Types - TRAV Protocol
+ * Trigger / Replay / Action / Verify
  */
 
 export type Severity = "critical" | "high" | "medium" | "low";
-export type DetectorStrength = "strong" | "weak";
-export type DetectorKind = "rule" | "change" | "dynamic" | "command";
+export type TriggerStrength = "strong" | "weak";
+export type TriggerKind = "rule" | "change" | "dynamic" | "command" | "protect";
+export type ProtectPermission = "deny" | "allow";
 export type CommandAction = "block" | "warn";
 export type VerifyLevel = "V0" | "V1" | "V2" | "V3";
-export type RemedyLevel = "low" | "medium" | "high";
-export type RemedyKind = "transform" | "read" | "run";
+export type ActionLevel = "low" | "medium" | "high";
+export type ActionKind = "transform" | "read" | "run";
 
 /**
  * Evidence captured during fix
@@ -22,28 +24,35 @@ export interface Evidence {
 }
 
 /**
- * Detection rule
+ * Trigger rule - how to detect the issue
  */
-export interface DetectRule {
-	kind: DetectorKind;
+export interface TriggerRule {
+	kind: TriggerKind;
 	tool?: string;
 	pattern?: string;
 	scope?: string[];
 	exclude?: string[];
 	when_changed?: string[];
 	must_run?: string[];
-	strength: DetectorStrength;
-	// Command detector specific fields
+	strength: TriggerStrength;
+	// Command trigger specific fields
 	action?: CommandAction; // block or warn (default: block)
 	message?: string; // Custom message to show when triggered
+	// Protect trigger specific fields
+	paths?: string[]; // Glob patterns to protect
+	permissions?: {
+		create?: ProtectPermission; // deny | allow (default: allow)
+		update?: ProtectPermission;
+		delete?: ProtectPermission;
+	};
 }
 
 /**
- * Remedy path
+ * Action path - how to fix the issue
  */
-export interface RemedyPath {
-	level: RemedyLevel;
-	kind: RemedyKind;
+export interface ActionPath {
+	level: ActionLevel;
+	kind: ActionKind;
 	action?: string;
 	steps?: string[];
 	doc?: string;
@@ -91,7 +100,7 @@ export interface Replay {
 }
 
 /**
- * Complete Pitfall structure
+ * Complete Pitfall structure (TRAV protocol)
  */
 export interface Pitfall {
 	id: string;
@@ -100,9 +109,9 @@ export interface Pitfall {
 	tags: string[];
 	created: string;
 	evidence: Evidence;
-	detect: DetectRule[];
+	trigger: TriggerRule[];
 	replay: Replay;
-	remedy: RemedyPath[];
+	action: ActionPath[];
 	related_rule?: string;
 	verify: Verify;
 	regression: Regression;
@@ -132,7 +141,7 @@ export interface FDDConfig {
 		scope: string[];
 		exclude: string[];
 		verify_hooks: string[];
-		detector_tools: string[];
+		trigger_tools: string[];
 	};
 	limits: {
 		max_pitfalls_in_context: number;

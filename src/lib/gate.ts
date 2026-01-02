@@ -38,53 +38,84 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 		errors.push("Gate 3 failed: edge waiver requires waiver_reason");
 	}
 
-	// Gate 4: Weak detector warning
-	if (pitfall.detect) {
-		const hasWeakDetector = pitfall.detect.some((d) => d.strength === "weak");
-		const allWeak = pitfall.detect.every((d) => d.strength === "weak");
+	// Gate 4: Weak trigger warning
+	if (pitfall.trigger) {
+		const hasWeakTrigger = pitfall.trigger.some((t) => t.strength === "weak");
+		const allWeak = pitfall.trigger.every((t) => t.strength === "weak");
 
-		if (allWeak && pitfall.detect.length > 0) {
+		if (allWeak && pitfall.trigger.length > 0) {
 			warnings.push(
-				"Gate 4 warning: all detectors are weak - consider upgrading to rule/change/dynamic",
+				"Gate 4 warning: all triggers are weak - consider upgrading to rule/change/dynamic",
 			);
-		} else if (hasWeakDetector) {
+		} else if (hasWeakTrigger) {
 			warnings.push(
-				"Gate 4 warning: some detectors are weak - marked for future upgrade",
+				"Gate 4 warning: some triggers are weak - marked for future upgrade",
 			);
 		}
 	}
 
-	// Gate 5: Detect field validation
-	if (pitfall.detect && pitfall.detect.length > 0) {
-		for (let i = 0; i < pitfall.detect.length; i++) {
-			const d = pitfall.detect[i];
-			const prefix = `Gate 5 failed: detect[${i}]`;
+	// Gate 5: Trigger field validation
+	if (pitfall.trigger && pitfall.trigger.length > 0) {
+		for (let i = 0; i < pitfall.trigger.length; i++) {
+			const t = pitfall.trigger[i];
+			const prefix = `Gate 5 failed: trigger[${i}]`;
 
-			if (d.kind === "rule" && !d.pattern) {
+			if (t.kind === "rule" && !t.pattern) {
 				errors.push(`${prefix} kind=rule requires pattern`);
 			}
-			if (d.kind === "dynamic" && (!d.must_run || d.must_run.length === 0)) {
+			if (t.kind === "dynamic" && (!t.must_run || t.must_run.length === 0)) {
 				errors.push(`${prefix} kind=dynamic requires must_run`);
 			}
 			if (
-				d.kind === "change" &&
-				(!d.when_changed || d.when_changed.length === 0)
+				t.kind === "change" &&
+				(!t.when_changed || t.when_changed.length === 0)
 			) {
 				errors.push(`${prefix} kind=change requires when_changed`);
 			}
-			if (d.kind === "command" && !d.pattern) {
+			if (t.kind === "command" && !t.pattern) {
 				errors.push(`${prefix} kind=command requires pattern (regex)`);
 			}
 			if (
-				d.kind === "command" &&
-				d.action &&
-				!["block", "warn"].includes(d.action)
+				t.kind === "command" &&
+				t.action &&
+				!["block", "warn"].includes(t.action)
 			) {
 				errors.push(`${prefix} kind=command action must be "block" or "warn"`);
 			}
+			// Protect trigger validation
+			if (t.kind === "protect" && (!t.paths || t.paths.length === 0)) {
+				errors.push(`${prefix} kind=protect requires paths (glob patterns)`);
+			}
+			if (t.kind === "protect" && t.permissions) {
+				const validPerms = ["deny", "allow"];
+				if (
+					t.permissions.create &&
+					!validPerms.includes(t.permissions.create)
+				) {
+					errors.push(
+						`${prefix} kind=protect permissions.create must be "deny" or "allow"`,
+					);
+				}
+				if (
+					t.permissions.update &&
+					!validPerms.includes(t.permissions.update)
+				) {
+					errors.push(
+						`${prefix} kind=protect permissions.update must be "deny" or "allow"`,
+					);
+				}
+				if (
+					t.permissions.delete &&
+					!validPerms.includes(t.permissions.delete)
+				) {
+					errors.push(
+						`${prefix} kind=protect permissions.delete must be "deny" or "allow"`,
+					);
+				}
+			}
 		}
 	} else {
-		errors.push("Gate 5 failed: at least one detector is required");
+		errors.push("Gate 5 failed: at least one trigger is required");
 	}
 
 	// Gate 6: Replay required
@@ -97,18 +128,18 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 		errors.push("Gate 6 failed: replay.root_cause is required");
 	}
 
-	// Gate 7: Remedy content validation
-	if (!pitfall.remedy || pitfall.remedy.length === 0) {
-		errors.push("Gate 7 failed: at least one remedy is required");
+	// Gate 7: Action content validation
+	if (!pitfall.action || pitfall.action.length === 0) {
+		errors.push("Gate 7 failed: at least one action is required");
 	} else {
-		for (let i = 0; i < pitfall.remedy.length; i++) {
-			const r = pitfall.remedy[i];
-			const prefix = `Gate 7 failed: remedy[${i}]`;
+		for (let i = 0; i < pitfall.action.length; i++) {
+			const a = pitfall.action[i];
+			const prefix = `Gate 7 failed: action[${i}]`;
 
 			// action or steps must exist
-			const hasAction = r.action && r.action.trim() !== "";
-			const hasSteps = r.steps && r.steps.length > 0;
-			const hasDoc = r.doc && r.doc.trim() !== "";
+			const hasAction = a.action && a.action.trim() !== "";
+			const hasSteps = a.steps && a.steps.length > 0;
+			const hasDoc = a.doc && a.doc.trim() !== "";
 
 			if (!hasAction && !hasSteps && !hasDoc) {
 				errors.push(`${prefix} requires action, steps, or doc`);

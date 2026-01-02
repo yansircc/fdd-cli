@@ -7,7 +7,7 @@ import { guard } from "./commands/guard.js";
 import { init } from "./commands/init.js";
 import { installHook } from "./commands/install-hook.js";
 import { list } from "./commands/list.js";
-import { record } from "./commands/record.js";
+import { record } from "./commands/record/index.js";
 import { validate } from "./commands/validate.js";
 
 const program = new Command();
@@ -56,7 +56,7 @@ program
 
 program
 	.command("check")
-	.description("Run detectors to find potential issues")
+	.description("Run triggers to find potential issues")
 	.option("-i, --id <id>", "Check specific pitfall by ID")
 	.option("-v, --verbose", "Show detailed match information")
 	.action((options) => check(options));
