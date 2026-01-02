@@ -1,0 +1,541 @@
+import { describe, expect, it } from "bun:test";
+import { validatePitfallInput } from "../lib/schema.js";
+
+describe("validatePitfallInput", () => {
+	// Helper to create a valid pitfall JSON
+	const validPitfall = {
+		title: "Test pitfall",
+		severity: "medium",
+		tags: ["test"],
+		evidence: { error_snippet: "Error: something went wrong" },
+		trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
+		replay: { root_cause: "Missing null check" },
+		action: [{ level: "low", kind: "transform", action: "Add null check" }],
+		verify: { level: "V0", checks: ["bun test"] },
+		regression: { repro: ["step 1"], expected: "error occurs" },
+		edge: { negative_case: ["valid input"], expected: "no error" },
+	};
+
+	describe("JSON parsing", () => {
+		it("should parse valid JSON", () => {
+			const result = validatePitfallInput(JSON.stringify(validPitfall));
+			expect(result.title).toBe("Test pitfall");
+		});
+
+		it("should throw on invalid JSON", () => {
+			expect(() => validatePitfallInput("not json")).toThrow(
+				"Invalid JSON format",
+			);
+		});
+
+		it("should throw on incomplete JSON", () => {
+			expect(() => validatePitfallInput('{"title":')).toThrow(
+				"Invalid JSON format",
+			);
+		});
+	});
+
+	describe("Evidence validation", () => {
+		it("should pass with error_snippet", () => {
+			const input = { ...validPitfall, evidence: { error_snippet: "Error" } };
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.evidence.error_snippet).toBe("Error");
+		});
+
+		it("should pass with command", () => {
+			const input = { ...validPitfall, evidence: { command: "npm test" } };
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.evidence.command).toBe("npm test");
+		});
+
+		it("should pass with both error_snippet and command", () => {
+			const input = {
+				...validPitfall,
+				evidence: { error_snippet: "Error", command: "npm test" },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.evidence.error_snippet).toBe("Error");
+			expect(result.evidence.command).toBe("npm test");
+		});
+
+		it("should fail without error_snippet or command", () => {
+			const input = { ...validPitfall, evidence: {} };
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"evidence must contain error_snippet or command",
+			);
+		});
+	});
+
+	describe("Trigger validation", () => {
+		it("should pass rule trigger with pattern", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.trigger[0].kind).toBe("rule");
+		});
+
+		it("should fail rule trigger without pattern", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "rule", strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"rule/command needs pattern",
+			);
+		});
+
+		it("should pass command trigger with pattern and action", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{
+						kind: "command",
+						pattern: "npm i",
+						action: "block",
+						strength: "strong",
+					},
+				],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.trigger[0].kind).toBe("command");
+			expect(result.trigger[0].action).toBe("block");
+		});
+
+		it("should fail command trigger without pattern", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "command", action: "block", strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"rule/command needs pattern",
+			);
+		});
+
+		it("should pass dynamic trigger with must_run", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{ kind: "dynamic", must_run: ["bun test"], strength: "strong" },
+				],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.trigger[0].kind).toBe("dynamic");
+		});
+
+		it("should fail dynamic trigger without must_run", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "dynamic", strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"dynamic needs must_run",
+			);
+		});
+
+		it("should fail dynamic trigger with empty must_run", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "dynamic", must_run: [], strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"dynamic needs must_run",
+			);
+		});
+
+		it("should pass change trigger with when_changed", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{ kind: "change", when_changed: ["src/*.ts"], strength: "strong" },
+				],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.trigger[0].kind).toBe("change");
+		});
+
+		it("should fail change trigger without when_changed", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "change", strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"change needs when_changed",
+			);
+		});
+
+		it("should pass protect trigger with paths", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{
+						kind: "protect",
+						paths: [".fdd/**"],
+						permissions: { create: "deny" },
+						strength: "strong",
+					},
+				],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.trigger[0].kind).toBe("protect");
+		});
+
+		it("should fail protect trigger without paths", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "protect", strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"protect needs paths",
+			);
+		});
+
+		it("should pass ai-context trigger with when_touching and context", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{
+						kind: "ai-context",
+						when_touching: ["src/db/**"],
+						context: "Use parameterized queries",
+						strength: "strong",
+					},
+				],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.trigger[0].kind).toBe("ai-context");
+		});
+
+		it("should fail ai-context trigger without when_touching", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{
+						kind: "ai-context",
+						context: "Use parameterized queries",
+						strength: "strong",
+					},
+				],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"ai-context needs when_touching and context",
+			);
+		});
+
+		it("should fail ai-context trigger without context", () => {
+			const input = {
+				...validPitfall,
+				trigger: [
+					{
+						kind: "ai-context",
+						when_touching: ["src/db/**"],
+						strength: "strong",
+					},
+				],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"ai-context needs when_touching and context",
+			);
+		});
+
+		it("should require at least one trigger", () => {
+			const input = { ...validPitfall, trigger: [] };
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"at least one trigger required",
+			);
+		});
+	});
+
+	describe("Action validation", () => {
+		it("should pass with action field", () => {
+			const input = {
+				...validPitfall,
+				action: [{ level: "low", kind: "transform", action: "Fix it" }],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.action[0].action).toBe("Fix it");
+		});
+
+		it("should pass with steps field", () => {
+			const input = {
+				...validPitfall,
+				action: [{ level: "low", kind: "transform", steps: ["Step 1"] }],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.action[0].steps).toEqual(["Step 1"]);
+		});
+
+		it("should pass with doc field", () => {
+			const input = {
+				...validPitfall,
+				action: [{ level: "low", kind: "read", doc: "README.md" }],
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.action[0].doc).toBe("README.md");
+		});
+
+		it("should fail without action, steps, or doc", () => {
+			const input = {
+				...validPitfall,
+				action: [{ level: "low", kind: "transform" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"action requires action, steps, or doc",
+			);
+		});
+	});
+
+	describe("Verify validation", () => {
+		it("should pass V0 with checks", () => {
+			const input = {
+				...validPitfall,
+				verify: { level: "V0", checks: ["bun test"] },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.verify.level).toBe("V0");
+		});
+
+		it("should pass V1 with checks", () => {
+			const input = {
+				...validPitfall,
+				verify: { level: "V1", checks: ["bun lint"] },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.verify.level).toBe("V1");
+		});
+
+		it("should fail V0 without checks", () => {
+			const input = {
+				...validPitfall,
+				verify: { level: "V0" },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"V0/V1 requires checks",
+			);
+		});
+
+		it("should fail V1 without checks", () => {
+			const input = {
+				...validPitfall,
+				verify: { level: "V1" },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"V0/V1 requires checks",
+			);
+		});
+
+		it("should pass V2 without checks", () => {
+			const input = {
+				...validPitfall,
+				verify: { level: "V2" },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.verify.level).toBe("V2");
+		});
+
+		it("should pass V3 with fallback.self_proof", () => {
+			const input = {
+				...validPitfall,
+				verify: {
+					level: "V3",
+					fallback: { level: "V3", self_proof: ["Verified manually"] },
+				},
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.verify.level).toBe("V3");
+		});
+
+		it("should fail V3 without fallback", () => {
+			const input = {
+				...validPitfall,
+				verify: { level: "V3" },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"V3 requires fallback.self_proof",
+			);
+		});
+	});
+
+	describe("Regression validation", () => {
+		it("should pass with repro steps", () => {
+			const input = {
+				...validPitfall,
+				regression: { repro: ["step 1"], expected: "error" },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.regression.repro).toEqual(["step 1"]);
+		});
+
+		it("should pass with waiver and reason", () => {
+			const input = {
+				...validPitfall,
+				regression: {
+					repro: [],
+					expected: "",
+					waiver: true,
+					waiver_reason: "Cannot reproduce",
+				},
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.regression.waiver).toBe(true);
+		});
+
+		it("should fail with empty repro and no waiver", () => {
+			const input = {
+				...validPitfall,
+				regression: { repro: [], expected: "" },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"regression requires repro steps or waiver",
+			);
+		});
+
+		it("should fail with waiver but no reason", () => {
+			const input = {
+				...validPitfall,
+				regression: { repro: [], expected: "", waiver: true },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"regression waiver requires waiver_reason",
+			);
+		});
+	});
+
+	describe("Edge validation", () => {
+		it("should pass with negative_case", () => {
+			const input = {
+				...validPitfall,
+				edge: { negative_case: ["valid input"], expected: "no error" },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.edge.negative_case).toEqual(["valid input"]);
+		});
+
+		it("should pass with waiver and reason", () => {
+			const input = {
+				...validPitfall,
+				edge: {
+					negative_case: [],
+					expected: "",
+					waiver: true,
+					waiver_reason: "No edge case",
+				},
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.edge.waiver).toBe(true);
+		});
+
+		it("should fail with empty negative_case and no waiver", () => {
+			const input = {
+				...validPitfall,
+				edge: { negative_case: [], expected: "" },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"edge requires negative_case or waiver",
+			);
+		});
+
+		it("should fail with waiver but no reason", () => {
+			const input = {
+				...validPitfall,
+				edge: { negative_case: [], expected: "", waiver: true },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"edge waiver requires waiver_reason",
+			);
+		});
+	});
+
+	describe("Replay validation", () => {
+		it("should pass with root_cause", () => {
+			const input = {
+				...validPitfall,
+				replay: { root_cause: "Missing null check" },
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.replay.root_cause).toBe("Missing null check");
+		});
+
+		it("should fail without root_cause", () => {
+			const input = {
+				...validPitfall,
+				replay: {},
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow();
+		});
+
+		it("should fail with empty root_cause", () => {
+			const input = {
+				...validPitfall,
+				replay: { root_cause: "" },
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"replay.root_cause is required",
+			);
+		});
+	});
+
+	describe("Required fields", () => {
+		it("should fail without title", () => {
+			const { title, ...noTitle } = validPitfall;
+			expect(() => validatePitfallInput(JSON.stringify(noTitle))).toThrow();
+		});
+
+		it("should fail with empty title", () => {
+			const input = { ...validPitfall, title: "" };
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"title is required",
+			);
+		});
+
+		it("should fail without severity", () => {
+			const { severity, ...noSeverity } = validPitfall;
+			expect(() => validatePitfallInput(JSON.stringify(noSeverity))).toThrow();
+		});
+
+		it("should fail with invalid severity", () => {
+			const input = { ...validPitfall, severity: "invalid" };
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow();
+		});
+	});
+
+	describe("Error messages", () => {
+		it("should include field path in error", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "rule", strength: "strong" }],
+			};
+			try {
+				validatePitfallInput(JSON.stringify(input));
+				expect(true).toBe(false); // Should not reach here
+			} catch (e) {
+				expect((e as Error).message).toContain("trigger");
+			}
+		});
+
+		it("should list multiple errors", () => {
+			const input = {
+				title: "",
+				severity: "medium",
+				tags: [],
+				evidence: {},
+				trigger: [],
+				replay: {},
+				action: [],
+				verify: { level: "V0" },
+				regression: { repro: [], expected: "" },
+				edge: { negative_case: [], expected: "" },
+			};
+			try {
+				validatePitfallInput(JSON.stringify(input));
+				expect(true).toBe(false);
+			} catch (e) {
+				const message = (e as Error).message;
+				expect(message).toContain("Validation failed");
+				// Should contain multiple errors
+				expect(message.split("\n").length).toBeGreaterThan(2);
+			}
+		});
+	});
+});

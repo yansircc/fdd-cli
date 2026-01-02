@@ -129,16 +129,19 @@ function processStopHook(input) {
 
   if (hasModification) {
     console.error(\`
-[FDD] 检测到文件修改，请反思是否值得记录 PIT( Pitfall 的缩写)：
-
+[FDD-PROMPT]
 修改的文件: \${modifiedFiles.slice(0, 5).join(", ")}\${modifiedFiles.length > 5 ? " ..." : ""}
 
-判断标准：
-1. 这是"修复"操作吗？（bug fix / 问题解决）
-2. 能设计自动 trigger → 记录为 pitfall (rule/change/dynamic)
-3. 不能自动 trigger → 记录为 ai-context (文件 note)
+请使用 AskUserQuestion 工具询问用户：
+- 问题："这次修改是否值得记录为 PIT？"
+- 选项：
+  1. "记录" - 值得记录下来避免再犯
+  2. "跳过" - 不需要记录
 
-如果值得记录，请主动询问用户。
+如果用户选择"记录"：
+1. 分析能否设计确定的 trigger（rule/change/dynamic/command）
+2. 如果能 → 使用 fdd record --json 记录为 pitfall
+3. 如果不能 → 使用 fdd record --json 记录为 ai-context（trigger.kind = "ai-context"）
 \`);
     process.exit(2);  // Trigger Claude to continue
   } else {
