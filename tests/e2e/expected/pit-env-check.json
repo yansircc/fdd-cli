@@ -1,0 +1,8 @@
+{
+	"_description": "场景 6: 环境变量检查",
+
+	"assertions": {
+		"trigger[0].kind": "dynamic",
+		"trigger[0].must_run": "exists"
+	}
+}

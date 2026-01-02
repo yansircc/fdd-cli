@@ -14,6 +14,6 @@
 		"indentStyle": "tab"
 	},
 	"files": {
-		"ignore": ["dist", "node_modules", "templates"]
+		"ignore": ["dist", "node_modules", "templates", "tests/e2e/mini-project"]
 	}
 }

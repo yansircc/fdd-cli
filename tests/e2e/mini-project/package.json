@@ -1,0 +1,11 @@
+{
+  "name": "fdd-e2e-mini-project",
+  "version": "1.0.0",
+  "description": "Mini project for FDD CLI E2E testing",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'Building...'",
+    "test": "echo 'Testing...'",
+    "typecheck": "echo 'Type checking...'"
+  }
+}

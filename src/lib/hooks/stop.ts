@@ -107,9 +107,14 @@ function processStopHook(input) {
 
         for (const c of contents) {
           if (c.type === "tool_use" && modifyTools.includes(c.name)) {
-            hasModification = true;
             const filePath = c.input?.file_path;
-            if (filePath && !modifiedFiles.includes(filePath)) {
+            if (!filePath) continue;
+
+            // 排除 .fdd/ 和 .claude/ 目录的修改（FDD 自身产生的文件）
+            if (filePath.includes("/.fdd/") || filePath.includes("/.claude/")) continue;
+
+            hasModification = true;
+            if (!modifiedFiles.includes(filePath)) {
               // Extract relative path for cleaner output
               const cwd = process.cwd();
               const displayPath = filePath.startsWith(cwd)
@@ -128,21 +133,10 @@ function processStopHook(input) {
   fs.writeFileSync(stateFile, JSON.stringify(state), "utf8");
 
   if (hasModification) {
-    console.error(\`
-[FDD-PROMPT]
-修改的文件: \${modifiedFiles.slice(0, 5).join(", ")}\${modifiedFiles.length > 5 ? " ..." : ""}
-
-请使用 AskUserQuestion 工具询问用户：
-- 问题："这次修改是否值得记录为 PIT？"
-- 选项：
-  1. "记录" - 值得记录下来避免再犯
-  2. "跳过" - 不需要记录
-
-如果用户选择"记录"：
-1. 分析能否设计确定的 trigger（rule/change/dynamic/command）
-2. 如果能 → 使用 fdd record --json 记录为 pitfall
-3. 如果不能 → 使用 fdd record --json 记录为 ai-context（trigger.kind = "ai-context"）
-\`);
+    // stdout: 给 Claude 看的指令（用户不可见）
+    console.log(\`[FDD] 修复: \${modifiedFiles.slice(0, 3).join(", ")}\${modifiedFiles.length > 3 ? " ..." : ""} → @.claude/rules/fdd-stop.md\`);
+    // stderr: 最小输出避免 "No stderr output" 警告
+    console.error(" ");
     process.exit(2);  // Trigger Claude to continue
   } else {
     process.exit(0);  // Silent exit

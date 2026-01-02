@@ -1,0 +1,8 @@
+{
+	"_description": "场景 4: 保护配置文件",
+
+	"assertions": {
+		"trigger[0].kind": "protect",
+		"trigger[0].paths": "contains:config"
+	}
+}

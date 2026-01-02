@@ -1,0 +1,52 @@
+{
+	"_comment": "用于保护 E2E 测试产物不被提交",
+	"_usage": "在 mini-project 中运行: fdd record --json '$(cat ../fixtures/pit-e2e-guard.json)'",
+	"title": "阻止提交 E2E 测试产物",
+	"severity": "high",
+	"tags": ["e2e", "guard"],
+	"evidence": {
+		"error_snippet": "E2E 测试产物（.fdd/, .claude/）不应提交到 git",
+		"command": "git add tests/e2e/mini-project/.fdd/"
+	},
+	"trigger": [
+		{
+			"kind": "command",
+			"pattern": "git\\s+(add|commit).*mini-project.*(\\.(fdd|claude)|e2e-output)",
+			"action": "block",
+			"message": "E2E 测试产物不应提交。如需重置测试环境，请删除 .fdd/ 和 .claude/ 目录。",
+			"strength": "strong"
+		}
+	],
+	"replay": {
+		"root_cause": "E2E 测试产物被误提交到 git，影响其他开发者的测试环境"
+	},
+	"action": [
+		{
+			"level": "low",
+			"kind": "run",
+			"action": "从暂存区移除测试产物",
+			"steps": [
+				"git reset HEAD tests/e2e/mini-project/.fdd/",
+				"git reset HEAD tests/e2e/mini-project/.claude/",
+				"git reset HEAD tests/e2e-output/"
+			]
+		}
+	],
+	"verify": {
+		"level": "V3",
+		"fallback": {
+			"level": "V3",
+			"self_proof": ["command trigger 会在 git add/commit 时自动拦截"]
+		}
+	},
+	"regression": {
+		"repro": [],
+		"expected": "",
+		"waiver": true,
+		"waiver_reason": "被动拦截机制，无需主动复现"
+	},
+	"edge": {
+		"negative_case": ["git add tests/e2e/mini-project/src/"],
+		"expected": "正常的源码文件应该可以提交"
+	}
+}

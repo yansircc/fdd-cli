@@ -1,0 +1,9 @@
+{
+	"_description": "场景 2: 忘记 build 就 publish",
+
+	"assertions": {
+		"trigger[0].kind": "command",
+		"trigger[0].pattern": "contains:publish",
+		"trigger[0].action": "block"
+	}
+}

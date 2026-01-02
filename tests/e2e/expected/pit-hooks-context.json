@@ -1,0 +1,9 @@
+{
+	"_description": "场景 5: 修改敏感文件需要提醒",
+
+	"assertions": {
+		"trigger[0].kind": "ai-context",
+		"trigger[0].when_touching": "contains:hook",
+		"trigger[0].context": "exists"
+	}
+}

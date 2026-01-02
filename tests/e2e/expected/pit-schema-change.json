@@ -1,0 +1,9 @@
+{
+	"_description": "场景 3: 类型变更没跑 typecheck",
+
+	"assertions": {
+		"trigger[0].kind": "change",
+		"trigger[0].when_changed": "contains:schema",
+		"trigger[0].must_run": "contains:typecheck"
+	}
+}

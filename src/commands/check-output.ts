@@ -14,32 +14,46 @@ export function printTriggeredResult(
 	);
 	console.log(chalk.gray("  Severity: ") + severityColor(result.severity));
 
+	// Show trigger details with matches
 	for (const trigger of result.triggers) {
 		if (trigger.triggered) {
-			console.log(
-				chalk.red(
-					`  ├─ Trigger ${trigger.triggerIndex + 1} (${trigger.kind}): TRIGGERED`,
-				),
-			);
-			if (verbose && trigger.matches) {
-				for (const match of trigger.matches.slice(0, 5)) {
-					console.log(chalk.gray(`  │  └─ ${match.slice(0, 80)}`));
+			console.log(chalk.red(`  ├─ Trigger (${trigger.kind}): TRIGGERED`));
+			// Always show matches (location info)
+			if (trigger.matches && trigger.matches.length > 0) {
+				const limit = verbose ? 10 : 3;
+				for (const match of trigger.matches.slice(0, limit)) {
+					console.log(chalk.yellow(`  │  → ${match.slice(0, 100)}`));
 				}
-				if (trigger.matches.length > 5) {
+				if (trigger.matches.length > limit) {
 					console.log(
-						chalk.gray(`  │  └─ ... and ${trigger.matches.length - 5} more`),
+						chalk.gray(`  │    ... and ${trigger.matches.length - limit} more`),
 					);
 				}
 			}
 		} else if (trigger.error) {
-			console.log(
-				chalk.yellow(
-					`  ├─ Trigger ${trigger.triggerIndex + 1} (${trigger.kind}): ERROR`,
-				),
-			);
+			console.log(chalk.yellow(`  ├─ Trigger (${trigger.kind}): ERROR`));
 			console.log(chalk.yellow(`  │  └─ ${trigger.error}`));
 		}
 	}
+
+	// Show Replay (root cause)
+	if (result.replay?.root_cause) {
+		console.log(chalk.cyan("  ├─ Replay: ") + result.replay.root_cause);
+	}
+
+	// Show Action (fix steps)
+	if (result.action && result.action.length > 0) {
+		const act = result.action[0];
+		if (act.action) {
+			console.log(chalk.green("  └─ Action: ") + act.action);
+		}
+		if (act.steps && act.steps.length > 0 && verbose) {
+			for (const step of act.steps) {
+				console.log(chalk.gray(`     • ${step}`));
+			}
+		}
+	}
+
 	console.log();
 }
 

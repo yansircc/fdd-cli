@@ -39,6 +39,9 @@ export async function runTriggers(
 		severity: pitfall.severity,
 		triggered,
 		triggers: triggerResults,
+		// Include TRAV info for display
+		replay: pitfall.replay,
+		action: pitfall.action,
 	};
 }
 

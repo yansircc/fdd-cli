@@ -4,4 +4,8 @@ templates/
 *.log
 .DS_Store
 .fdd/
-.claude/
+
+# E2E 测试产物
+tests/e2e-output/
+tests/e2e/mini-project/.fdd/
+tests/e2e/mini-project/.claude/

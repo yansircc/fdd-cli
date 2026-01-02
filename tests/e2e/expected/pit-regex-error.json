@@ -1,0 +1,10 @@
+{
+	"_description": "场景 1: 无效正则表达式",
+	"_assertions": "验证生成的 pit 包含以下关键点",
+
+	"assertions": {
+		"trigger[0].kind": "rule",
+		"trigger[0].pattern": "RegExp",
+		"replay.root_cause": "contains:正则|括号|SyntaxError"
+	}
+}

@@ -65,12 +65,16 @@ export async function init(options: InitOptions = {}): Promise<void> {
 		join(paths.pitfalls, "pit-000-example-protect-pitfalls.md"),
 	);
 
-	// Copy Claude commands
+	// Copy Claude commands and rules
 	await copyTemplate(
 		"claude/fdd-record.md",
 		join(paths.claude.commands, "fdd-record.md"),
 	);
 	await copyTemplate("claude/fdd.md", join(paths.claude.rules, "fdd.md"));
+	await copyTemplate(
+		"claude/fdd-stop.md",
+		join(paths.claude.rules, "fdd-stop.md"),
+	);
 
 	// Initialize all hooks (will be empty if no pitfalls exist)
 	const hooksResult = await syncAllHooks(cwd);

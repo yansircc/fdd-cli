@@ -16,6 +16,14 @@ export interface CheckResult {
 	severity: string;
 	triggered: boolean;
 	triggers: TriggerResult[];
+	// TRAV info for display
+	replay?: {
+		root_cause?: string;
+	};
+	action?: Array<{
+		action?: string;
+		steps?: string[];
+	}>;
 }
 
 export interface CommandGuardResult {
