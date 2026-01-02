@@ -110,9 +110,38 @@ async function runRuleDetector(
 
 	// Build grep command
 	if (tool === "grep") {
-		const excludeArgs = exclude.map((e) => `--exclude-dir="${e}"`).join(" ");
-		const scopeArgs = scope.join(" ");
-		const cmd = `grep -r -n ${excludeArgs} -E "${detector.pattern}" ${scopeArgs} 2>/dev/null || true`;
+		// Build include patterns for file types (e.g., src/**/*.tsx -> --include=*.tsx)
+		const includeArgs = scope
+			.map((s) => {
+				const ext = s.match(/\*\.(\w+)$/);
+				return ext ? `--include="*.${ext[1]}"` : "";
+			})
+			.filter(Boolean)
+			.join(" ");
+
+		// Build exclude patterns
+		const excludeArgs = exclude
+			.map((e) => {
+				if (e.includes("*")) {
+					// Glob pattern like **/*.test.* -> --exclude=*.test.*
+					const pattern = e.replace(/^\*\*\//, "");
+					return `--exclude="${pattern}"`;
+				}
+				// Directory name -> --exclude-dir
+				return `--exclude-dir="${e}"`;
+			})
+			.join(" ");
+
+		// Get base directories from scope (e.g., src/**/*.tsx -> src/)
+		const baseDirs = [
+			...new Set(
+				scope.map(
+					(s) => s.split("/").filter((p) => !p.includes("*"))[0] || ".",
+				),
+			),
+		].join(" ");
+
+		const cmd = `grep -r -n ${includeArgs} ${excludeArgs} -E "${detector.pattern}" ${baseDirs} 2>/dev/null || true`;
 
 		const { stdout } = await execAsync(cmd, { cwd });
 		const matches = stdout
