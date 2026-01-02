@@ -4,7 +4,8 @@
 
 export type Severity = "critical" | "high" | "medium" | "low";
 export type DetectorStrength = "strong" | "weak";
-export type DetectorKind = "rule" | "change" | "dynamic";
+export type DetectorKind = "rule" | "change" | "dynamic" | "command";
+export type CommandAction = "block" | "warn";
 export type VerifyLevel = "V0" | "V1" | "V2" | "V3";
 export type RemedyLevel = "low" | "medium" | "high";
 export type RemedyKind = "transform" | "read" | "run";
@@ -32,6 +33,9 @@ export interface DetectRule {
 	when_changed?: string[];
 	must_run?: string[];
 	strength: DetectorStrength;
+	// Command detector specific fields
+	action?: CommandAction; // block or warn (default: block)
+	message?: string; // Custom message to show when triggered
 }
 
 /**

@@ -24,17 +24,24 @@ fdd list
 
 # 4. Validate pitfalls against gate checks
 fdd validate
+
+# 5. Check for potential issues in the codebase
+fdd check
 ```
 
 ## Commands
 
 ### `fdd init`
 
-Initialize the FDD directory structure.
+Initialize the FDD directory structure and install shell hook.
 
 ```bash
-fdd init [--force]
+fdd init [--force] [--skip-hook]
 ```
+
+Options:
+- `-f, --force` — Force reinitialize even if already initialized
+- `--skip-hook` — Skip installing shell command guard hook
 
 Creates:
 - `.fdd/pitfalls/` — Pitfall entries (DRRV protocol)
@@ -89,6 +96,56 @@ fdd check [--id PIT-001] [--verbose]
 Options:
 - `-i, --id` — Check a specific pitfall by ID
 - `-v, --verbose` — Show detailed match information
+
+### `fdd guard <command>`
+
+Check if a command should be blocked (used by shell hook).
+
+```bash
+fdd guard "npm run dangerous-script"
+```
+
+Exit codes:
+- `0` — Command allowed
+- `1` — Command blocked
+- `2` — Command has warning
+
+Options:
+- `-q, --quiet` — Suppress output (exit code only)
+
+### `fdd install-hook`
+
+Install or uninstall shell hook for automatic command guarding.
+
+```bash
+fdd install-hook [--shell zsh|bash] [--uninstall]
+```
+
+Options:
+- `--shell <shell>` — Shell type (zsh/bash, default: zsh)
+- `--uninstall` — Remove the hook instead of installing
+
+## Command Guard
+
+FDD can automatically intercept and block dangerous commands before they execute. This works via:
+
+1. **`command` type detector** in pitfalls — Define regex patterns to match dangerous commands
+2. **Shell hook** — Installed in your `.zshrc` or `.bashrc` to intercept commands
+
+Example pitfall with command detector:
+
+```yaml
+detect:
+  - kind: command
+    pattern: "wrangler\\s+d1\\s+(execute|migrations)"
+    action: block  # or "warn"
+    message: "Use bun db:* commands instead"
+    strength: strong
+```
+
+Actions:
+- `block` — Prevent command execution (default)
+- `warn` — Show warning but allow execution
 
 ## Claude Integration
 

@@ -1,6 +1,6 @@
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
-import type { DetectRule, Pitfall } from "../types/index.js";
+import type { CommandAction, DetectRule, Pitfall } from "../types/index.js";
 
 const execAsync = promisify(exec);
 
@@ -248,4 +248,79 @@ async function runDynamicDetector(
 		triggered: failures.length > 0,
 		matches: failures.length > 0 ? failures : undefined,
 	};
+}
+
+/**
+ * Run command detector (match command against regex pattern)
+ * This is used by `fdd guard` to intercept dangerous commands
+ */
+function runCommandDetector(
+	baseResult: Omit<DetectorResult, "triggered">,
+	detector: DetectRule,
+	command: string,
+): DetectorResult {
+	if (!detector.pattern) {
+		return {
+			...baseResult,
+			triggered: false,
+			error: "Command detector missing pattern",
+		};
+	}
+
+	try {
+		const regex = new RegExp(detector.pattern);
+		const triggered = regex.test(command);
+
+		return {
+			...baseResult,
+			triggered,
+			matches: triggered ? [command] : undefined,
+		};
+	} catch (error) {
+		return {
+			...baseResult,
+			triggered: false,
+			error: `Invalid regex pattern: ${error instanceof Error ? error.message : String(error)}`,
+		};
+	}
+}
+
+/**
+ * Check if a command should be blocked by any pitfall's command detector
+ * Returns the first matching pitfall with its detector info, or null if no match
+ */
+export interface CommandGuardResult {
+	blocked: boolean;
+	pitfall?: Pitfall;
+	detector?: DetectRule;
+	action: "block" | "warn";
+	message?: string;
+}
+
+export function checkCommandAgainstPitfalls(
+	command: string,
+	pitfalls: Pitfall[],
+): CommandGuardResult {
+	for (const pitfall of pitfalls) {
+		for (const detector of pitfall.detect || []) {
+			if (detector.kind !== "command") continue;
+
+			if (!detector.pattern) continue;
+
+			try {
+				const regex = new RegExp(detector.pattern);
+				if (regex.test(command)) {
+					return {
+						blocked: true,
+						pitfall,
+						detector,
+						action: detector.action || "block",
+						message: detector.message,
+					};
+				}
+			} catch {}
+		}
+	}
+
+	return { blocked: false, action: "block" };
 }

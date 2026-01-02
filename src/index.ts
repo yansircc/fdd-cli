@@ -3,7 +3,9 @@
 import { Command } from "commander";
 import pkg from "../package.json";
 import { check } from "./commands/check.js";
+import { guard } from "./commands/guard.js";
 import { init } from "./commands/init.js";
+import { installHook } from "./commands/install-hook.js";
 import { list } from "./commands/list.js";
 import { record } from "./commands/record.js";
 import { validate } from "./commands/validate.js";
@@ -19,8 +21,9 @@ program
 
 program
 	.command("init")
-	.description("Initialize FDD in the current directory")
+	.description("Initialize FDD in the current directory (includes shell hook)")
 	.option("-f, --force", "Force reinitialize even if already initialized")
+	.option("--skip-hook", "Skip installing shell command guard hook")
 	.action((options) => init(options));
 
 program
@@ -57,5 +60,18 @@ program
 	.option("-i, --id <id>", "Check specific pitfall by ID")
 	.option("-v, --verbose", "Show detailed match information")
 	.action((options) => check(options));
+
+program
+	.command("guard <command>")
+	.description("Check if a command should be blocked (used by shell hook)")
+	.option("-q, --quiet", "Suppress output (exit code only)")
+	.action((command, options) => guard(command, options));
+
+program
+	.command("install-hook")
+	.description("Install shell hook for automatic command guarding")
+	.option("--shell <shell>", "Shell type (zsh/bash)", "zsh")
+	.option("--uninstall", "Remove the hook instead of installing")
+	.action((options) => installHook(options));
 
 program.parse();

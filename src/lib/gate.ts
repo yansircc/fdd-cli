@@ -72,6 +72,16 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 			) {
 				errors.push(`${prefix} kind=change requires when_changed`);
 			}
+			if (d.kind === "command" && !d.pattern) {
+				errors.push(`${prefix} kind=command requires pattern (regex)`);
+			}
+			if (
+				d.kind === "command" &&
+				d.action &&
+				!["block", "warn"].includes(d.action)
+			) {
+				errors.push(`${prefix} kind=command action must be "block" or "warn"`);
+			}
 		}
 	} else {
 		errors.push("Gate 5 failed: at least one detector is required");
