@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { syncProtectHooks } from "../../lib/hooks-generator.js";
+import { syncAllHooks } from "../../lib/hooks/index.js";
 import { createPitfall } from "../../lib/pitfall.js";
 import { validatePitfallInput } from "../../lib/schema.js";
 
@@ -18,14 +18,19 @@ export async function recordFromJson(
 
 		const result = await createPitfall(pitfallsDir, data);
 
-		// Auto-sync protect hooks if pitfall contains protect triggers
-		let hooksSynced = false;
-		const hasProtectTrigger = data.trigger?.some((t) => t.kind === "protect");
+		// Always sync all hooks after recording a pitfall
+		// - protect: if there are protect triggers
+		// - context: if there are ai-context triggers
+		// - autocheck: if there are any pitfalls (runs fdd check after edits)
+		// - guard: if there are command triggers (intercepts Bash commands)
+		const syncResult = await syncAllHooks(cwd);
 
-		if (hasProtectTrigger) {
-			const syncResult = await syncProtectHooks(cwd);
-			hooksSynced = syncResult.generated;
-		}
+		const hooksSynced = {
+			protect: syncResult.protect.generated,
+			context: syncResult.context.generated,
+			autocheck: syncResult.autocheck.generated,
+			guard: syncResult.guard.generated,
+		};
 
 		console.log(chalk.green("✓ Pitfall recorded successfully!"));
 		console.log(

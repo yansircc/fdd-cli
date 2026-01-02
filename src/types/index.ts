@@ -5,7 +5,13 @@
 
 export type Severity = "critical" | "high" | "medium" | "low";
 export type TriggerStrength = "strong" | "weak";
-export type TriggerKind = "rule" | "change" | "dynamic" | "command" | "protect";
+export type TriggerKind =
+	| "rule"
+	| "change"
+	| "dynamic"
+	| "command"
+	| "protect"
+	| "ai-context";
 export type ProtectPermission = "deny" | "allow";
 export type CommandAction = "block" | "warn";
 export type VerifyLevel = "V0" | "V1" | "V2" | "V3";
@@ -45,6 +51,9 @@ export interface TriggerRule {
 		update?: ProtectPermission;
 		delete?: ProtectPermission;
 	};
+	// AI Context trigger specific fields
+	when_touching?: string[]; // Glob patterns - inject context when these files are mentioned/modified
+	context?: string; // Context to inject into AI agent
 }
 
 /**

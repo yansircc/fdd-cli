@@ -20,8 +20,8 @@ trigger:
       - "pit-000-*.md"
     permissions:
       create: deny
-      update: deny
-      delete: deny
+      update: allow
+      delete: allow
     message: "请使用 fdd record --json 命令创建 pitfall，而不是直接写入文件"
     strength: strong
 
@@ -73,7 +73,7 @@ edge:
 
 - **paths**: `.fdd/pitfalls/**` - 保护整个 pitfalls 目录
 - **exclude**: `_template.md`, `pit-000-*.md` - 排除模板和本示例
-- **permissions**: 禁止 Create/Update/Delete 操作
+- **permissions**: 禁止 Create 操作
 - **message**: 提示使用正确的命令
 
 ## Replay

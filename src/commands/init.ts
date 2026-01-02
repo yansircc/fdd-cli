@@ -10,7 +10,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import chalk from "chalk";
 import { getPaths, isInitialized } from "../lib/config.js";
-import { syncProtectHooks } from "../lib/hooks-generator.js";
+import { syncAllHooks } from "../lib/hooks/index.js";
 import { HOOK_MARKER_START, ZSH_HOOK } from "../lib/shell-hooks.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -61,8 +61,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	);
 	await copyTemplate("claude/fdd.md", join(paths.claude.rules, "fdd.md"));
 
-	// Initialize protect hooks (will be empty if no pitfalls exist)
-	const hooksResult = await syncProtectHooks(cwd);
+	// Initialize all hooks (will be empty if no pitfalls exist)
+	const hooksResult = await syncAllHooks(cwd);
 
 	console.log(chalk.green("✓ FDD initialized successfully!"));
 	console.log();
@@ -81,9 +81,25 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log(chalk.gray("  .claude/"));
 	console.log(chalk.gray("    ├── commands/"));
 	console.log(chalk.gray("    │   └── fdd-record.md"));
-	if (hooksResult.generated) {
+	const anyHooksGenerated =
+		hooksResult.protect.generated ||
+		hooksResult.context.generated ||
+		hooksResult.autocheck.generated ||
+		hooksResult.guard.generated;
+	if (anyHooksGenerated) {
 		console.log(chalk.gray("    ├── hooks/"));
-		console.log(chalk.gray("    │   └── fdd-protect.js"));
+		if (hooksResult.protect.generated) {
+			console.log(chalk.gray("    │   ├── fdd-protect.js"));
+		}
+		if (hooksResult.context.generated) {
+			console.log(chalk.gray("    │   ├── fdd-context.js"));
+		}
+		if (hooksResult.autocheck.generated) {
+			console.log(chalk.gray("    │   ├── fdd-autocheck.js"));
+		}
+		if (hooksResult.guard.generated) {
+			console.log(chalk.gray("    │   └── fdd-guard.js"));
+		}
 		console.log(chalk.gray("    ├── settings.json"));
 	}
 	console.log(chalk.gray("    └── rules/"));

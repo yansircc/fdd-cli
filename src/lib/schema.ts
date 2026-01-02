@@ -29,7 +29,14 @@ const EvidenceSchema = z
 // Trigger Rule
 const TriggerRuleSchema = z
 	.object({
-		kind: z.enum(["rule", "change", "dynamic", "command", "protect"]),
+		kind: z.enum([
+			"rule",
+			"change",
+			"dynamic",
+			"command",
+			"protect",
+			"ai-context",
+		]),
 		tool: z.string().optional(),
 		pattern: z.string().optional(),
 		scope: z.array(z.string()).optional(),
@@ -47,6 +54,9 @@ const TriggerRuleSchema = z
 				delete: ProtectPermissionSchema.optional(),
 			})
 			.optional(),
+		// AI Context trigger fields
+		when_touching: z.array(z.string()).optional(),
+		context: z.string().optional(),
 	})
 	.refine(
 		(data) => {
@@ -64,11 +74,18 @@ const TriggerRuleSchema = z
 				return false;
 			if (data.kind === "protect" && (!data.paths || data.paths.length === 0))
 				return false;
+			if (
+				data.kind === "ai-context" &&
+				(!data.when_touching ||
+					data.when_touching.length === 0 ||
+					!data.context)
+			)
+				return false;
 			return true;
 		},
 		{
 			message:
-				"trigger missing required field: rule/command needs pattern, dynamic needs must_run, change needs when_changed, protect needs paths",
+				"trigger missing required field: rule/command needs pattern, dynamic needs must_run, change needs when_changed, protect needs paths, ai-context needs when_touching and context",
 		},
 	);
 

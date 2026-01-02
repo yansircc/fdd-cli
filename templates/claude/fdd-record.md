@@ -23,11 +23,13 @@ description: 把刚完成的修复编译成可触发坑位（趁热，一键完�
 | 文件变更触发 | `change` | schema 变更后验证 |
 | 危险命令拦截 | `command` | 阻止 `wrangler d1` |
 | 文件写入保护 | `protect` | 禁止直接写入 `.fdd/` |
+| AI 上下文提醒 | `ai-context` | 修改某文件时自动提醒历史坑位 |
 
 **决策流程：**
 ```
 保护文件不被 AI 写入？→ protect
 阻止危险命令？→ command
+需要 AI 事前了解历史？→ ai-context
 静态分析可检测？→ rule
 需要运行时检查？→ dynamic
 文件变更相关？→ change
@@ -60,6 +62,11 @@ description: 把刚完成的修复编译成可触发坑位（趁热，一键完�
 {"kind": "protect", "paths": [".fdd/pitfalls/**"], "exclude": ["*.bak"], "permissions": {"create": "deny", "update": "deny", "delete": "deny"}, "message": "请使用 fdd record --json", "strength": "strong"}
 ```
 
+#### ai-context - AI 上下文注入（用户无感）
+```json
+{"kind": "ai-context", "when_touching": ["src/lib/database.ts", "src/db/**"], "context": "此区域曾发生 SQL 注入问题，修改时需使用 parameterized queries，不要拼接 SQL 字符串。", "strength": "strong"}
+```
+
 ### 4. 构建完整 JSON
 
 ```json
@@ -88,11 +95,13 @@ fdd record --json '<JSON>'
 | 字段 | 值 | 说明 |
 |-----|---|-----|
 | severity | critical/high/medium/low | 严重程度 |
-| trigger[].kind | rule/change/dynamic/command/protect | 触发器类型 |
+| trigger[].kind | rule/change/dynamic/command/protect/ai-context | 触发器类型 |
 | trigger[].strength | strong/weak | 检测可靠度 |
 | trigger[].action | block/warn | command 专用 |
 | trigger[].paths | glob[] | protect 专用 - 保护路径 |
 | trigger[].permissions | {create,update,delete} | protect 专用 - CUD 权限 |
+| trigger[].when_touching | glob[] | ai-context 专用 - 监听文件 |
+| trigger[].context | string | ai-context 专用 - 注入的上下文 |
 | replay.root_cause | string | **必填** |
 | action[].level | low/medium/high | 风险等级 |
 | action[].kind | transform/read/run | 操作类型 |

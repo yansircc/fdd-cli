@@ -86,6 +86,18 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 			if (t.kind === "protect" && (!t.paths || t.paths.length === 0)) {
 				errors.push(`${prefix} kind=protect requires paths (glob patterns)`);
 			}
+			// AI Context trigger validation
+			if (
+				t.kind === "ai-context" &&
+				(!t.when_touching || t.when_touching.length === 0)
+			) {
+				errors.push(
+					`${prefix} kind=ai-context requires when_touching (glob patterns)`,
+				);
+			}
+			if (t.kind === "ai-context" && !t.context) {
+				errors.push(`${prefix} kind=ai-context requires context (text)`);
+			}
 			if (t.kind === "protect" && t.permissions) {
 				const validPerms = ["deny", "allow"];
 				if (
