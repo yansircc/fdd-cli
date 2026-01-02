@@ -99,6 +99,10 @@ bun install && bun dev <cmd>
 bun test && bun lint
 ```
 
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, architecture overview, and contribution guidelines.
+
 ## License
 
 MIT
