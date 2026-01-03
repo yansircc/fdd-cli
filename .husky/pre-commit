@@ -1,1 +1,10 @@
+# 阻止提交 buggy-*.ts 文件的修改（E2E 测试用，应保持 buggy 状态）
+if git diff --cached --name-only | grep -q "tests/e2e/mini-project/src/buggy-.*\.ts$"; then
+  echo "❌ 不允许提交 buggy-*.ts 文件的修改"
+  echo "   这些文件是 E2E 测试用的，应保持 buggy 状态"
+  echo ""
+  echo "   如果确实需要修改，请使用: git commit --no-verify"
+  exit 1
+fi
+
 bunx lint-staged
