@@ -90,7 +90,7 @@ FDD 支持 6 种触发器，用于检测和预防问题。
 ```json
 {
   "kind": "protect",
-  "paths": [".fdd/pitfalls/**", "config/production.yaml"],
+  "paths": [".fdd/pits/**", "config/production.yaml"],
   "exclude": ["*.bak"],
   "permissions": {
     "create": "deny",

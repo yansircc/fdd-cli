@@ -54,7 +54,7 @@ cd tests/e2e/mini-project
 rm -rf .fdd .claude
 fdd init
 # ... 执行测试场景
-bun ../../verify.ts .fdd/pitfalls/pit-xxx.md ../../expected/pit-xxx.json
+bun ../../verify.ts .fdd/pits/pit-xxx.md ../../expected/pit-xxx.json
 ```
 
 ## 测试规范

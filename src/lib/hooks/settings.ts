@@ -76,7 +76,7 @@ export async function ensureAllHookSettings(
 }
 
 /**
- * Ensure settings.json has the protect hook configured (legacy single hook)
+ * Ensure settings.json has the protect hook configured
  */
 export async function ensureProtectHookSettings(cwd: string): Promise<boolean> {
 	const settingsPath = join(cwd, SETTINGS_FILE);

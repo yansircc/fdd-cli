@@ -115,7 +115,7 @@ function processToolUse(input) {
     ).join("\\n");
 
     const docPaths = matchedContexts.map(ctx =>
-      \`@.fdd/pitfalls/\${ctx.pitfallFilename}\`
+      \`@.fdd/pits/\${ctx.pitfallFilename}\`
     ).join(" ");
 
     const systemMessage = \`⚠️ [FDD] AI 正在编辑危险区域文件: \${normalizedPath}

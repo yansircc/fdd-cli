@@ -1,6 +1,7 @@
 # FDD CLI - Claude Code Instructions
 
-> Feedback-Driven Development CLI - 将修复编译成可触发、可回归的 pitfalls
+> Feedforward & Feedback Driven Development CLI
+> 前馈驱动 + 反馈驱动开发
 
 ## Quick Reference
 
@@ -13,13 +14,46 @@ bun build              # 构建
 
 ## Project Overview
 
-FDD CLI 是一个将 bug 修复编译成可触发、可回归的 pitfall 的工具。核心功能：
+FDD CLI 是一个前馈驱动 + 反馈驱动的开发工具。
 
-1. **Pitfall 记录** - 将修复过程结构化为 TRAV 协议
-2. **触发器系统** - 6 种触发器检测潜在问题
-3. **Claude Code 集成** - 自动生成 hooks 提供上下文和保护
+### 双 F 模型
+
+```
+FDD = Feedforward + Feedback
+
+Feedforward（前馈/演绎）
+  来源：AI 元认知 —— "我知道未来的我不知道"
+  时机：开发前
+  产出：specs/ 文档 + 演绎 Pit
+
+Feedback（反馈/归纳）
+  来源：真实错误
+  时机：Bug 修复后
+  产出：归纳 Pit
+```
+
+### 核心功能
+
+1. **Interview 流程** - 发散→收敛→元认知，产出规划文档和演绎 Pit
+2. **Pitfall 记录** - 将修复过程结构化为 TRAV 协议
+3. **触发器系统** - 6 种触发器检测潜在问题
+4. **Claude Code 集成** - 自动生成 hooks 提供上下文和保护
 
 ## Core Concepts
+
+### Origin（来源）
+
+| Origin | 说明 | Gate 检查 |
+|--------|------|-----------|
+| `deductive` | 演绎 Pit - 来自 AI 预判 | evidence/regression/edge 可选 |
+| `inductive` | 归纳 Pit - 来自真实错误 | evidence/regression/edge 必填 |
+
+### Scope（生命周期）
+
+| Type | 说明 |
+|------|------|
+| `permanent` | 长期 - 项目级约束 |
+| `temporary` | 临时 - 有终止条件（日期/分支/里程碑） |
 
 ### TRAV Protocol
 
@@ -43,9 +77,15 @@ FDD CLI 是一个将 bug 修复编译成可触发、可回归的 pitfall 的工�
 ### Gate Checks
 
 创建 pitfall 前必须通过的检查：
+
+**归纳 Pit（origin: inductive）**：
 1. **Evidence** - 必须有 error_snippet 或 command
 2. **Regression** - 必须有复现步骤或豁免说明
 3. **Edge** - 必须有边界情况或豁免说明
+
+**演绎 Pit（origin: deductive）**：
+- Evidence/Regression/Edge 可选
+- 只需 trigger/replay/action/verify
 
 ## Key Directories
 
@@ -56,12 +96,26 @@ src/
 │   ├── trigger/       # 触发器实现
 │   ├── hooks/         # Claude Code hooks 生成器
 │   └── schema.ts      # Zod schema 定义
-├── templates/         # 模板文件（源文件）
+├── templates/
+│   ├── skills/fdd/    # FDD skill 文档
+│   └── specs/         # 规划文档模板
 └── types/             # TypeScript 类型
 
 templates/             # 构建后的模板（不要手动编辑）
 tests/e2e/             # E2E 测试
+
 .fdd/                  # FDD 数据目录
+├── specs/             # 规划文档
+│   └── {feature}/
+│       ├── SPEC.md
+│       ├── stories.md
+│       ├── flows.md
+│       ├── context.md
+│       ├── constraints.md
+│       └── unresolved.md
+├── pits/              # Pit 文件
+└── config.yaml
+
 .claude/               # Claude Code hooks
 ```
 

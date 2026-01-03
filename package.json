@@ -1,7 +1,7 @@
 {
 	"name": "fdd-cli",
-	"version": "0.2.11",
-	"description": "Feedback-Driven Development CLI - Compile fixes into triggerable pitfalls",
+	"version": "0.3.0",
+	"description": "Feedforward & Feedback Driven Development CLI - 前馈驱动 + 反馈驱动开发",
 	"type": "module",
 	"bin": {
 		"fdd": "./dist/index.js"

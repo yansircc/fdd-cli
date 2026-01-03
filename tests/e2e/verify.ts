@@ -109,7 +109,7 @@ if (args.length < 2) {
 	console.log("");
 	console.log("示例:");
 	console.log(
-		"  bun tests/e2e/verify.ts .fdd/pitfalls/pit-001-xxx.md ../expected/pit-regex-error.json",
+		"  bun tests/e2e/verify.ts .fdd/pits/pit-001-xxx.md ../expected/pit-regex-error.json",
 	);
 	process.exit(1);
 }

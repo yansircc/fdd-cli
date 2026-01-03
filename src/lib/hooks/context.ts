@@ -47,7 +47,7 @@ function generateScript(rules: AiContextRule[]): string {
  * DO NOT EDIT MANUALLY - regenerated on each fdd add
  *
  * Intercepts UserPromptSubmit and injects relevant context
- * based on ai-context rules defined in .fdd/pitfalls/
+ * based on ai-context rules defined in .fdd/pits/
  */
 
 const { minimatch } = require("minimatch");
@@ -133,7 +133,7 @@ function processPrompt(input) {
   if (matchedContexts.length > 0) {
     // 输出 @ 引用让 Claude 阅读 pitfall 文件
     for (const ctx of matchedContexts) {
-      console.log(\`注意: \${ctx.pitfallTitle} → @.fdd/pitfalls/\${ctx.pitfallFilename}\`);
+      console.log(\`注意: \${ctx.pitfallTitle} → @.fdd/pits/\${ctx.pitfallFilename}\`);
     }
     console.error(" ");  // 避免 "No stderr output" 警告
   }

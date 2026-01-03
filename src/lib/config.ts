@@ -65,7 +65,7 @@ export function getPaths(cwd: string = process.cwd()) {
 	const root = getFddRoot(cwd);
 	return {
 		root,
-		pitfalls: join(root, "pitfalls"),
+		pits: join(root, "pits"),
 		config: join(root, "config.yaml"),
 		readme: join(root, "README.md"),
 		claude: {

@@ -1,9 +1,37 @@
 /**
  * FDD CLI Types - TRAV Protocol
  * Trigger / Replay / Action / Verify
+ *
+ * FDD = Feedforward & Feedback Driven Development
+ * - Feedforward (deductive): AI 元认知，预防性约束
+ * - Feedback (inductive): 真实错误，防止复发
  */
 
 export type Severity = "critical" | "high" | "medium" | "low";
+
+/**
+ * Origin - 约束来源
+ * deductive: 演绎（前馈）- 来自 AI 预判或 Interview
+ * inductive: 归纳（反馈）- 来自真实错误
+ */
+export type Origin = "deductive" | "inductive";
+
+/**
+ * Scope type - 生命周期类型
+ */
+export type ScopeType = "permanent" | "temporary";
+
+/**
+ * Scope - 生命周期配置
+ */
+export interface Scope {
+	type: ScopeType;
+	// temporary 时的可选字段
+	reason?: string; // 为什么是临时的
+	expires?: string; // ISO date - 日期过期
+	branch?: string; // 分支合并后过期
+	milestone?: string; // 里程碑完成后过期
+}
 export type TriggerStrength = "strong" | "weak";
 export type TriggerKind =
 	| "rule"
@@ -117,14 +145,29 @@ export interface Pitfall {
 	severity: Severity;
 	tags: string[];
 	created: string;
-	evidence: Evidence;
+
+	// FDD v2: 来源和生命周期
+	origin: Origin; // deductive | inductive
+	scope: Scope; // permanent | temporary
+
+	// TRAV 协议
 	trigger: TriggerRule[];
 	replay: Replay;
 	action: ActionPath[];
-	related_rule?: string;
 	verify: Verify;
-	regression: Regression;
-	edge: Edge;
+
+	// Gate 检查（归纳必填，演绎可选）
+	evidence?: Evidence;
+	regression?: Regression;
+	edge?: Edge;
+
+	// 可选
+	related_rule?: string;
+
+	// 归档状态
+	archived?: boolean;
+	archived_at?: string;
+	archived_reason?: string;
 }
 
 /**

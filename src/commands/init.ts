@@ -46,7 +46,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log(chalk.blue("Initializing FDD..."));
 
 	// Create .fdd directory structure
-	await mkdir(paths.pitfalls, { recursive: true });
+	await mkdir(paths.pits, { recursive: true });
 
 	// Create .claude directories
 	await mkdir(paths.claude.fddSkill, { recursive: true });
@@ -58,7 +58,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	// Copy example pitfall (demonstrates protect trigger)
 	await copyTemplate(
 		"pitfall-example.md",
-		join(paths.pitfalls, "pit-000-example-protect-pitfalls.md"),
+		join(paths.pits, "pit-000-example-protect-pitfalls.md"),
 	);
 
 	// Copy FDD skill files
@@ -71,7 +71,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log();
 	console.log("Created:");
 	console.log(chalk.gray("  .fdd/"));
-	console.log(chalk.gray("    ├── pitfalls/"));
+	console.log(chalk.gray("    ├── pits/"));
 	console.log(
 		chalk.gray("    │   └── pit-000-example-protect-pitfalls.md ") +
 			chalk.dim("(示例，可删除)"),

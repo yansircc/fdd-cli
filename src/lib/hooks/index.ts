@@ -55,14 +55,14 @@ export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
 }
 
 /**
- * Sync only protect hooks (legacy single hook support)
+ * Sync only protect hooks
  */
 export async function syncProtectHooks(cwd: string): Promise<SyncResult> {
-	const pitfallsDir = join(cwd, ".fdd", "pitfalls");
+	const pitsDir = join(cwd, ".fdd", "pits");
 
 	let pitfalls: Awaited<ReturnType<typeof listPitfalls>> = [];
-	if (existsSync(pitfallsDir)) {
-		pitfalls = await listPitfalls(pitfallsDir);
+	if (existsSync(pitsDir)) {
+		pitfalls = await listPitfalls(pitsDir);
 	}
 
 	const result = await syncProtectHook(cwd, pitfalls);

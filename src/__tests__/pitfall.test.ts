@@ -231,7 +231,7 @@ title: Template
 
 		it("should parse evidence correctly", async () => {
 			const pitfalls = await listPitfalls(pitfallsDir);
-			expect(pitfalls[0].evidence.error_snippet).toBe(
+			expect(pitfalls[0].evidence?.error_snippet).toBe(
 				"Error: something went wrong",
 			);
 		});
@@ -314,6 +314,6 @@ edge:
 		const pitfall = await getPitfallById(pitfallsDir, "PIT-001");
 		expect(pitfall?.title).toBe("Test pitfall");
 		expect(pitfall?.severity).toBe("high");
-		expect(pitfall?.evidence.error_snippet).toBe("Error");
+		expect(pitfall?.evidence?.error_snippet).toBe("Error");
 	});
 });

@@ -1,41 +1,60 @@
-import type { GateCheckResult, Pitfall } from "../types/index.js";
+import type { GateCheckResult, Origin, Pitfall } from "../types/index.js";
 
 /**
  * Check if pitfall passes all gates before writing
+ *
+ * FDD v2: 演绎 Pit (deductive) 跳过 Gate 1-3
+ * - Gate 1: Evidence (归纳必填，演绎可选)
+ * - Gate 2: Regression (归纳必填，演绎可选)
+ * - Gate 3: Edge (归纳必填，演绎可选)
  */
 export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 	const errors: string[] = [];
 	const warnings: string[] = [];
 
-	// Gate 1: Evidence required
-	if (pitfall.evidence) {
-		const hasContent =
-			pitfall.evidence.error_snippet || pitfall.evidence.command;
-		if (!hasContent) {
-			errors.push(
-				"Gate 1 failed: evidence must contain error_snippet or command",
-			);
+	// 获取 origin，默认为 inductive（向后兼容旧数据）
+	const origin: Origin = pitfall.origin ?? "inductive";
+	const isDeductive = origin === "deductive";
+
+	// Gate 1: Evidence required (仅归纳 Pit)
+	if (!isDeductive) {
+		if (pitfall.evidence) {
+			const hasContent =
+				pitfall.evidence.error_snippet || pitfall.evidence.command;
+			if (!hasContent) {
+				errors.push(
+					"Gate 1 failed: evidence must contain error_snippet or command",
+				);
+			}
+		} else {
+			errors.push("Gate 1 failed: evidence is required for inductive pit");
 		}
-	} else {
-		errors.push("Gate 1 failed: evidence is required");
 	}
 
-	// Gate 2: Regression required
-	if (!pitfall.regression) {
-		errors.push("Gate 2 failed: regression is required");
-	} else if (!(pitfall.regression.waiver || pitfall.regression.repro?.length)) {
-		errors.push("Gate 2 failed: regression must have repro steps or waiver");
-	} else if (pitfall.regression.waiver && !pitfall.regression.waiver_reason) {
-		errors.push("Gate 2 failed: regression waiver requires waiver_reason");
+	// Gate 2: Regression required (仅归纳 Pit)
+	if (!isDeductive) {
+		if (!pitfall.regression) {
+			errors.push("Gate 2 failed: regression is required for inductive pit");
+		} else if (
+			!(pitfall.regression.waiver || pitfall.regression.repro?.length)
+		) {
+			errors.push("Gate 2 failed: regression must have repro steps or waiver");
+		} else if (pitfall.regression.waiver && !pitfall.regression.waiver_reason) {
+			errors.push("Gate 2 failed: regression waiver requires waiver_reason");
+		}
 	}
 
-	// Gate 3: Edge required
-	if (!pitfall.edge) {
-		errors.push("Gate 3 failed: edge (negative case) is required");
-	} else if (!(pitfall.edge.waiver || pitfall.edge.negative_case?.length)) {
-		errors.push("Gate 3 failed: edge must have negative_case or waiver");
-	} else if (pitfall.edge.waiver && !pitfall.edge.waiver_reason) {
-		errors.push("Gate 3 failed: edge waiver requires waiver_reason");
+	// Gate 3: Edge required (仅归纳 Pit)
+	if (!isDeductive) {
+		if (!pitfall.edge) {
+			errors.push(
+				"Gate 3 failed: edge (negative case) is required for inductive pit",
+			);
+		} else if (!(pitfall.edge.waiver || pitfall.edge.negative_case?.length)) {
+			errors.push("Gate 3 failed: edge must have negative_case or waiver");
+		} else if (pitfall.edge.waiver && !pitfall.edge.waiver_reason) {
+			errors.push("Gate 3 failed: edge waiver requires waiver_reason");
+		}
 	}
 
 	// Gate 4: Weak trigger warning

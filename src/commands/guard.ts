@@ -28,7 +28,7 @@ export async function guard(
 	}
 
 	const paths = getPaths(cwd);
-	const pitfalls = await listPitfalls(paths.pitfalls);
+	const pitfalls = await listPitfalls(paths.pits);
 
 	if (pitfalls.length === 0) {
 		process.exit(0);

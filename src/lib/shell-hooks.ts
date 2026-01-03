@@ -8,7 +8,7 @@ export const HOOK_MARKER_END = "# <<< FDD Command Guard <<<";
 
 export const ZSH_HOOK = `${HOOK_MARKER_START}
 # FDD (Failure-Driven Development) command guard
-# Automatically blocks dangerous commands defined in .fdd/pitfalls/
+# Automatically blocks dangerous commands defined in .fdd/pits/
 # Install: fdd install-hook | Uninstall: fdd install-hook --uninstall
 
 __fdd_accept_line() {
@@ -65,7 +65,7 @@ ${HOOK_MARKER_END}`;
 
 export const BASH_HOOK = `${HOOK_MARKER_START}
 # FDD (Failure-Driven Development) command guard
-# Automatically blocks dangerous commands defined in .fdd/pitfalls/
+# Automatically blocks dangerous commands defined in .fdd/pits/
 # Install: fdd install-hook --shell bash | Uninstall: fdd install-hook --shell bash --uninstall
 
 # Enable extdebug to allow DEBUG trap to block commands (return 1 = skip command)

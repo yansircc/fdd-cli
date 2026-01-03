@@ -1,10 +1,19 @@
 # Gate Checks
 
-每个 pitfall 必须通过以下质量门禁。
+每个 Pit 必须通过质量门禁。**演绎 Pit 的门禁更宽松。**
 
-## Gate 1: Evidence Required
+## 演绎 vs 归纳
 
-Pitfall 必须包含 `evidence` 块：
+| Gate | 归纳 Pit | 演绎 Pit |
+|------|----------|----------|
+| Gate 1: Evidence | **必填** | 可选 |
+| Gate 2: Regression | **必填或 waiver** | 可选 |
+| Gate 3: Edge | **必填或 waiver** | 可选 |
+| Gate 4-8 | 必填 | 必填 |
+
+## Gate 1: Evidence Required（仅归纳）
+
+**归纳 Pit** 必须包含 `evidence` 块：
 - `error_snippet` 或 `command`（至少一个）
 - `commit`（如果有）
 
@@ -19,11 +28,11 @@ Pitfall 必须包含 `evidence` 块：
 }
 ```
 
-**缺少 evidence 的 pitfall 将被拒绝。**
+**演绎 Pit 可以省略 evidence。**
 
-## Gate 2: Regression Required
+## Gate 2: Regression Required（仅归纳）
 
-Pitfall 必须包含 `regression` 块。
+**归纳 Pit** 必须包含 `regression` 块。
 
 ### 正常情况
 ```json
@@ -51,11 +60,11 @@ Pitfall 必须包含 `regression` 块。
 }
 ```
 
-**缺少 regression 的 pitfall 将被拒绝。**
+**演绎 Pit 可以省略 regression。**
 
-## Gate 3: Edge Required
+## Gate 3: Edge Required（仅归纳）
 
-Pitfall 必须包含 `edge` 块（至少一个负面案例）。
+**归纳 Pit** 必须包含 `edge` 块（至少一个负面案例）。
 
 ### 正常情况
 ```json
@@ -82,7 +91,7 @@ Pitfall 必须包含 `edge` 块（至少一个负面案例）。
 }
 ```
 
-**缺少 edge 的 pitfall 将被拒绝。**
+**演绎 Pit 可以省略 edge。**
 
 ## Gate 4: Weak Trigger Marking
 
@@ -99,6 +108,56 @@ Pitfall 必须包含 `edge` 块（至少一个负面案例）。
   }]
 }
 ```
+
+## Gate 5: Trigger Field Validation
+
+每种 trigger.kind 有必填字段：
+
+| kind | 必填字段 |
+|------|----------|
+| rule | pattern |
+| command | pattern |
+| dynamic | must_run |
+| change | when_changed |
+| protect | paths |
+| ai-context | when_touching, context |
+
+## Gate 6: Replay Required
+
+所有 Pit 必须包含 `replay.root_cause`：
+
+```json
+{
+  "replay": {
+    "root_cause": "根本原因（必填）"
+  }
+}
+```
+
+## Gate 7: Action Required
+
+所有 Pit 必须包含至少一个 action：
+
+```json
+{
+  "action": [{
+    "level": "low",
+    "kind": "transform",
+    "action": "如何修复",
+    "steps": ["步骤1", "步骤2"]
+  }]
+}
+```
+
+## Gate 8: Verify Required
+
+所有 Pit 必须包含 verify：
+
+| Level | 必填 |
+|-------|------|
+| V0, V1 | checks |
+| V2 | evidence 存在 |
+| V3 | fallback.self_proof |
 
 ## Verify Levels
 
@@ -130,8 +189,6 @@ Pitfall 必须包含 `edge` 块（至少一个负面案例）。
 ## Trigger 优先原则
 
 > **按成本效益排序：最低成本 + 最高准确度优先。**
-
-静态/变更类触发器通常更便宜，但如果问题本质上是动态契约问题，则优先使用动态触发器。
 
 | 优先级 | 类型 | 成本 |
 |--------|------|------|

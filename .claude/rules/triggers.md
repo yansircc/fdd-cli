@@ -78,7 +78,7 @@ trigger:
 ```yaml
 trigger:
   - kind: protect
-    paths: [".fdd/pitfalls/**"]
+    paths: [".fdd/pits/**"]
     permissions:
       create: deny
       update: deny

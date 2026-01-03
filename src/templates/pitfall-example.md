@@ -7,14 +7,14 @@ created: 2024-01-01
 
 evidence:
   error_snippet: |
-    AI agent 绕过门禁检查直接写入 .fdd/pitfalls/ 目录，
+    AI agent 绕过门禁检查直接写入 .fdd/pits/ 目录，
     导致 pitfall 文件缺少必要字段或格式不正确。
   command: "AI 使用 Write 工具直接创建 pitfall 文件"
 
 trigger:
   - kind: protect
     paths:
-      - ".fdd/pitfalls/**"
+      - ".fdd/pits/**"
     exclude:
       - "_template.md"
       - "pit-000-*.md"
@@ -27,9 +27,9 @@ trigger:
 
 replay:
   root_cause: "AI agent 不知道 pitfall 文件需要通过 CLI 创建以确保门禁检查和 ID 生成"
-  trigger_condition: "AI 尝试直接使用 Write/Edit 工具操作 .fdd/pitfalls/ 目录"
+  trigger_condition: "AI 尝试直接使用 Write/Edit 工具操作 .fdd/pits/ 目录"
   affected_scope:
-    - ".fdd/pitfalls/"
+    - ".fdd/pits/"
 
 action:
   - level: low
@@ -71,7 +71,7 @@ edge:
 
 本 pitfall 使用 `protect` 类型的 trigger，配置如下：
 
-- **paths**: `.fdd/pitfalls/**` - 保护整个 pitfalls 目录
+- **paths**: `.fdd/pits/**` - 保护整个 pitfalls 目录
 - **exclude**: `_template.md`, `pit-000-*.md` - 排除模板和本示例
 - **permissions**: 禁止 Create 操作
 - **message**: 提示使用正确的命令

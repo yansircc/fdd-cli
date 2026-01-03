@@ -2,9 +2,11 @@ import { describe, expect, it } from "bun:test";
 import { validatePitfallInput } from "../lib/schema.js";
 
 describe("validatePitfallInput", () => {
-	// Helper to create a valid pitfall JSON
+	// Helper to create a valid inductive pitfall JSON (all fields required)
 	const validPitfall = {
 		title: "Test pitfall",
+		origin: "inductive",
+		scope: { type: "permanent" },
 		severity: "medium",
 		tags: ["test"],
 		evidence: { error_snippet: "Error: something went wrong" },
@@ -35,17 +37,17 @@ describe("validatePitfallInput", () => {
 		});
 	});
 
-	describe("Evidence validation", () => {
+	describe("Evidence validation (inductive)", () => {
 		it("should pass with error_snippet", () => {
 			const input = { ...validPitfall, evidence: { error_snippet: "Error" } };
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.evidence.error_snippet).toBe("Error");
+			expect(result.evidence?.error_snippet).toBe("Error");
 		});
 
 		it("should pass with command", () => {
 			const input = { ...validPitfall, evidence: { command: "npm test" } };
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.evidence.command).toBe("npm test");
+			expect(result.evidence?.command).toBe("npm test");
 		});
 
 		it("should pass with both error_snippet and command", () => {
@@ -54,8 +56,8 @@ describe("validatePitfallInput", () => {
 				evidence: { error_snippet: "Error", command: "npm test" },
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.evidence.error_snippet).toBe("Error");
-			expect(result.evidence.command).toBe("npm test");
+			expect(result.evidence?.error_snippet).toBe("Error");
+			expect(result.evidence?.command).toBe("npm test");
 		});
 
 		it("should fail without error_snippet or command", () => {
@@ -357,14 +359,14 @@ describe("validatePitfallInput", () => {
 		});
 	});
 
-	describe("Regression validation", () => {
+	describe("Regression validation (inductive)", () => {
 		it("should pass with repro steps", () => {
 			const input = {
 				...validPitfall,
 				regression: { repro: ["step 1"], expected: "error" },
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.regression.repro).toEqual(["step 1"]);
+			expect(result.regression?.repro).toEqual(["step 1"]);
 		});
 
 		it("should pass with waiver and reason", () => {
@@ -378,7 +380,7 @@ describe("validatePitfallInput", () => {
 				},
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.regression.waiver).toBe(true);
+			expect(result.regression?.waiver).toBe(true);
 		});
 
 		it("should fail with empty repro and no waiver", () => {
@@ -402,14 +404,14 @@ describe("validatePitfallInput", () => {
 		});
 	});
 
-	describe("Edge validation", () => {
+	describe("Edge validation (inductive)", () => {
 		it("should pass with negative_case", () => {
 			const input = {
 				...validPitfall,
 				edge: { negative_case: ["valid input"], expected: "no error" },
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.edge.negative_case).toEqual(["valid input"]);
+			expect(result.edge?.negative_case).toEqual(["valid input"]);
 		});
 
 		it("should pass with waiver and reason", () => {
@@ -423,7 +425,7 @@ describe("validatePitfallInput", () => {
 				},
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.edge.waiver).toBe(true);
+			expect(result.edge?.waiver).toBe(true);
 		});
 
 		it("should fail with empty negative_case and no waiver", () => {
@@ -517,6 +519,8 @@ describe("validatePitfallInput", () => {
 		it("should list multiple errors", () => {
 			const input = {
 				title: "",
+				origin: "inductive",
+				scope: { type: "permanent" },
 				severity: "medium",
 				tags: [],
 				evidence: {},
@@ -536,6 +540,69 @@ describe("validatePitfallInput", () => {
 				// Should contain multiple errors
 				expect(message.split("\n").length).toBeGreaterThan(2);
 			}
+		});
+	});
+
+	describe("Deductive pitfall validation", () => {
+		it("should pass deductive pitfall without evidence/regression/edge", () => {
+			const input = {
+				title: "Deductive test",
+				origin: "deductive",
+				scope: { type: "permanent" },
+				severity: "medium",
+				tags: ["test"],
+				trigger: [
+					{
+						kind: "ai-context",
+						when_touching: ["src/**"],
+						context: "Test context",
+						strength: "strong",
+					},
+				],
+				replay: { root_cause: "Preventive constraint" },
+				action: [{ level: "low", kind: "read", doc: "https://example.com" }],
+				verify: {
+					level: "V3",
+					fallback: { level: "V3", self_proof: ["Preventive"] },
+				},
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.origin).toBe("deductive");
+			expect(result.evidence).toBeUndefined();
+			expect(result.regression).toBeUndefined();
+			expect(result.edge).toBeUndefined();
+		});
+
+		it("should pass deductive pitfall with temporary scope", () => {
+			const input = {
+				title: "Temporary deductive",
+				origin: "deductive",
+				scope: {
+					type: "temporary",
+					reason: "v1.0 only",
+					expires: "2025-12-31",
+				},
+				severity: "low",
+				tags: ["non-goal"],
+				trigger: [
+					{
+						kind: "command",
+						pattern: "npm install oauth",
+						action: "block",
+						message: "Not in scope",
+						strength: "strong",
+					},
+				],
+				replay: { root_cause: "Product decision" },
+				action: [{ level: "low", kind: "read", doc: "Wait for v2" }],
+				verify: {
+					level: "V3",
+					fallback: { level: "V3", self_proof: ["Product decision"] },
+				},
+			};
+			const result = validatePitfallInput(JSON.stringify(input));
+			expect(result.scope.type).toBe("temporary");
+			expect(result.scope.expires).toBe("2025-12-31");
 		});
 	});
 });

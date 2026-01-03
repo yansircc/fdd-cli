@@ -1,6 +1,22 @@
 # FDD CLI
 
-> **Feedback-Driven Development** — Compile fixes into triggerable, regression-testable pitfalls.
+> **Feedforward & Feedback Driven Development** — 前馈驱动 + 反馈驱动开发
+
+## 双 F 模型
+
+```
+FDD = Feedforward + Feedback
+
+Feedforward（前馈/演绎）
+  来源：AI 元认知 —— "我知道未来的我不知道"
+  时机：开发前
+  产出：specs/ 文档 + 演绎 Pit
+
+Feedback（反馈/归纳）
+  来源：真实错误
+  时机：Bug 修复后
+  产出：归纳 Pit
+```
 
 ## Installation
 
@@ -24,11 +40,25 @@ fdd validate                # Validate gate checks
 |---------|-------------|---------|
 | `init` | Initialize FDD directory + skills | `--force`, `--skip-hook` |
 | `add` | Add pitfall | `--json` (required) |
-| `list` | List pitfalls | `-s severity`, `-t tag` |
+| `list` | List pitfalls | `-s severity`, `-t tag`, `--origin`, `--scope`, `--archived` |
 | `validate` | Validate gate checks | `-i id` |
 | `check` | Run triggers | `-i id`, `-v verbose` |
 | `guard <cmd>` | Check command (for hook) | `-q quiet` |
 | `install-hook` | Install/uninstall shell hook | `--shell`, `--uninstall` |
+
+## Origin（来源）
+
+| Origin | 说明 | Gate 检查 |
+|--------|------|-----------|
+| `deductive` | 演绎 Pit - 来自 AI 预判 | evidence/regression/edge 可选 |
+| `inductive` | 归纳 Pit - 来自真实错误 | evidence/regression/edge 必填 |
+
+## Scope（生命周期）
+
+| Type | 说明 |
+|------|------|
+| `permanent` | 长期 - 项目级约束 |
+| `temporary` | 临时 - 有终止条件 |
 
 ## Trigger Types
 
@@ -50,33 +80,6 @@ FDD automatically generates Claude Code hooks:
 - **Protect Hook**: Blocks AI from modifying protected files
 - **Guard Hook**: Intercepts dangerous Bash commands
 
-### ai-context Trigger
-
-Automatically remind AI about past issues when modifying certain files:
-
-```yaml
-trigger:
-  - kind: ai-context
-    when_touching: ["src/lib/database.ts", "src/db/**"]
-    context: "This area had SQL injection issues. Use parameterized queries."
-    strength: strong
-```
-
-### protect Trigger
-
-Prevent AI from modifying protected files:
-
-```yaml
-trigger:
-  - kind: protect
-    paths: [".fdd/pitfalls/**"]
-    permissions:
-      create: deny
-      update: deny
-      delete: deny
-    message: "Use fdd add --json instead"
-```
-
 ## TRAV Protocol
 
 Each pitfall contains:
@@ -85,23 +88,12 @@ Each pitfall contains:
 - **Action** — How to fix it
 - **Verify** — How to confirm the fix
 
-## Gate Checks
-
-Required fields:
-- `evidence` — Error snippet or command
-- `regression` — Repro steps (or waiver)
-- `edge` — Negative case (or waiver)
-
 ## Development
 
 ```bash
 bun install && bun dev <cmd>
 bun test && bun lint
 ```
-
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for development setup, architecture overview, and contribution guidelines.
 
 ## License
 

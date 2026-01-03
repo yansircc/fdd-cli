@@ -44,7 +44,7 @@ function generateScript(rules: ProtectRule[]): string {
  * DO NOT EDIT MANUALLY - regenerated on each fdd add
  *
  * Intercepts Write/Edit tool calls and blocks/warns based on
- * protect rules defined in .fdd/pitfalls/
+ * protect rules defined in .fdd/pits/
  */
 
 const { minimatch } = require("minimatch");

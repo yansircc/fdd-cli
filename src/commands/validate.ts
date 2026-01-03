@@ -16,7 +16,7 @@ export async function validate(options: ValidateOptions = {}): Promise<void> {
 	}
 
 	const paths = getPaths(cwd);
-	const pitfalls = await listPitfalls(paths.pitfalls);
+	const pitfalls = await listPitfalls(paths.pits);
 
 	if (pitfalls.length === 0) {
 		console.log(chalk.yellow("No pitfalls found."));

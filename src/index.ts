@@ -15,7 +15,7 @@ const program = new Command();
 program
 	.name("fdd")
 	.description(
-		"FDD CLI - Compile fixes into triggerable pitfalls (Feedback-Driven Development)",
+		"FDD CLI - Feedforward & Feedback Driven Development (前馈驱动 + 反馈驱动开发)",
 	)
 	.version(pkg.version);
 
@@ -46,6 +46,9 @@ program
 		"Filter by severity (critical/high/medium/low)",
 	)
 	.option("-t, --tag <tag>", "Filter by tag")
+	.option("-o, --origin <origin>", "Filter by origin (deductive/inductive)")
+	.option("--scope <scope>", "Filter by scope (permanent/temporary)")
+	.option("--archived", "Show archived pitfalls only")
 	.action((options) => list(options));
 
 program

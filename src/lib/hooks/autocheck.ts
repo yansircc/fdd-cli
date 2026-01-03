@@ -86,7 +86,7 @@ function runAutocheck(input) {
         console.log("");
       }
 
-      console.log("💡 Run 'fdd list' or check .fdd/pitfalls/ for remediation steps.\\n");
+      console.log("💡 Run 'fdd list' or check .fdd/pits/ for remediation steps.\\n");
     }
   } catch (error) {
     // Silently ignore - don't block workflow

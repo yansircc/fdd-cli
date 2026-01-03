@@ -18,7 +18,7 @@ describe("getPaths", () => {
 		const paths = getPaths("/home/user/project");
 
 		expect(paths.root).toBe("/home/user/project/.fdd");
-		expect(paths.pitfalls).toBe("/home/user/project/.fdd/pitfalls");
+		expect(paths.pits).toBe("/home/user/project/.fdd/pits");
 		expect(paths.config).toBe("/home/user/project/.fdd/config.yaml");
 		expect(paths.readme).toBe("/home/user/project/.fdd/README.md");
 	});

@@ -15,7 +15,7 @@ fdd init --skip-hook  # 跳过 shell hook 安装
 实现：`src/commands/init.ts`
 
 行为：
-1. 创建 `.fdd/` 目录结构
+1. 创建 `.fdd/` 目录结构（包括 `specs/` 和 `pits/`）
 2. 创建 `.claude/` hooks 目录
 3. 复制模板文件
 4. 安装 ZSH shell hook（除非 --skip-hook）
@@ -37,14 +37,23 @@ fdd add --json '<JSON>'     # JSON 模式（AI 自动生成）
 
 JSON 格式参考：`.claude/skills/fdd/create.md`
 
+**Origin 说明**：
+- `origin: "inductive"` - 归纳 Pit，需要 evidence/regression/edge
+- `origin: "deductive"` - 演绎 Pit，evidence/regression/edge 可选
+
 ### fdd list
 
 列出 pitfalls。
 
 ```bash
-fdd list              # 列出所有
-fdd list -s high      # 按严重级别过滤
-fdd list -t security  # 按标签过滤
+fdd list                    # 列出所有生效的 Pit
+fdd list -s high            # 按严重级别过滤
+fdd list -t security        # 按标签过滤
+fdd list --origin deductive # 只看演绎 Pit
+fdd list --origin inductive # 只看归纳 Pit
+fdd list --scope permanent  # 只看长期 Pit
+fdd list --scope temporary  # 只看临时 Pit
+fdd list --archived         # 只看已归档
 ```
 
 实现：`src/commands/list.ts`
@@ -54,12 +63,16 @@ fdd list -t security  # 按标签过滤
 运行触发器检测问题。
 
 ```bash
-fdd check           # 检查所有
-fdd check -i PIT-001  # 检查特定 pitfall
-fdd check -v        # 详细输出
+fdd check              # 检查所有（跳过过期和归档）
+fdd check -i PIT-001   # 检查特定 pitfall
+fdd check -v           # 详细输出
 ```
 
 实现：`src/commands/check.ts`
+
+**行为**：
+- 自动跳过过期的临时 Pit（显示警告）
+- 自动跳过已归档的 Pit
 
 ### fdd validate
 
@@ -71,6 +84,10 @@ fdd validate -i PIT-001  # 验证特定 pitfall
 ```
 
 实现：`src/commands/validate.ts`
+
+**Origin 差异**：
+- 归纳 Pit：完整 Gate 检查（evidence/regression/edge 必填）
+- 演绎 Pit：宽松 Gate 检查（evidence/regression/edge 可选）
 
 ### fdd guard
 
@@ -131,13 +148,16 @@ cp -r src/templates templates
 
 输出：
 - `dist/index.js` - CLI 入口
-- `templates/` - 模板文件副本
+- `templates/` - 模板文件副本（包括 skills/ 和 specs/）
 
 ## 调试技巧
 
 ```bash
 # 查看 pitfall 内容
-cat .fdd/pitfalls/PIT-001-*.md
+cat .fdd/pits/PIT-001-*.md
+
+# 查看规划文档
+ls .fdd/specs/
 
 # 查看配置
 cat .fdd/config.yaml

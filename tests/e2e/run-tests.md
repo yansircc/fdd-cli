@@ -49,7 +49,7 @@ fdd init
 
 ```bash
 # 在 mini-project 目录下
-bun ../../verify.ts .fdd/pitfalls/pit-xxx.md ../../expected/pit-regex-error.json
+bun ../../verify.ts .fdd/pits/pit-xxx.md ../../expected/pit-regex-error.json
 ```
 
 验证脚本语法：

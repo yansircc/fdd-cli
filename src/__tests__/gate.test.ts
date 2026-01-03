@@ -3,8 +3,10 @@ import { checkGates, formatGateResult } from "../lib/gate.js";
 import type { Pitfall } from "../types/index.js";
 
 describe("checkGates", () => {
-	// Helper to create a valid pitfall
+	// Helper to create a valid inductive pitfall
 	const validPitfall: Partial<Pitfall> = {
+		origin: "inductive",
+		scope: { type: "permanent" },
 		evidence: { error_snippet: "Error: something went wrong" },
 		regression: { repro: ["step 1", "step 2"], expected: "error occurs" },
 		edge: { negative_case: ["valid input"], expected: "no error" },
@@ -35,7 +37,9 @@ describe("checkGates", () => {
 			const { evidence, ...noEvidence } = validPitfall;
 			const result = checkGates(noEvidence);
 			expect(result.passed).toBe(false);
-			expect(result.errors).toContain("Gate 1 failed: evidence is required");
+			expect(result.errors).toContain(
+				"Gate 1 failed: evidence is required for inductive pit",
+			);
 		});
 
 		it("should fail with empty evidence", () => {
@@ -76,7 +80,9 @@ describe("checkGates", () => {
 			const { regression, ...noRegression } = validPitfall;
 			const result = checkGates(noRegression);
 			expect(result.passed).toBe(false);
-			expect(result.errors).toContain("Gate 2 failed: regression is required");
+			expect(result.errors).toContain(
+				"Gate 2 failed: regression is required for inductive pit",
+			);
 		});
 
 		it("should fail with empty repro and no waiver", () => {
@@ -129,7 +135,7 @@ describe("checkGates", () => {
 			const result = checkGates(noEdge);
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 3 failed: edge (negative case) is required",
+				"Gate 3 failed: edge (negative case) is required for inductive pit",
 			);
 		});
 

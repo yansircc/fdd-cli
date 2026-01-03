@@ -5,6 +5,7 @@ import matter from "gray-matter";
 import type { Pitfall } from "../types/index.js";
 import { checkGates, formatGateResult } from "./gate.js";
 import { generatePitfallId, pitfallFilename } from "./id.js";
+import type { PitfallInput } from "./schema.js";
 
 /**
  * Create a new pitfall file
@@ -12,7 +13,7 @@ import { generatePitfallId, pitfallFilename } from "./id.js";
  */
 export async function createPitfall(
 	pitfallsDir: string,
-	pitfall: Omit<Pitfall, "id" | "created">,
+	pitfall: PitfallInput,
 ): Promise<{
 	path: string;
 	id: string;
@@ -27,11 +28,11 @@ export async function createPitfall(
 	const id = await generatePitfallId(pitfallsDir);
 	const created = new Date().toISOString().split("T")[0];
 
-	const fullPitfall: Pitfall = {
+	const fullPitfall = {
 		...pitfall,
 		id,
 		created,
-	};
+	} as Pitfall;
 
 	// Check gates
 	const gateResult = checkGates(fullPitfall);
@@ -55,38 +56,69 @@ export async function createPitfall(
  * Generate pitfall markdown content
  */
 function generatePitfallContent(pitfall: Pitfall): string {
-	const frontmatter = {
+	const frontmatter: Record<string, unknown> = {
 		id: pitfall.id,
 		title: pitfall.title,
+		origin: pitfall.origin,
+		scope: pitfall.scope,
 		severity: pitfall.severity,
 		tags: pitfall.tags,
 		created: pitfall.created,
-		evidence: pitfall.evidence,
 		trigger: pitfall.trigger,
 		replay: pitfall.replay,
 		action: pitfall.action,
-		...(pitfall.related_rule && { related_rule: pitfall.related_rule }),
 		verify: pitfall.verify,
-		regression: pitfall.regression,
-		edge: pitfall.edge,
 	};
 
+	// 可选字段（演绎 Pit 可能没有）
+	if (pitfall.evidence) {
+		frontmatter.evidence = pitfall.evidence;
+	}
+	if (pitfall.regression) {
+		frontmatter.regression = pitfall.regression;
+	}
+	if (pitfall.edge) {
+		frontmatter.edge = pitfall.edge;
+	}
+	if (pitfall.related_rule) {
+		frontmatter.related_rule = pitfall.related_rule;
+	}
+
+	// 归档状态
+	if (pitfall.archived) {
+		frontmatter.archived = pitfall.archived;
+		if (pitfall.archived_at) frontmatter.archived_at = pitfall.archived_at;
+		if (pitfall.archived_reason)
+			frontmatter.archived_reason = pitfall.archived_reason;
+	}
+
+	const originLabel =
+		pitfall.origin === "deductive" ? "演绎（前馈）" : "归纳（反馈）";
+	const scopeLabel =
+		pitfall.scope.type === "permanent"
+			? "长期"
+			: `临时: ${pitfall.scope.reason || ""}`;
+
 	const body = `
-# Trigger（触发条件）
+# ${pitfall.title}
+
+> Origin: ${originLabel} | Scope: ${scopeLabel}
+
+## Trigger（触发条件）
 
 ${formatTriggerSection(pitfall)}
 
-# Replay（问题回放）
+## Replay（问题回放）
 
-${pitfall.evidence.error_snippet || "[Error details]"}
+${pitfall.evidence?.error_snippet || pitfall.replay.root_cause}
 
-${pitfall.evidence.diff_summary ? `**变更摘要：**\n${pitfall.evidence.diff_summary}` : ""}
+${pitfall.evidence?.diff_summary ? `**变更摘要：**\n${pitfall.evidence.diff_summary}` : ""}
 
-# Action（修复方案）
+## Action（修复方案）
 
 ${formatActionSection(pitfall)}
 
-# Verify（验证检查）
+## Verify（验证检查）
 
 ${formatVerifySection(pitfall)}
 `.trim();
@@ -155,6 +187,9 @@ export async function listPitfalls(
 	filter?: {
 		severity?: string;
 		tag?: string;
+		origin?: string;
+		scope?: string;
+		archived?: boolean;
 	},
 ): Promise<Pitfall[]> {
 	if (!existsSync(pitfallsDir)) {
@@ -186,6 +221,21 @@ export async function listPitfalls(
 	if (filter?.tag) {
 		const tag = filter.tag;
 		result = result.filter((p) => p.tags?.includes(tag));
+	}
+
+	if (filter?.origin) {
+		result = result.filter((p) => p.origin === filter.origin);
+	}
+
+	if (filter?.scope) {
+		result = result.filter((p) => p.scope?.type === filter.scope);
+	}
+
+	if (filter?.archived !== undefined) {
+		result = result.filter((p) => (p.archived ?? false) === filter.archived);
+	} else {
+		// 默认不显示已归档的
+		result = result.filter((p) => !p.archived);
 	}
 
 	// Sort by ID

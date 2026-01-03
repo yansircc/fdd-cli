@@ -1,20 +1,37 @@
-# FDD (Feedback-Driven Development)
+# FDD (Feedforward & Feedback Driven Development)
 
-> Capture fix knowledge while AI context is warm, compiling it into triggerable, regression-testable pitfalls.
+> 前馈驱动 + 反馈驱动开发
 
-## Workflow
+## 双 F 模型
 
-1. Human + AI collaborate to complete a fix (context is warm)
-2. Stop hook triggers → AI decides if worth recording
-3. AI automatically: generates TRAV → runs regression test → runs edge test
-4. Pitfall is written to `.fdd/pitfalls/`, becoming long-term repository memory
+```
+FDD = Feedforward + Feedback
+
+Feedforward（前馈/演绎）
+  来源：AI 元认知 —— "我知道未来的我不知道"
+  时机：开发前
+  产出：specs/ 文档 + 演绎 Pit
+
+Feedback（反馈/归纳）
+  来源：真实错误
+  时机：Bug 修复后
+  产出：归纳 Pit
+```
 
 ## Directory Structure
 
 ```
 .fdd/
-├── pitfalls/     # Pitfall entries (TRAV protocol)
-└── config.yaml   # Global configuration
+├── specs/        # 规划文档（Interview 产出）
+│   └── {feature}/
+│       ├── SPEC.md
+│       ├── stories.md
+│       ├── flows.md
+│       ├── context.md
+│       ├── constraints.md
+│       └── unresolved.md
+├── pits/         # Pit 文件（TRAV 协议）
+└── config.yaml   # 配置
 
 .claude/
 └── skills/fdd/   # FDD skill for Claude Code
@@ -29,14 +46,12 @@ Each pitfall must contain:
 - **Action** — How to fix it
 - **Verify** — How to verify the fix succeeded
 
-## Gate Checks
+## Origin
 
-Pitfalls must include:
-- `evidence` — Original evidence (error_snippet or command)
-- `regression` — Regression test (or waiver + reason)
-- `edge` — False positive boundary test (or waiver + reason)
-
-Missing any required field will prevent the pitfall from being written.
+| Origin | 说明 | Gate 检查 |
+|--------|------|-----------|
+| `deductive` | 演绎 Pit - 来自 AI 预判 | evidence/regression/edge 可选 |
+| `inductive` | 归纳 Pit - 来自真实错误 | evidence/regression/edge 必填 |
 
 ## Commands
 

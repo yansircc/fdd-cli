@@ -23,7 +23,7 @@
 输出：`.claude/hooks/fdd-context.cjs`
 
 **输出规范**：
-- 输出 `注意: [title] @.fdd/pitfalls/pit-xxx.md`
+- 输出 `注意: [title] @.fdd/pits/pit-xxx.md`
 - 直接引用 pitfall 文件作为上下文
 
 从 `ai-context` 类型触发器生成。
@@ -50,7 +50,7 @@
 
 ```
 stop hook 输出 → @.claude/skills/fdd/stop.md → @create.md
-context hook 输出 → @.fdd/pitfalls/pit-xxx.md
+context hook 输出 → @.fdd/pits/pit-xxx.md
 ```
 
 ## Hook 配置

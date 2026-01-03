@@ -2,6 +2,10 @@ import { z } from "zod";
 
 /**
  * Zod schemas for FDD CLI - validates AI agent JSON input
+ *
+ * FDD v2: Feedforward & Feedback Driven Development
+ * - deductive (演绎): evidence/regression/edge 可选
+ * - inductive (归纳): evidence/regression/edge 必填
  */
 
 // Base types
@@ -12,6 +16,26 @@ const ProtectPermissionSchema = z.enum(["deny", "allow"]);
 const VerifyLevelSchema = z.enum(["V0", "V1", "V2", "V3"]);
 const ActionLevelSchema = z.enum(["low", "medium", "high"]);
 const ActionKindSchema = z.enum(["transform", "read", "run"]);
+
+// FDD v2: Origin and Scope
+const OriginSchema = z.enum(["deductive", "inductive"]);
+const ScopeTypeSchema = z.enum(["permanent", "temporary"]);
+
+const ScopeSchema = z
+	.object({
+		type: ScopeTypeSchema,
+		reason: z.string().optional(),
+		expires: z.string().optional(), // ISO date
+		branch: z.string().optional(),
+		milestone: z.string().optional(),
+	})
+	.refine(
+		(data) => {
+			// temporary 类型建议提供过期条件，但不强制
+			return true;
+		},
+		{ message: "scope validation failed" },
+	);
 
 // Evidence
 const EvidenceSchema = z
@@ -164,22 +188,70 @@ const ReplaySchema = z.object({
 	affected_scope: z.array(z.string()).optional(),
 });
 
-// Complete Pitfall Input (without id and created)
-export const PitfallInputSchema = z.object({
+// Evidence schema (relaxed version for optional use)
+const EvidenceSchemaOptional = z.object({
+	error_snippet: z.string().optional(),
+	commit: z.string().optional(),
+	command: z.string().optional(),
+	env_fingerprint: z.record(z.string(), z.string()).optional(),
+	diff_summary: z.string().optional(),
+});
+
+// Regression schema (relaxed version for optional use)
+const RegressionSchemaOptional = z.object({
+	repro: z.array(z.string()).optional(),
+	expected: z.string().optional(),
+	waiver: z.boolean().optional(),
+	waiver_reason: z.string().optional(),
+});
+
+// Edge schema (relaxed version for optional use)
+const EdgeSchemaOptional = z.object({
+	negative_case: z.array(z.string()).optional(),
+	expected: z.string().optional(),
+	waiver: z.boolean().optional(),
+	waiver_reason: z.string().optional(),
+});
+
+// Base Pitfall Input (common fields)
+const BasePitfallInputSchema = z.object({
 	title: z.string().min(1, "title is required"),
 	severity: SeveritySchema,
 	tags: z.array(z.string()),
-	evidence: EvidenceSchema,
+	origin: OriginSchema,
+	scope: ScopeSchema,
 	trigger: z.array(TriggerRuleSchema).min(1, "at least one trigger required"),
 	replay: ReplaySchema,
 	action: z.array(ActionPathSchema).min(1, "at least one action required"),
-	related_rule: z.string().optional(),
 	verify: VerifySchema,
+	related_rule: z.string().optional(),
+});
+
+// Inductive Pitfall Input (evidence/regression/edge required)
+export const InductivePitfallInputSchema = BasePitfallInputSchema.extend({
+	origin: z.literal("inductive"),
+	evidence: EvidenceSchema,
 	regression: RegressionSchema,
 	edge: EdgeSchema,
 });
 
+// Deductive Pitfall Input (evidence/regression/edge optional)
+export const DeductivePitfallInputSchema = BasePitfallInputSchema.extend({
+	origin: z.literal("deductive"),
+	evidence: EvidenceSchemaOptional.optional(),
+	regression: RegressionSchemaOptional.optional(),
+	edge: EdgeSchemaOptional.optional(),
+});
+
+// Combined schema using discriminated union
+export const PitfallInputSchema = z.discriminatedUnion("origin", [
+	InductivePitfallInputSchema,
+	DeductivePitfallInputSchema,
+]);
+
 export type PitfallInput = z.infer<typeof PitfallInputSchema>;
+export type InductivePitfallInput = z.infer<typeof InductivePitfallInputSchema>;
+export type DeductivePitfallInput = z.infer<typeof DeductivePitfallInputSchema>;
 
 /**
  * Validate and parse pitfall JSON input

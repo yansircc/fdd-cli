@@ -17,7 +17,7 @@ export async function addFromJson(
 		// Validate JSON with Zod schema
 		const data = validatePitfallInput(jsonInput);
 
-		const result = await createPitfall(paths.pitfalls, data);
+		const result = await createPitfall(paths.pits, data);
 
 		// Sync all hooks after adding a pitfall
 		const syncResult = await syncAllHooks(cwd);
