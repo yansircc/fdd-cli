@@ -1,4 +1,4 @@
-# CDD 约束定义
+# CDD 文档定义
 
 ## 文件结构
 
@@ -6,10 +6,39 @@
 .cdd/
 ├── 00-context.md           # 全局约束（写一次）
 ├── features/{name}/
-│   ├── 01-constraints.md   # 功能约束
-│   ├── 02-validators.md    # 验证器
-│   └── 03-convergence.md   # 收敛状态
+│   ├── 00-prd.md           # 用户故事 + 功能描述（发散）
+│   ├── 01-constraints.md   # 约束定义（收敛）
+│   ├── 02-validators.md    # 验证器（完整版）
+│   └── 03-convergence.md   # 收敛状态（完整版）
 └── changes/                # 变更记录
+```
+
+## 00-prd.md 模板（发散产出）
+
+```markdown
+# PRD — {feature}
+
+## 用户故事
+
+### 角色 1: {role}
+- 作为 {role}，我希望 {goal}，以便 {benefit}
+
+### 角色 2: {role}
+- 作为 {role}，我希望 {goal}，以便 {benefit}
+
+## 功能描述
+
+### 核心流程
+1. 用户 {action}
+2. 系统 {response}
+3. 结果 {outcome}
+
+### 主要场景
+- 场景 A: {description}
+- 场景 B: {description}
+
+## 成功标志
+- {metric}
 ```
 
 ## 00-context.md 模板
@@ -76,12 +105,4 @@
 
 ## 与 FDD 映射
 
-| CDD 约束 | FDD 触发器 | 预防性 Pitfall |
-|----------|-----------|---------------|
-| BC | `rule` / `dynamic` | ✅ 推荐 |
-| RC | `dynamic` (benchmark) | ⚠️ 可选 |
-| SC | `rule` (lint) / `change` | ✅ 推荐 |
-| Non-Goals | `protect` / `command` | ✅ 强烈推荐 |
-
-**预防性 Pitfall**：在 Bug 发生前，基于 CDD 约束主动添加 FDD Pitfall。
-适合高风险、可自动检测、硬性禁止的约束。
+详见：[fdd.md](fdd.md)

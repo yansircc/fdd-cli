@@ -55,6 +55,6 @@
 	},
 	"files": ["dist", "templates"],
 	"lint-staged": {
-		"*.{ts,tsx,js,json,md}": ["biome check --write"]
+		"*.{ts,tsx,js,json}": ["biome check --write"]
 	}
 }
