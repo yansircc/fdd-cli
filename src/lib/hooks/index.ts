@@ -7,8 +7,8 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { listPitfalls } from "../pitfall.js";
 import { syncAutocheckHook } from "./autocheck.js";
-import { syncContextHook } from "./context.js";
 import { syncContextPreHook } from "./context-pre.js";
+import { syncContextHook } from "./context.js";
 import { syncGuardHook } from "./guard.js";
 import { syncProtectHook } from "./protect.js";
 import {
