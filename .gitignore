@@ -1,6 +1,6 @@
 node_modules/
 dist/
-templates/
+/templates/
 *.log
 .DS_Store
 .fdd/
