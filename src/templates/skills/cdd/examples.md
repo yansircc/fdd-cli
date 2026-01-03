@@ -41,6 +41,11 @@ Q: 不确定项？ → 锁定解锁机制、Token 刷新策略
 ## Unresolved
 - UC-01: 锁定解锁机制？
 - UC-02: Token 刷新策略？
+
+<!-- 如果无不确定项，写：
+## Unresolved
+(无)
+-->
 ```
 
 ### 02-validators.md
@@ -77,9 +82,43 @@ Blocking: UC-01（待产品）, UC-02（待安全）
 Merge: ❌ NO
 ```
 
-## 与 FDD 集成
+## 预防性 Pitfall 建议
 
-发现 Bug 后转化为 Pitfall：
+Interview 完成后，AI 主动询问：
+
+```
+这些约束中，以下几条适合预防性添加为 Pitfall：
+
+| 约束 | 触发器 | 理由 |
+|------|--------|------|
+| BC-02 密码哈希 | rule | 检测明文密码存储 |
+| SC-02 模块边界 | protect | 阻止跨模块依赖 |
+| Non-Goal: OAuth | command | 阻止安装 OAuth 库 |
+
+要现在添加吗？
+```
+
+### 预防性 Pitfall 示例
+
+```bash
+# BC-02: 禁止明文密码（预防性，Bug 还没发生）
+fdd add --json '{
+  "title": "密码必须哈希存储",
+  "trigger": [{"kind": "rule", "pattern": "password\\s*[=:]\\s*[\"'\'']", "scope": ["src/**"]}],
+  "replay": {"root_cause": "预防性约束：CDD BC-02"},
+  "verify": {"level": "V0", "checks": ["bun test:security"]}
+}'
+
+# Non-Goal: 阻止安装 OAuth 库
+fdd add --json '{
+  "title": "本版本不做 OAuth",
+  "trigger": [{"kind": "command", "pattern": "npm install.*(passport|oauth)", "action": "block", "message": "Non-Goal: 本版本不做 OAuth"}],
+  "replay": {"root_cause": "预防性约束：CDD Non-Goal"},
+  "verify": {"level": "V3", "fallback": {"level": "V3", "self_proof": ["Non-Goal 明确排除"]}}
+}'
+```
+
+### Bug 修复后转化（传统 FDD）
 
 ```bash
 fdd add --json '{

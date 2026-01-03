@@ -71,13 +71,17 @@
 
 1. **可验证** — 每条约束必须能写测试或 lint
 2. **Non-Goals 是硬约束** — AI 禁止实现
-3. **Unresolved 阻塞合并** — 必须解决后才能 merge
+3. **Unresolved 必须显式声明** — 即使为空也要写 `## Unresolved\n(无)` 表明已思考过
+4. **Unresolved 阻塞合并** — 有未决项时必须解决后才能 merge
 
 ## 与 FDD 映射
 
-| CDD 约束 | FDD 触发器 |
-|----------|-----------|
-| BC | `rule` / `dynamic` |
-| RC | `dynamic` (benchmark) |
-| SC | `rule` (lint) / `change` |
-| Non-Goals | `protect` / `command` |
+| CDD 约束 | FDD 触发器 | 预防性 Pitfall |
+|----------|-----------|---------------|
+| BC | `rule` / `dynamic` | ✅ 推荐 |
+| RC | `dynamic` (benchmark) | ⚠️ 可选 |
+| SC | `rule` (lint) / `change` | ✅ 推荐 |
+| Non-Goals | `protect` / `command` | ✅ 强烈推荐 |
+
+**预防性 Pitfall**：在 Bug 发生前，基于 CDD 约束主动添加 FDD Pitfall。
+适合高风险、可自动检测、硬性禁止的约束。
