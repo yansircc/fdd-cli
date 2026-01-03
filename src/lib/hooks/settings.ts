@@ -60,6 +60,12 @@ export async function ensureAllHookSettings(
 		addUserPromptSubmitHook(settings, HOOK_FILES.context);
 	}
 
+	// Configure PreToolUse for context-pre hooks (Write|Edit|MultiEdit)
+	// This alerts user via systemMessage when AI edits files matching ai-context rules
+	if (flags.contextPre) {
+		addPreToolUseHook(settings, "Write|Edit|MultiEdit", HOOK_FILES.contextPre);
+	}
+
 	// Configure Stop hook for quality gates
 	if (flags.stop) {
 		addStopHook(settings, HOOK_FILES.stop, 30);

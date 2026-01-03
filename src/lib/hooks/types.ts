@@ -8,6 +8,7 @@ export const SETTINGS_FILE = ".claude/settings.json";
 export const HOOK_FILES = {
 	protect: "fdd-protect.cjs",
 	context: "fdd-context.cjs",
+	contextPre: "fdd-context-pre.cjs",
 	autocheck: "fdd-autocheck.cjs",
 	guard: "fdd-guard.cjs",
 	stop: "fdd-stop.cjs",
@@ -22,6 +23,7 @@ export interface SyncResult {
 export interface SyncAllResult {
 	protect: SyncResult;
 	context: SyncResult;
+	contextPre: SyncResult;
 	autocheck: SyncResult;
 	guard: SyncResult;
 	stop: SyncResult;
@@ -30,6 +32,7 @@ export interface SyncAllResult {
 export interface HookFlags {
 	protect: boolean;
 	context: boolean;
+	contextPre: boolean;
 	autocheck: boolean;
 	guard: boolean;
 	stop: boolean;

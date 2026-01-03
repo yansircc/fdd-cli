@@ -8,6 +8,7 @@ import { join } from "node:path";
 import { listPitfalls } from "../pitfall.js";
 import { syncAutocheckHook } from "./autocheck.js";
 import { syncContextHook } from "./context.js";
+import { syncContextPreHook } from "./context-pre.js";
 import { syncGuardHook } from "./guard.js";
 import { syncProtectHook } from "./protect.js";
 import {
@@ -35,6 +36,7 @@ export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
 	// Sync all hook types
 	const protect = await syncProtectHook(cwd, pitfalls);
 	const context = await syncContextHook(cwd, pitfalls);
+	const contextPre = await syncContextPreHook(cwd, pitfalls);
 	const autocheck = await syncAutocheckHook(cwd, pitfalls);
 	const guard = await syncGuardHook(cwd, pitfalls);
 	const stop = await syncStopHook(cwd, pitfalls);
@@ -43,12 +45,13 @@ export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
 	await ensureAllHookSettings(cwd, {
 		protect: protect.generated,
 		context: context.generated,
+		contextPre: contextPre.generated,
 		autocheck: autocheck.generated,
 		guard: guard.generated,
 		stop: stop.generated,
 	});
 
-	return { protect, context, autocheck, guard, stop };
+	return { protect, context, contextPre, autocheck, guard, stop };
 }
 
 /**
