@@ -11,8 +11,8 @@ npm install -g fdd-cli
 ## Quick Start
 
 ```bash
-fdd init                    # Initialize FDD + Claude Code hooks
-fdd record "Fix title"      # Record pitfall (interactive or --json)
+fdd init                    # Initialize FDD + Claude Code skills
+fdd add --json '<JSON>'     # Add pitfall (AI auto-generates JSON)
 fdd list                    # List pitfalls
 fdd check                   # Run triggers to find issues
 fdd validate                # Validate gate checks
@@ -22,8 +22,8 @@ fdd validate                # Validate gate checks
 
 | Command | Description | Options |
 |---------|-------------|---------|
-| `init` | Initialize FDD directory + hooks | `--force`, `--skip-hook` |
-| `record [title]` | Record pitfall | `-s severity`, `-t tags`, `--json` |
+| `init` | Initialize FDD directory + skills | `--force`, `--skip-hook` |
+| `add` | Add pitfall | `--json` (required) |
 | `list` | List pitfalls | `-s severity`, `-t tag` |
 | `validate` | Validate gate checks | `-i id` |
 | `check` | Run triggers | `-i id`, `-v verbose` |
@@ -74,7 +74,7 @@ trigger:
       create: deny
       update: deny
       delete: deny
-    message: "Use fdd record --json instead"
+    message: "Use fdd add --json instead"
 ```
 
 ## TRAV Protocol

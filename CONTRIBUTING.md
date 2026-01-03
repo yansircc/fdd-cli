@@ -28,7 +28,7 @@ fdd-cli/
 │   ├── types/             # TypeScript type definitions
 │   ├── commands/          # CLI command handlers
 │   │   ├── init.ts
-│   │   ├── record/        # Complex command with submodules
+│   │   ├── add/           # Add pitfall command
 │   │   ├── list.ts
 │   │   ├── check.ts
 │   │   ├── validate.ts
@@ -97,13 +97,12 @@ Claude Code hooks are generated in `src/lib/hooks/`:
 1. Create generator in `src/lib/hooks/{type}.ts`
 2. Register in `src/lib/hooks/index.ts`
 3. Update `src/lib/hooks/settings.ts`
-4. Add template to `src/templates/claude/`
 
 ### Modifying Pitfall Structure
 
 1. Update types in `src/types/index.ts`
 2. Update Zod schema in `src/lib/schema.ts`
-3. Update template `src/templates/pitfall.md`
+3. Update skill files in `src/templates/skills/fdd/`
 4. Run `bun build` to copy templates
 
 ## Testing

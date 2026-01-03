@@ -1,28 +1,25 @@
 import chalk from "chalk";
+import { getPaths } from "../../lib/config.js";
 import { syncAllHooks } from "../../lib/hooks/index.js";
 import { createPitfall } from "../../lib/pitfall.js";
 import { validatePitfallInput } from "../../lib/schema.js";
 
 /**
- * Record pitfall from JSON (non-interactive mode for AI agents)
+ * Add pitfall from JSON (for AI agents)
  */
-export async function recordFromJson(
-	pitfallsDir: string,
+export async function addFromJson(
+	cwd: string,
 	jsonInput: string,
 ): Promise<void> {
 	try {
-		const cwd = process.cwd();
+		const paths = getPaths(cwd);
 
 		// Validate JSON with Zod schema
 		const data = validatePitfallInput(jsonInput);
 
-		const result = await createPitfall(pitfallsDir, data);
+		const result = await createPitfall(paths.pitfalls, data);
 
-		// Always sync all hooks after recording a pitfall
-		// - protect: if there are protect triggers
-		// - context: if there are ai-context triggers
-		// - autocheck: if there are any pitfalls (runs fdd check after edits)
-		// - guard: if there are command triggers (intercepts Bash commands)
+		// Sync all hooks after adding a pitfall
 		const syncResult = await syncAllHooks(cwd);
 
 		const hooksSynced = {
@@ -32,7 +29,7 @@ export async function recordFromJson(
 			guard: syncResult.guard.generated,
 		};
 
-		console.log(chalk.green("✓ Pitfall recorded successfully!"));
+		console.log(chalk.green("✓ Pitfall added successfully!"));
 		console.log(
 			JSON.stringify({
 				success: true,
@@ -43,7 +40,7 @@ export async function recordFromJson(
 			}),
 		);
 	} catch (error) {
-		console.error(chalk.red("Failed to record pitfall:"));
+		console.error(chalk.red("Failed to add pitfall:"));
 		console.log(
 			JSON.stringify({
 				success: false,

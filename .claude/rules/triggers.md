@@ -83,7 +83,7 @@ trigger:
       create: deny
       update: deny
       delete: deny
-    message: "Use fdd record --json instead"
+    message: "Use fdd add --json instead"
 ```
 
 实现：`src/lib/trigger/protect.ts`

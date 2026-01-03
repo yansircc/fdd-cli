@@ -20,24 +20,22 @@ fdd init --skip-hook  # 跳过 shell hook 安装
 3. 复制模板文件
 4. 安装 ZSH shell hook（除非 --skip-hook）
 
-### fdd record
+### fdd add
 
-记录 pitfall。
+添加 pitfall。
 
 ```bash
-fdd record "Title"              # 交互模式
-fdd record "Title" --json       # JSON 模式（AI 使用）
-fdd record -s high -t security  # 带选项
+fdd add --json '<JSON>'     # JSON 模式（AI 自动生成）
 ```
 
-实现：`src/commands/record/`
+实现：`src/commands/add/`
 
 选项：
+- `--json` - JSON 输入（必填）
 - `-s, --severity <level>` - 严重级别
 - `-t, --tags <tags>` - 标签（逗号分隔）
-- `--json` - JSON 输入模式
 
-JSON 模式输入格式参考：`src/templates/claude/fdd-record.md`
+JSON 格式参考：`.claude/skills/fdd/create.md`
 
 ### fdd list
 

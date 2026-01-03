@@ -24,7 +24,7 @@ fdd init
 2. AI 分析并修复
 3. stop hook 触发 → AskUserQuestion
 4. 用户选择"记录" → AI 自己构建完整 JSON
-5. fdd record --json '...'
+5. fdd add --json '...'
 6. 运行验证脚本检查结果
 ```
 

@@ -2,12 +2,12 @@
 
 import { Command } from "commander";
 import pkg from "../package.json";
+import { add } from "./commands/add/index.js";
 import { check } from "./commands/check.js";
 import { guard } from "./commands/guard.js";
 import { init } from "./commands/init.js";
 import { installHook } from "./commands/install-hook.js";
 import { list } from "./commands/list.js";
-import { record } from "./commands/record/index.js";
 import { validate } from "./commands/validate.js";
 
 const program = new Command();
@@ -27,16 +27,16 @@ program
 	.action((options) => init(options));
 
 program
-	.command("record [title]")
-	.description("Record a new pitfall (compile a fix into a triggerable entry)")
+	.command("add")
+	.description("Add a new pitfall (compile a fix into a triggerable entry)")
 	.option(
 		"-s, --severity <level>",
 		"Severity level (critical/high/medium/low)",
 		"medium",
 	)
 	.option("-t, --tags <tags>", "Tags (comma-separated)")
-	.option("--json <data>", "Non-interactive mode: pass pitfall data as JSON")
-	.action((title, options) => record(title, options));
+	.requiredOption("--json <data>", "Pitfall data as JSON (required)")
+	.action((options) => add(options));
 
 program
 	.command("list")

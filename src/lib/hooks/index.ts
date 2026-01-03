@@ -22,7 +22,7 @@ export type { SyncAllResult, SyncResult } from "./types.js";
 
 /**
  * Sync all FDD hooks (protect + context + autocheck + guard)
- * Called after: fdd record, fdd init
+ * Called after: fdd add, fdd init
  */
 export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
 	const pitfallsDir = join(cwd, ".fdd", "pitfalls");

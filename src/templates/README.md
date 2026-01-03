@@ -5,26 +5,28 @@
 ## Workflow
 
 1. Human + AI collaborate to complete a fix (context is warm)
-2. Immediately run: `/fdd-record` (Claude) or `fdd record` (terminal)
-3. AI automatically: generates DRRV → runs regression test → runs edge test
+2. Stop hook triggers → AI decides if worth recording
+3. AI automatically: generates TRAV → runs regression test → runs edge test
 4. Pitfall is written to `.fdd/pitfalls/`, becoming long-term repository memory
 
 ## Directory Structure
 
 ```
 .fdd/
-├── pitfalls/     # Pitfall entries (DRRV protocol)
-├── rules/        # Long-term invariants (architectural contracts)
+├── pitfalls/     # Pitfall entries (TRAV protocol)
 └── config.yaml   # Global configuration
+
+.claude/
+└── skills/fdd/   # FDD skill for Claude Code
 ```
 
-## DRRV Protocol
+## TRAV Protocol
 
 Each pitfall must contain:
 
-- **Detect** — How to detect this issue
+- **Trigger** — How to detect this issue
 - **Replay** — How the issue occurred (root cause)
-- **Remedy** — How to fix it
+- **Action** — How to fix it
 - **Verify** — How to verify the fix succeeded
 
 ## Gate Checks
@@ -38,7 +40,7 @@ Missing any required field will prevent the pitfall from being written.
 
 ## Commands
 
-- `/fdd-record` — Compile pitfall in Claude (one-click)
-- `fdd record` — Record pitfall in terminal
+- `fdd add --json` — Create pitfall via JSON input
 - `fdd list` — List all pitfalls
+- `fdd check` — Run triggers to detect issues
 - `fdd validate` — Validate pitfalls against gate checks

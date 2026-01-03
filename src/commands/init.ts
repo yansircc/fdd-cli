@@ -4,7 +4,7 @@ import {
 	readFileSync,
 	writeFileSync,
 } from "node:fs";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -47,17 +47,13 @@ export async function init(options: InitOptions = {}): Promise<void> {
 
 	// Create .fdd directory structure
 	await mkdir(paths.pitfalls, { recursive: true });
-	await mkdir(paths.rules, { recursive: true });
 
 	// Create .claude directories
-	await mkdir(paths.claude.commands, { recursive: true });
-	await mkdir(paths.claude.rules, { recursive: true });
+	await mkdir(paths.claude.fddSkill, { recursive: true });
 
-	// Copy templates
+	// Copy .fdd templates
 	await copyTemplate("config.yaml", paths.config);
 	await copyTemplate("README.md", paths.readme);
-	await copyTemplate("pitfall.md", join(paths.pitfalls, "_template.md"));
-	await copyTemplate("rule.md", join(paths.rules, "_template.md"));
 
 	// Copy example pitfall (demonstrates protect trigger)
 	await copyTemplate(
@@ -65,16 +61,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
 		join(paths.pitfalls, "pit-000-example-protect-pitfalls.md"),
 	);
 
-	// Copy Claude commands and rules
-	await copyTemplate(
-		"claude/fdd-record.md",
-		join(paths.claude.commands, "fdd-record.md"),
-	);
-	await copyTemplate("claude/fdd.md", join(paths.claude.rules, "fdd.md"));
-	await copyTemplate(
-		"claude/fdd-stop.md",
-		join(paths.claude.rules, "fdd-stop.md"),
-	);
+	// Copy FDD skill files
+	await copySkillDirectory(paths.claude.fddSkill);
 
 	// Initialize all hooks (will be empty if no pitfalls exist)
 	const hooksResult = await syncAllHooks(cwd);
@@ -84,41 +72,43 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log("Created:");
 	console.log(chalk.gray("  .fdd/"));
 	console.log(chalk.gray("    ├── pitfalls/"));
-	console.log(chalk.gray("    │   ├── _template.md"));
 	console.log(
 		chalk.gray("    │   └── pit-000-example-protect-pitfalls.md ") +
 			chalk.dim("(示例，可删除)"),
 	);
-	console.log(chalk.gray("    ├── rules/"));
-	console.log(chalk.gray("    │   └── _template.md"));
 	console.log(chalk.gray("    ├── config.yaml"));
 	console.log(chalk.gray("    └── README.md"));
 	console.log(chalk.gray("  .claude/"));
-	console.log(chalk.gray("    ├── commands/"));
-	console.log(chalk.gray("    │   └── fdd-record.md"));
+	console.log(chalk.gray("    ├── skills/"));
+	console.log(chalk.gray("    │   └── fdd/"));
+	console.log(chalk.gray("    │       ├── SKILL.md"));
+	console.log(chalk.gray("    │       ├── stop.md"));
+	console.log(chalk.gray("    │       ├── create.md"));
+	console.log(chalk.gray("    │       ├── triggers.md"));
+	console.log(chalk.gray("    │       ├── gates.md"));
+	console.log(chalk.gray("    │       └── examples.md"));
+
 	const anyHooksGenerated =
 		hooksResult.protect.generated ||
 		hooksResult.context.generated ||
 		hooksResult.autocheck.generated ||
-		hooksResult.guard.generated;
+		hooksResult.guard.generated ||
+		hooksResult.stop.generated;
 	if (anyHooksGenerated) {
-		console.log(chalk.gray("    ├── hooks/"));
+		console.log(chalk.gray("    └── hooks/"));
+		if (hooksResult.stop.generated) {
+			console.log(chalk.gray("        ├── fdd-stop.cjs"));
+		}
 		if (hooksResult.protect.generated) {
-			console.log(chalk.gray("    │   ├── fdd-protect.js"));
+			console.log(chalk.gray("        ├── fdd-protect.cjs"));
 		}
 		if (hooksResult.context.generated) {
-			console.log(chalk.gray("    │   ├── fdd-context.js"));
-		}
-		if (hooksResult.autocheck.generated) {
-			console.log(chalk.gray("    │   ├── fdd-autocheck.js"));
+			console.log(chalk.gray("        ├── fdd-context.cjs"));
 		}
 		if (hooksResult.guard.generated) {
-			console.log(chalk.gray("    │   └── fdd-guard.js"));
+			console.log(chalk.gray("        └── fdd-guard.cjs"));
 		}
-		console.log(chalk.gray("    ├── settings.json"));
 	}
-	console.log(chalk.gray("    └── rules/"));
-	console.log(chalk.gray("        └── fdd.md"));
 
 	// Install shell hook if not skipped
 	if (!options.skipHook) {
@@ -136,7 +126,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log("Next steps:");
 	console.log(chalk.cyan("  1. Complete a fix with AI assistance"));
 	console.log(
-		chalk.cyan("  2. Run /fdd-record (in Claude) or fdd record (in terminal)"),
+		chalk.cyan("  2. AI will auto-detect and prompt to record pitfall"),
 	);
 }
 
@@ -192,4 +182,35 @@ async function copyTemplate(name: string, dest: string): Promise<void> {
 	}
 
 	console.warn(chalk.yellow(`Template not found: ${name}`));
+}
+
+async function copySkillDirectory(destDir: string): Promise<void> {
+	// Try multiple possible skill template locations
+	const possiblePaths = [
+		join(TEMPLATES_DIR, "skills", "fdd"), // src/templates (dev mode)
+		join(__dirname, "..", "..", "templates", "skills", "fdd"), // templates/ (npm installed)
+		join(__dirname, "..", "..", "..", "templates", "skills", "fdd"), // fallback
+	];
+
+	let srcDir: string | null = null;
+	for (const path of possiblePaths) {
+		if (existsSync(path)) {
+			srcDir = path;
+			break;
+		}
+	}
+
+	if (!srcDir) {
+		console.warn(chalk.yellow("Skill templates not found"));
+		return;
+	}
+
+	// Copy all files in the skill directory
+	const files = await readdir(srcDir);
+	for (const file of files) {
+		const srcPath = join(srcDir, file);
+		const destPath = join(destDir, file);
+		const content = await readFile(srcPath, "utf-8");
+		await writeFile(destPath, content, "utf-8");
+	}
 }

@@ -1,7 +1,7 @@
 import type { Severity } from "../../types/index.js";
 
-export interface RecordOptions {
+export interface AddOptions {
 	severity?: Severity;
 	tags?: string;
-	json?: string;
+	json: string;
 }

@@ -157,10 +157,10 @@ describe("extractProtectRules", () => {
 
 		it("should include message", () => {
 			const pitfalls = [
-				createPitfall("PIT-001", [".fdd/**"], { message: "Use fdd record" }),
+				createPitfall("PIT-001", [".fdd/**"], { message: "Use fdd add" }),
 			];
 			const rules = extractProtectRules(pitfalls);
-			expect(rules[0].message).toBe("Use fdd record");
+			expect(rules[0].message).toBe("Use fdd add");
 		});
 	});
 

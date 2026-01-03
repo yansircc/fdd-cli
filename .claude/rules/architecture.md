@@ -6,7 +6,7 @@
 
 每个命令对应一个文件或目录：
 - 简单命令：单文件 (如 `list.ts`, `check.ts`)
-- 复杂命令：目录结构 (如 `record/index.ts`, `record/interactive.ts`)
+- 复杂命令：目录结构 (如 `add/index.ts`, `add/json-mode.ts`)
 
 命令职责：
 - 解析参数和选项
@@ -73,7 +73,7 @@ pitfall 变更 → syncAllHooks() → 生成各类 hook 文件 → 更新 settin
 |------|------|------|
 | Pitfall | `PIT-{N}-{slug}.md` | `PIT-001-sql-injection-fix.md` |
 | Rule | `RULE-{N}-{slug}.md` | `RULE-001-no-console-log.md` |
-| Hook | `{type}.mjs` | `protect.mjs`, `guard.mjs` |
+| Hook | `fdd-{type}.js` | `fdd-protect.js`, `fdd-guard.js` |
 
 ## 依赖规则
 

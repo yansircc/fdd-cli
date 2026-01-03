@@ -1,9 +1,11 @@
 import type { Pitfall, TriggerRule } from "../../types/index.js";
+import { pitfallFilename } from "../id.js";
 import type { BaseTriggerResult, TriggerResult } from "./types.js";
 
 export interface AiContextRule {
 	pitfallId: string;
 	pitfallTitle: string;
+	pitfallFilename: string;
 	triggerIndex: number;
 	whenTouching: string[];
 	exclude: string[];
@@ -27,6 +29,7 @@ export function extractAiContextRules(pitfalls: Pitfall[]): AiContextRule[] {
 			rules.push({
 				pitfallId: pitfall.id,
 				pitfallTitle: pitfall.title,
+				pitfallFilename: pitfallFilename(pitfall.id, pitfall.title),
 				triggerIndex: i,
 				whenTouching: trigger.when_touching,
 				exclude: trigger.exclude || [],

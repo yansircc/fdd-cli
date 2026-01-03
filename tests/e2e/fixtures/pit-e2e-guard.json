@@ -1,6 +1,6 @@
 {
 	"_comment": "用于保护 E2E 测试产物不被提交",
-	"_usage": "在 mini-project 中运行: fdd record --json '$(cat ../fixtures/pit-e2e-guard.json)'",
+	"_usage": "在 mini-project 中运行: fdd add --json '$(cat ../fixtures/pit-e2e-guard.json)'",
 	"title": "阻止提交 E2E 测试产物",
 	"severity": "high",
 	"tags": ["e2e", "guard"],

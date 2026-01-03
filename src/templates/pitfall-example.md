@@ -22,7 +22,7 @@ trigger:
       create: deny
       update: allow
       delete: allow
-    message: "请使用 fdd record --json 命令创建 pitfall，而不是直接写入文件"
+    message: "请使用 fdd add --json 命令创建 pitfall，而不是直接写入文件"
     strength: strong
 
 replay:
@@ -34,10 +34,10 @@ replay:
 action:
   - level: low
     kind: run
-    action: "使用 fdd record --json 命令创建 pitfall"
+    action: "使用 fdd add --json 命令创建 pitfall"
     steps:
       - "构建符合 TRAV 协议的 JSON"
-      - "执行 fdd record --json '<JSON>'"
+      - "执行 fdd add --json '<JSON>'"
       - "CLI 自动处理 ID 生成和门禁检查"
 
 verify:
@@ -89,7 +89,7 @@ AI agent 可能不了解 FDD 的工作流程，直接使用 Write/Edit 工具创
 正确的创建方式是使用 CLI：
 
 ```bash
-fdd record --json '{
+fdd add --json '{
   "title": "...",
   "severity": "...",
   ...
