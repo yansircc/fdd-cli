@@ -11,107 +11,47 @@
 | Gate 3: Edge | **必填或 waiver** | 可选 |
 | Gate 4-8 | 必填 | 必填 |
 
-## Gate 1: Evidence Required（仅归纳）
+## Gate 1-3: 仅归纳 Pit
 
-**归纳 Pit** 必须包含 `evidence` 块：
-- `error_snippet` 或 `command`（至少一个）
-- `commit`（如果有）
+### Evidence（Gate 1）
+
+`error_snippet` 或 `command` 至少一个：
 
 ```json
-{
-  "evidence": {
-    "error_snippet": "TypeError: Cannot read property 'x' of undefined",
-    "diff_summary": "Added null check before accessing property",
-    "command": "bun test",
-    "commit": "abc1234"
-  }
-}
+{"evidence": {"error_snippet": "TypeError: ...", "command": "bun test"}}
 ```
 
-**演绎 Pit 可以省略 evidence。**
+### Regression（Gate 2）
 
-## Gate 2: Regression Required（仅归纳）
+复现步骤：
 
-**归纳 Pit** 必须包含 `regression` 块。
-
-### 正常情况
 ```json
-{
-  "regression": {
-    "repro": [
-      "1. Create user without email",
-      "2. Call sendWelcome()",
-      "3. Observe error"
-    ],
-    "expected": "Should throw ValidationError before sending"
-  }
-}
+{"regression": {"repro": ["步骤1", "步骤2"], "expected": "预期结果"}}
 ```
 
-### 无法复现时（Waiver）
+### Edge（Gate 3）
+
+负面案例：
+
 ```json
-{
-  "regression": {
-    "repro": [],
-    "expected": "",
-    "waiver": true,
-    "waiver_reason": "Issue only occurs in production with specific data"
-  }
-}
+{"edge": {"negative_case": ["不触发场景"], "expected": "原因"}}
 ```
 
-**演绎 Pit 可以省略 regression。**
+### Waiver 格式（Gate 2/3 通用）
 
-## Gate 3: Edge Required（仅归纳）
+无法提供时使用：
 
-**归纳 Pit** 必须包含 `edge` 块（至少一个负面案例）。
-
-### 正常情况
 ```json
-{
-  "edge": {
-    "negative_case": [
-      "Valid email should not trigger",
-      "Empty string should be caught by earlier validation"
-    ],
-    "expected": "Only null/undefined emails trigger this pitfall"
-  }
-}
+{"repro": [], "expected": "", "waiver": true, "waiver_reason": "原因"}
 ```
 
-### 无法设计负面案例时（Waiver）
-```json
-{
-  "edge": {
-    "negative_case": [],
-    "expected": "",
-    "waiver": true,
-    "waiver_reason": "All inputs of this type should trigger the check"
-  }
-}
-```
-
-**演绎 Pit 可以省略 edge。**
+**演绎 Pit 可以省略 evidence/regression/edge。**
 
 ## Gate 4: Weak Trigger Marking
 
-如果触发器只使用字符串匹配，必须：
-- 标记 `strength: weak`
-- 生成 TODO 说明如何升级
-
-```json
-{
-  "trigger": [{
-    "kind": "rule",
-    "pattern": "error",
-    "strength": "weak"
-  }]
-}
-```
+弱触发器必须标记 `strength: weak`。
 
 ## Gate 5: Trigger Field Validation
-
-每种 trigger.kind 有必填字段：
 
 | kind | 必填字段 |
 |------|----------|
@@ -124,34 +64,13 @@
 
 ## Gate 6: Replay Required
 
-所有 Pit 必须包含 `replay.root_cause`：
-
-```json
-{
-  "replay": {
-    "root_cause": "根本原因（必填）"
-  }
-}
-```
+所有 Pit 必须包含 `replay.root_cause`。
 
 ## Gate 7: Action Required
 
-所有 Pit 必须包含至少一个 action：
-
-```json
-{
-  "action": [{
-    "level": "low",
-    "kind": "transform",
-    "action": "如何修复",
-    "steps": ["步骤1", "步骤2"]
-  }]
-}
-```
+所有 Pit 必须包含至少一个 action。
 
 ## Gate 8: Verify Required
-
-所有 Pit 必须包含 verify：
 
 | Level | 必填 |
 |-------|------|
@@ -159,42 +78,21 @@
 | V2 | evidence 存在 |
 | V3 | fallback.self_proof |
 
-## Verify Levels
-
-验证级别从强到弱：
+### Verify Levels
 
 | Level | 说明 | 示例 |
 |-------|------|------|
-| V0 | test/type/build | `bun test`, `tsc --noEmit` |
-| V1 | lint/grep/AST | `bun lint`, 静态分析 |
-| V2 | evidence 存在性 | 有错误截图或日志 |
-| V3 | 结构化自证 | 人工确认理由 |
+| V0 | test/type/build | `bun test` |
+| V1 | lint/grep/AST | `bun lint` |
+| V2 | evidence 存在 | 有日志 |
+| V3 | 结构化自证 | 人工确认 |
 
 ### V3 自证格式
+
 ```json
-{
-  "verify": {
-    "level": "V3",
-    "fallback": {
-      "level": "V3",
-      "self_proof": [
-        "Manually verified fix works",
-        "No automated test possible for this UI issue"
-      ]
-    }
-  }
-}
+{"verify": {"level": "V3", "fallback": {"level": "V3", "self_proof": ["确认理由"]}}}
 ```
 
 ## Trigger 优先原则
 
-> **按成本效益排序：最低成本 + 最高准确度优先。**
-
-| 优先级 | 类型 | 成本 |
-|--------|------|------|
-| 1 | rule | 低 |
-| 2 | change | 低 |
-| 3 | protect | 低 |
-| 4 | command | 低 |
-| 5 | dynamic | 中 |
-| 6 | ai-context | 低（但无程序化检测） |
+按成本效益排序：rule > change > protect > command > dynamic > ai-context

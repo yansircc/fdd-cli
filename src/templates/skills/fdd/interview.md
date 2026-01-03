@@ -1,202 +1,160 @@
 # FDD Interview
 
-> 通过 Interview 厘清想法、定义约束、识别 AI 认知盲区。
+> 调用 AskUserQuestionTool，厘清想法、定义约束、识别 AI 盲区
 
-## 触发场景
+## 原则
 
-1. **新功能开发前** - 用户描述功能需求
-2. **AI 发现认知盲区** - 遇到不熟悉的框架/技术
-3. **用户主动提醒** - "这个项目有特殊约定..."
+- **完整**：结束时无模棱两可
+- **高效**：每轮 3-5 个问题
 
-## Interview 流程
+## 流程
 
 ```
-1. 发散阶段 → stories.md, flows.md, context.md
-2. 收敛阶段 → constraints.md, unresolved.md
-3. 生成索引 → SPEC.md
-4. 元认知阶段 → 识别盲区 → 演绎 Pit
+1. 发散 → stories.md, flows.md
+2. 收敛 → context.md, constraints.md
+3. Challenge → 挑刺
+4. 生成 Spec → 确认后写文件
+5. 元认知 → 识别盲区 → Pit Challenge → 创建
+6. 完成
 ```
 
 ---
 
-## 阶段 1: 发散
+## 1. 发散
 
-> 帮用户勾勒完整 picture
+目标：理解用户想做什么
 
-### D1: 用户故事
+- **What**：目标？问题？
+- **Why**：痛点？动机？
+- **Scope**：边界？MVP？
 
-- 有哪些角色会使用这个功能？
-- 每个角色希望达成什么目标？
-- 格式：`作为 X，我希望 Y，以便 Z`
+**产出**：stories.md, flows.md
 
-**产出**：`stories.md`
+## 2. 收敛
 
-### D2: 流程与场景
+目标：确定怎么实现
 
-- 核心流程是什么？
-- 有哪些主要场景？
-- 成功的标志是什么？
+- **How**：技术方案？关键决策？
+- **Constraints**：约束？Non-Goals？
+- **Edge cases**：异常处理？
 
-**产出**：`flows.md`
-
-### D3: 技术背景
-
-- 涉及哪些现有模块？
-- 有技术选型偏好吗？
-- 有哪些依赖？
-
-**产出**：`context.md`
+**产出**：context.md, constraints.md
 
 ---
 
-## 阶段 2: 收敛
+## 3. Challenge
 
-> 从 picture 提取约束边界
+> 生成前挑刺
 
-### C1: 约束定义
+检查维度：
+- **数据**：结构？示例？损坏处理？
+- **状态**：状态列表？转换规则？
+- **输入输出**：边界？格式？
+- **一致性**：文档间矛盾？
 
-- 什么情况算失败？
-- 边界情况有哪些？
-- 性能/资源要求？
+```
+## Challenge 结果
 
-### C2: Non-Goals
+### 必须补充
+1. **{问题}** - {影响}
 
-- 这个版本不做什么？
-- 哪些技术方案排除？
+### 建议补充
+1. **{问题}** - {建议}
 
-### C3: 未决事项（可选）
-
-- 哪些还没想清楚？
-- 需要谁来确认？
-
-**产出**：`constraints.md`, `unresolved.md`（可选）
-
----
-
-## 阶段 3: 生成索引
-
-创建 `SPEC.md`，包含：
-- Intent（一句话描述）
-- 文档链接
-- 相关 Pit 列表（稍后填充）
+补充？[补充 / 跳过]
+```
 
 ---
 
-## 阶段 4: 元认知
+## 4. 生成 Spec
 
-> 核心阶段：识别 AI 认知盲区
+先确认再写：
+
+```
+## 即将生成
+
+Feature: {name}
+技术摘要: {关键决策}
+文件: stories.md, flows.md, context.md, constraints.md
+
+确认？[生成 / 修改]
+```
+
+---
+
+## 5. 元认知
+
+> 识别 AI 易犯错的地方
 
 ### 筛选标准
 
-**如果这个约束不记录，未来没有当前上下文的 AI 大概率会犯同样的错**
+**未来没有当前上下文的 AI 大概率会犯同样的错**
 
-| 信号 | 示例 |
+信号：
+- **知识截止**：新框架/API
+- **反直觉**：与主流相反
+- **项目特有**：AI 无法提前知道
+- **经典陷阱**：时区、编码、并发
+
+### 识别
+
+```
+## 元认知
+
+我注意到以下容易犯错：
+
+1. **{决策}** - 风险：{AI 可能怎么犯错}
+2. ...
+
+创建 Pit？[1,2,... / 全部 / 跳过]
+```
+
+### Pit Challenge（必须）
+
+对每个要创建的 Pit，使用 AskUserQuestionTool 展示设计：
+
+```
+## Pit 设计预览
+
+**标题**: {title}
+**Trigger**: {kind}
+  - scope: src/**/*.ts（通用模式）
+  - context/pattern: {value}
+
+**风险**: {description}
+**验证**: V3（预防性约束）
+
+确认？[创建 / 调整 / 跳过]
+```
+
+调整后再次确认。确认后读取 [create.md](create.md) 执行。
+
+---
+
+## 6. 完成
+
+更新 SPEC.md 添加 Related Pits：
+
+```
+## 完成
+
+产出: .fdd/specs/{feature}/
+Pit: PIT-001, PIT-002
+Status: Ready
+```
+
+---
+
+## 反模式
+
+| 避免 | 正确 |
 |------|------|
-| **知识截止** | 新框架、新 API（训练数据里没有） |
-| **反直觉约定** | "用 UTC+8 存储，不是 UTC" |
-| **项目特有** | "禁止用 lodash" |
-| **经典陷阱** | 时区、浮点、并发 |
-| **上下文易失** | "上次决定用方案 A" |
-
-### 流程
-
-1. **扫描项目**：查看 package.json、配置文件、现有代码
-2. **对比认知**：哪些和 AI 的默认认知不同
-3. **评估风险**：哪些地方 AI 容易犯错
-4. **提示用户**：
-
-```
-我注意到以下可能会犯错的地方：
-
-1. 项目使用 day.js（我更熟悉 moment）
-2. 时间存储为 UTC+8（通常是 UTC）
-3. 日期格式是 YYYY/MM/DD
-
-这些我未来大概率会犯错。要创建预防性 Pit 吗？
-
-[ ] 1. day.js
-[ ] 2. UTC+8
-[ ] 3. 日期格式
-[ ] 全部
-[ ] 跳过
-```
-
-5. **用户确认后**，生成演绎 Pit
-
----
-
-## 产出结构
-
-```
-.fdd/specs/{feature-name}/
-├── SPEC.md              # 索引 + Intent
-├── stories.md           # 用户故事
-├── flows.md             # 核心流程、场景
-├── context.md           # 技术背景
-├── constraints.md       # 约束 + Non-Goals
-└── unresolved.md        # 未决事项（可选）
-
-.fdd/pits/
-└── PIT-xxx.md           # 演绎 Pit（AI 容易犯错的）
-```
-
----
-
-## constraints.md vs Pit
-
-**不是所有约束都生成 Pit**：
-
-```
-constraints.md（所有约束）
-    │
-    ├── P99 < 500ms          → 难以检测，只留在文档
-    ├── Token 15 分钟过期     → 可检测，但 AI 不易犯错，不生成 Pit
-    ├── 用 day.js 不用 moment → AI 容易犯错 → 生成演绎 Pit ✓
-    └── 时区用 UTC+8          → AI 容易犯错 → 生成演绎 Pit ✓
-```
-
----
-
-## 演绎 Pit 示例
-
-```json
-{
-  "title": "使用 day.js 处理日期",
-  "origin": "deductive",
-  "scope": {"type": "permanent"},
-  "severity": "medium",
-  "tags": ["convention", "date"],
-  "trigger": [{
-    "kind": "ai-context",
-    "when_touching": ["src/**/*.ts"],
-    "context": "本项目使用 day.js 处理日期，不是 moment。格式统一用 YYYY/MM/DD。",
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "AI 预判：对 day.js API 不够熟悉"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "read",
-    "doc": "https://day.js.org/docs/en/parse/string-format"
-  }],
-  "verify": {
-    "level": "V3",
-    "fallback": {
-      "level": "V3",
-      "self_proof": ["预防性约束，无法自动验证"]
-    }
-  }
-}
-```
-
----
-
-## 最佳实践
-
-1. **主动识别**：扫描项目时主动发现反直觉的约定
-2. **最小化**：只记录真正容易犯错的地方
-3. **用户确认**：始终询问用户是否值得记录
-4. **触发器选择**：
-   - 软提醒 → `ai-context`
-   - 硬阻止 → `command`、`rule`、`protect`
+| 每轮 1 问 | 合并 3-5 个 |
+| 直接写文件 | 先确认再写 |
+| Challenge 在生成后 | 生成前 |
+| stories 写验收标准 | 只写故事 |
+| context 写备选/待定 | 只写确定的 |
+| flows/context 重复 | flows 写步骤，context 写细节 |
+| 所有约束生成 Pit | 只有 AI 盲区 |
+| Pit 假设代码结构 | 通用模式 `src/**` |
+| 直接创建 Pit | 先 Challenge 确认 |

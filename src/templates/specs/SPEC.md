@@ -1,21 +1,22 @@
-# SPEC — {{feature}}
+# {{feature}}
+
+> {{一句话描述}}
+
+## Status: Draft
+
+Created: {{date}}
 
 ## Intent
 
-当 {{trigger}} 时，系统必须 {{action}}，且 {{constraint}}。
+{{核心价值：解决什么问题}}
 
-## 文档
+## Documents
 
-| 文件 | 说明 |
-|------|------|
-| [stories.md](stories.md) | 用户故事 |
-| [flows.md](flows.md) | 核心流程、主要场景 |
-| [context.md](context.md) | 技术背景、选型约束 |
-| [constraints.md](constraints.md) | 约束、Non-Goals |
-| [unresolved.md](unresolved.md) | 未决事项 |
+- [stories.md](stories.md) — 用户故事
+- [flows.md](flows.md) — 核心流程
+- [context.md](context.md) — 技术决策
+- [constraints.md](constraints.md) — 约束 + Non-Goals
 
-## 相关 Pit
+## Related Pits
 
-<!-- AI 在元认知阶段识别出的 Pit -->
-
-- PIT-xxx: ...
+{{在元认知阶段识别出的 AI 易犯错点，格式：PIT-xxx: 简述}}

@@ -6,42 +6,18 @@
 
 ```json
 {
-  "title": "SQL 注入：禁止字符串拼接 SQL",
+  "title": "SQL injection: use parameterized queries",
   "origin": "inductive",
   "scope": {"type": "permanent"},
   "severity": "critical",
   "tags": ["security", "database"],
-  "evidence": {
-    "error_snippet": "SQL injection vulnerability detected",
-    "diff_summary": "Changed string concatenation to parameterized query"
-  },
-  "trigger": [{
-    "kind": "rule",
-    "pattern": "\\$\\{.*\\}.*(?:SELECT|INSERT|UPDATE|DELETE)",
-    "scope": ["src/db/**/*.ts"],
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "Developer used template literals to build SQL queries"
-  },
-  "action": [{
-    "level": "high",
-    "kind": "transform",
-    "action": "Use parameterized queries",
-    "steps": ["Replace template literal with placeholder", "Pass values as second argument"]
-  }],
-  "verify": {
-    "level": "V0",
-    "checks": ["bun test:security"]
-  },
-  "regression": {
-    "repro": ["Input: '; DROP TABLE users; --", "Execute query"],
-    "expected": "Query should use parameterized input"
-  },
-  "edge": {
-    "negative_case": ["Hardcoded SQL without variables"],
-    "expected": "Static SQL is safe"
-  }
+  "evidence": {"error_snippet": "SQL injection detected", "diff_summary": "Changed to parameterized query"},
+  "trigger": [{"kind": "rule", "pattern": "\\$\\{.*\\}.*(?:SELECT|INSERT|UPDATE|DELETE)", "scope": ["src/**"], "strength": "strong"}],
+  "replay": {"root_cause": "Template literals used to build SQL"},
+  "action": [{"level": "high", "kind": "transform", "steps": ["Use placeholder syntax", "Pass values separately"]}],
+  "verify": {"level": "V0", "checks": ["npm test"]},
+  "regression": {"repro": ["Input: '; DROP TABLE users; --"], "expected": "Should use parameterized input"},
+  "edge": {"negative_case": ["Static SQL without variables"], "expected": "Static SQL is safe"}
 }
 ```
 
@@ -49,42 +25,18 @@
 
 ```json
 {
-  "title": "Schema 变更需要运行迁移",
+  "title": "Schema change requires migration",
   "origin": "inductive",
   "scope": {"type": "permanent"},
   "severity": "high",
   "tags": ["database", "migration"],
-  "evidence": {
-    "error_snippet": "Column 'email' does not exist",
-    "command": "bun db:push"
-  },
-  "trigger": [{
-    "kind": "change",
-    "when_changed": ["prisma/schema.prisma"],
-    "must_run": ["bun db:generate", "bun db:migrate"],
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "Schema was modified but migration was not generated"
-  },
-  "action": [{
-    "level": "medium",
-    "kind": "run",
-    "action": "Generate and apply migration",
-    "steps": ["bun db:generate", "bun db:migrate"]
-  }],
-  "verify": {
-    "level": "V0",
-    "checks": ["bun db:push --dry-run"]
-  },
-  "regression": {
-    "repro": ["Modify schema.prisma", "Run app without migration"],
-    "expected": "Should fail with column not found"
-  },
-  "edge": {
-    "negative_case": ["Adding comments to schema"],
-    "expected": "Comments don't require migration"
-  }
+  "evidence": {"error_snippet": "Column does not exist", "command": "npm run db:push"},
+  "trigger": [{"kind": "change", "when_changed": ["db/schema.*", "migrations/**"], "must_run": ["npm run db:generate"], "strength": "strong"}],
+  "replay": {"root_cause": "Schema modified but migration not generated"},
+  "action": [{"level": "medium", "kind": "run", "steps": ["npm run db:generate", "npm run db:migrate"]}],
+  "verify": {"level": "V0", "checks": ["npm run db:check"]},
+  "regression": {"repro": ["Modify schema", "Run app without migration"], "expected": "Should fail with column not found"},
+  "edge": {"negative_case": ["Adding comments to schema"], "expected": "Comments don't require migration"}
 }
 ```
 
@@ -92,43 +44,18 @@
 
 ```json
 {
-  "title": "禁止直接操作生产数据库",
+  "title": "Block production database direct access",
   "origin": "inductive",
   "scope": {"type": "permanent"},
   "severity": "critical",
   "tags": ["safety", "database"],
-  "evidence": {
-    "error_snippet": "Accidentally deleted production data",
-    "command": "wrangler d1 execute prod-db --command='DELETE FROM users'"
-  },
-  "trigger": [{
-    "kind": "command",
-    "pattern": "wrangler\\s+d1\\s+execute\\s+prod",
-    "action": "block",
-    "message": "禁止直接操作生产数据库！使用 bun db:prod:* 命令",
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "Developer executed raw SQL on production without safety checks"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "transform",
-    "action": "Use wrapped commands with confirmation",
-    "steps": ["Use bun db:prod:query instead"]
-  }],
-  "verify": {
-    "level": "V1",
-    "checks": ["Command should be blocked by guard"]
-  },
-  "regression": {
-    "repro": ["Run: wrangler d1 execute prod-db"],
-    "expected": "Command should be blocked"
-  },
-  "edge": {
-    "negative_case": ["wrangler d1 execute dev-db"],
-    "expected": "Dev database operations are allowed"
-  }
+  "evidence": {"error_snippet": "Accidentally deleted production data", "command": "db-cli exec prod"},
+  "trigger": [{"kind": "command", "pattern": "db-cli\\s+exec\\s+prod", "action": "block", "message": "Direct production access blocked", "strength": "strong"}],
+  "replay": {"root_cause": "Raw SQL executed on production without safety checks"},
+  "action": [{"level": "low", "kind": "transform", "steps": ["Use safe query wrapper instead"]}],
+  "verify": {"level": "V1", "checks": ["Command should be blocked"]},
+  "regression": {"repro": ["Run: db-cli exec prod"], "expected": "Command should be blocked"},
+  "edge": {"negative_case": ["db-cli exec dev"], "expected": "Dev operations allowed"}
 }
 ```
 
@@ -140,32 +67,15 @@
 
 ```json
 {
-  "title": "使用 day.js 处理日期",
+  "title": "Use project date library",
   "origin": "deductive",
   "scope": {"type": "permanent"},
   "severity": "medium",
-  "tags": ["convention", "date"],
-  "trigger": [{
-    "kind": "ai-context",
-    "when_touching": ["src/**/*.ts"],
-    "context": "本项目使用 day.js 处理日期，不是 moment。格式统一用 YYYY/MM/DD。",
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "AI 预判：对 day.js API 不够熟悉"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "read",
-    "doc": "https://day.js.org/docs/en/parse/string-format"
-  }],
-  "verify": {
-    "level": "V3",
-    "fallback": {
-      "level": "V3",
-      "self_proof": ["预防性约束，基于项目约定"]
-    }
-  }
+  "tags": ["convention"],
+  "trigger": [{"kind": "ai-context", "when_touching": ["src/**"], "context": "Use dayjs for dates, not moment. Format: YYYY/MM/DD", "strength": "strong"}],
+  "replay": {"root_cause": "AI may use wrong date library"},
+  "action": [{"level": "low", "kind": "read", "doc": "See context.md for date handling"}],
+  "verify": {"level": "V3", "fallback": {"level": "V3", "self_proof": ["Preventive constraint"]}}
 }
 ```
 
@@ -173,144 +83,30 @@
 
 ```json
 {
-  "title": "v1.0 不做 OAuth",
+  "title": "OAuth not in v1.0 scope",
   "origin": "deductive",
-  "scope": {
-    "type": "temporary",
-    "reason": "产品决策：v1.0 scope 限制",
-    "milestone": "v2.0"
-  },
+  "scope": {"type": "temporary", "reason": "Product decision", "milestone": "v2.0"},
   "severity": "medium",
-  "tags": ["non-goal", "auth"],
-  "trigger": [{
-    "kind": "command",
-    "pattern": "npm install.*(passport|oauth|@auth)",
-    "action": "block",
-    "message": "Non-Goal: 本版本不做 OAuth，请等待 v2.0",
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "预防性约束：产品决策"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "read",
-    "doc": "等待 v2.0 规划，届时重新评估"
-  }],
-  "verify": {
-    "level": "V3",
-    "fallback": {
-      "level": "V3",
-      "self_proof": ["产品决策，非技术约束"]
-    }
-  }
+  "tags": ["non-goal"],
+  "trigger": [{"kind": "command", "pattern": "npm install.*(passport|oauth)", "action": "block", "message": "Non-Goal: OAuth not in v1.0", "strength": "strong"}],
+  "replay": {"root_cause": "Preventive: product decision"},
+  "action": [{"level": "low", "kind": "read", "doc": "Wait for v2.0"}],
+  "verify": {"level": "V3", "fallback": {"level": "V3", "self_proof": ["Product decision"]}}
 }
 ```
 
-### 示例 6: 反直觉约定 (ai-context)
+### 示例 6: 文件保护 (protect)
 
 ```json
 {
-  "title": "时区存储为 UTC+8",
+  "title": "Protect production config",
   "origin": "deductive",
   "scope": {"type": "permanent"},
   "severity": "high",
-  "tags": ["convention", "timezone"],
-  "trigger": [{
-    "kind": "ai-context",
-    "when_touching": ["src/**/*.ts"],
-    "context": "所有时间存储为 UTC+8（北京时间），显示时不需转换。new Date() 返回的是本地时间，直接存储即可。",
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "AI 预判：通常项目用 UTC 存储，但本项目用 UTC+8"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "transform",
-    "steps": [
-      "存储时直接使用 new Date()",
-      "不要调用 .toISOString()（会转为 UTC）",
-      "显示时不需要时区转换"
-    ]
-  }],
-  "verify": {
-    "level": "V3",
-    "fallback": {
-      "level": "V3",
-      "self_proof": ["项目约定，与主流做法不同"]
-    }
-  }
-}
-```
-
-### 示例 7: 禁止使用特定库 (rule)
-
-```json
-{
-  "title": "禁止使用 lodash",
-  "origin": "deductive",
-  "scope": {"type": "permanent"},
-  "severity": "low",
-  "tags": ["convention", "dependency"],
-  "trigger": [{
-    "kind": "rule",
-    "pattern": "from ['\"]lodash",
-    "scope": ["src/**/*.ts"],
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "项目约定：使用原生方法或 es-toolkit"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "transform",
-    "steps": [
-      "使用原生 Array/Object 方法",
-      "如需工具函数，使用 es-toolkit"
-    ]
-  }],
-  "verify": {
-    "level": "V1",
-    "checks": ["bun lint"]
-  }
-}
-```
-
-### 示例 8: 文件保护 (protect)
-
-```json
-{
-  "title": "保护配置文件",
-  "origin": "deductive",
-  "scope": {"type": "permanent"},
-  "severity": "medium",
-  "tags": ["protection", "config"],
-  "trigger": [{
-    "kind": "protect",
-    "paths": [".env.production", "wrangler.toml"],
-    "permissions": {
-      "create": "allow",
-      "update": "deny",
-      "delete": "deny"
-    },
-    "message": "生产配置文件不应被 AI 修改，请人工操作",
-    "strength": "strong"
-  }],
-  "replay": {
-    "root_cause": "预防性约束：保护敏感配置"
-  },
-  "action": [{
-    "level": "low",
-    "kind": "read",
-    "doc": "生产配置变更需要人工审核"
-  }],
-  "verify": {
-    "level": "V3",
-    "fallback": {
-      "level": "V3",
-      "self_proof": ["安全约束，保护敏感文件"]
-    }
-  }
+  "tags": ["safety"],
+  "trigger": [{"kind": "protect", "paths": ["config/prod.*", ".env.production"], "permissions": {"update": "deny", "delete": "deny"}, "message": "Production config is protected", "strength": "strong"}],
+  "replay": {"root_cause": "Prevent accidental production config changes"},
+  "action": [{"level": "low", "kind": "read", "doc": "Use staging config for testing"}],
+  "verify": {"level": "V3", "fallback": {"level": "V3", "self_proof": ["Safety constraint"]}}
 }
 ```

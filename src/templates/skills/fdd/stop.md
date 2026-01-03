@@ -1,29 +1,53 @@
-# FDD Stop Hook 处理规则
+# FDD Stop Hook 处理
 
-当你看到 `[FDD] 修复:` 消息时，执行以下步骤：
+当看到 `[FDD] 修复:` 消息时：
 
-## 1. 判断是否值得记录
+## 1. 判断价值
 
-思考：**如果记录为 PIT，能否帮助未来没有当前 context 的 AI agent 避免踩同样的坑？**
+**能帮未来没有当前 context 的 AI 避坑？**
 
-- 能 → 询问用户
-- 不能 → **静默跳过，输出 DONE 即可。**
+- 能 → 继续
+- 不能 → 静默跳过
 
-## 2. 询问用户（仅当值得记录时）
+## 2. 询问用户
 
-使用 AskUserQuestion 工具：
-- 问题："是否记录为 PIT？"
-- 选项：
-  - "记录"
-  - "跳过"
+使用 AskUserQuestionTool：
 
-## 3. 如果用户选择"记录"
+```
+是否记录为 Pit？
+- [记录]
+- [跳过]
+```
 
-**先读取 [create.md](create.md) 获取完整的 JSON 格式和字段参考。**
+## 3. 设计 Pit
 
-## 4. 执行记录
+读取 [create.md](create.md)，设计 Pit：
 
-按照 `create.md` 中的模板构建完整 JSON，然后执行：
+- 收集 evidence（错误信息、修复摘要）
+- 选择 trigger 类型
+- 确定 scope 和 severity
+
+## 4. Challenge（必须）
+
+使用 AskUserQuestionTool 展示设计：
+
+```
+## Pit 设计预览
+
+**标题**: {title}
+**Trigger**: {kind} - {pattern/scope}
+**根因**: {root_cause}
+**验证**: {verify.level}
+
+确认创建？
+- [创建]
+- [调整]
+- [跳过]
+```
+
+## 5. 执行
+
+确认后执行：
 
 ```bash
 fdd add --json '{...}'
