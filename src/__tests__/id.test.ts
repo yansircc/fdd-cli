@@ -14,12 +14,12 @@ describe("slugify", () => {
 		expect(slugify("hello@world!")).toBe("hello-world");
 	});
 
-	it("should handle Chinese characters", () => {
-		expect(slugify("配置错误")).toBe("配置错误");
+	it("should remove Chinese characters", () => {
+		expect(slugify("配置错误")).toBe("");
 	});
 
-	it("should handle mixed Chinese and English", () => {
-		expect(slugify("API 配置错误")).toBe("api-配置错误");
+	it("should keep English in mixed Chinese and English", () => {
+		expect(slugify("API 配置错误")).toBe("api");
 	});
 
 	it("should trim leading and trailing hyphens", () => {
@@ -51,8 +51,8 @@ describe("pitfallFilename", () => {
 		);
 	});
 
-	it("should handle Chinese titles", () => {
-		expect(pitfallFilename("PIT-002", "配置错误")).toBe("pit-002-配置错误.md");
+	it("should handle Chinese titles (removed)", () => {
+		expect(pitfallFilename("PIT-002", "配置错误")).toBe("pit-002-.md");
 	});
 
 	it("should lowercase the ID", () => {
@@ -67,9 +67,7 @@ describe("ruleFilename", () => {
 		);
 	});
 
-	it("should handle Chinese titles", () => {
-		expect(ruleFilename("RULE-002", "禁止硬编码")).toBe(
-			"rule-002-禁止硬编码.md",
-		);
+	it("should handle Chinese titles (removed)", () => {
+		expect(ruleFilename("RULE-002", "禁止硬编码")).toBe("rule-002-.md");
 	});
 });
