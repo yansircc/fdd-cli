@@ -1,6 +1,6 @@
 {
 	"name": "fdd-cli",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"description": "Feedforward & Feedback Driven Development CLI - 前馈驱动 + 反馈驱动开发",
 	"type": "module",
 	"bin": {
