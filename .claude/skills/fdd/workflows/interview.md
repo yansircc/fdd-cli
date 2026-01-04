@@ -184,6 +184,16 @@ Task tool:
 
 确认后，按 [record.md](record.md) 流程创建演绎 Pit。
 
+**4. 更新 SPEC.md 关联**
+
+每创建一个 Pit，必须同步更新 `SPEC.md` 的 `## Related Pits` 表格：
+
+```markdown
+| Pit | 纠正什么 |
+|-----|----------|
+| [pit-name](../../pits/pit-name.json) | 简述偏差 |
+```
+
 ---
 
 ## 产出规范

@@ -95,6 +95,26 @@ AI 根据上下文准备：
 
 ---
 
+## 第六步：关联 Spec（如有）
+
+检查 `.fdd/specs/` 下是否有相关的 spec 目录。
+
+**如果有**：更新该 spec 的 `SPEC.md` 的 `## Related Pits` 表格：
+
+```markdown
+| Pit | 纠正什么 |
+|-----|----------|
+| [pit-name](../../pits/pit-name.json) | 简述偏差 |
+```
+
+**判断标准**：
+- 这个 Pit 是否与某个功能的开发相关？
+- 修复的 bug 是否属于某个已规划的 feature？
+
+**如果没有关联的 spec**：跳过此步骤。
+
+---
+
 ## JSON 格式
 
 ### 归纳 Pit
