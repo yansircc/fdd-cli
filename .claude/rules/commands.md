@@ -35,7 +35,7 @@ fdd add --json '<JSON>'     # JSON 模式（AI 自动生成）
 - `-s, --severity <level>` - 严重级别
 - `-t, --tags <tags>` - 标签（逗号分隔）
 
-JSON 格式参考：`.claude/skills/fdd/create.md`
+JSON 格式参考：`.claude/skills/fdd/workflows/record.md`
 
 **Origin 说明**：
 - `origin: "inductive"` - 归纳 Pit，需要 evidence/regression/edge

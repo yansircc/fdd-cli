@@ -10,9 +10,9 @@
 输出：`.claude/hooks/fdd-stop.cjs`
 
 **输出规范**：
-- stdout: JSON `{"decision": "block", "reason": "[FDD] 修复: <files> → @.claude/skills/fdd/stop.md"}`
+- stdout: JSON `{"decision": "block", "reason": "Potential PIT(s) Detected, read: @.claude/skills/fdd/workflows/record.md"}`
 - exit(0) + JSON 格式，Claude 读取 `reason` 字段
-- AI 先阅读 `stop.md` 快速判断，值得记录时再阅读 `create.md`
+- AI 阅读 `record.md` 判断是否值得记录，按流程执行
 - 不值得记录时**静默跳过，不解释**
 
 ### Context Hook
@@ -49,7 +49,7 @@
 ## Skill 引用链
 
 ```
-stop hook 输出 → @.claude/skills/fdd/stop.md → @create.md
+stop hook 输出 → @.claude/skills/fdd/workflows/record.md
 context hook 输出 → @.fdd/pits/pit-xxx.md
 ```
 

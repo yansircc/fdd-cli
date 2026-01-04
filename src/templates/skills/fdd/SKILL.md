@@ -1,64 +1,32 @@
 ---
 name: fdd
-description: Feedforward & Feedback Driven Development - 前馈（演绎）+ 反馈（归纳）。开发前 Interview 厘清想法，Bug 后创建 Pit 防复发。
+description: FDD 前馈反馈开发。开发前用 Interview 厘清需求，Bug 后创建 Pit 防复发。当用户提到 Interview、看到 [FDD] 消息、或要求记录 Pit 时触发。
 ---
 
-# FDD - Feedforward & Feedback Driven Development
+# FDD
 
-## 双 F 模型
+## 入口
 
-```
-Feedforward（前馈/演绎）: AI 元认知 → specs/ + 演绎 Pit
-Feedback（反馈/归纳）: 真实错误 → 归纳 Pit
-```
+| 触发 | 读 |
+|------|-----|
+| 用户说"开始 Interview" | [workflows/interview.md](workflows/interview.md) |
+| 看到 `[FDD]` 消息 | [workflows/record.md](workflows/record.md) |
+| 用户说"记录 Pit" | 先分流，再读 [workflows/record.md](workflows/record.md) |
 
-## Interview 流程（前馈）
+## "记录 Pit" 分流
 
-```
-发散 → 收敛 → Challenge → 生成 Spec → 元认知 → 完成
-                  ↑
-            生成前挑刺
-```
+用 AskUserQuestion 问来源：
 
-详见：[interview.md](interview.md)
+| 选项 | origin |
+|------|--------|
+| 刚修复了一个 bug | `inductive`（归纳） |
+| 想预防某个问题 | `deductive`（演绎） |
 
-## Bug 修复后（反馈）
+## 参考
 
-1. 值得记录？（能帮未来 AI 避坑？）
-2. `fdd list` 检查重复
-3. 询问用户确认
-4. `fdd add --json '{...}'`
+概念解释、触发器详情、示例等按需读取：
 
-格式：[create.md](create.md)
-
-## 目录结构
-
-```
-.fdd/
-├── specs/{feature}/    # 规划文档
-│   ├── SPEC.md         # 索引
-│   ├── stories.md      # 用户故事
-│   ├── flows.md        # 核心流程
-│   ├── context.md      # 技术决策
-│   └── constraints.md  # 约束 + Non-Goals
-└── pits/               # Pit 文件
-```
-
-## 核心原则
-
-- **精简**：不损失信息的前提下，最小化 token
-- **完整**：Interview 后无模棱两可
-- **元认知**：只有 AI 易犯错的才生成 Pit
-
-## Origin / Scope
-
-- `deductive`：演绎，evidence/regression/edge 可选
-- `inductive`：归纳，evidence/regression/edge 必填
-- `permanent`：长期
-- `temporary`：临时（有过期条件）
-
-## 触发器
-
-`rule` | `change` | `dynamic` | `command` | `protect` | `ai-context`
-
-详见：[triggers.md](triggers.md) [gates.md](gates.md) [examples.md](examples.md)
+- [reference/concepts.md](reference/concepts.md) - 双F模型、Origin、Scope
+- [reference/triggers.md](reference/triggers.md) - 6种触发器
+- [reference/gates.md](reference/gates.md) - Gate 检查
+- [reference/examples.md](reference/examples.md) - 完整示例

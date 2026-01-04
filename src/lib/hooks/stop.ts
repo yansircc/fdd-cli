@@ -137,7 +137,7 @@ function processStopHook(input) {
     // reason 给 Claude 看，systemMessage 给用户看
     console.log(JSON.stringify({
       decision: "block",
-      reason: \`Potential PIT(s) Detected, read: @.claude/skills/fdd/stop.md\`
+      reason: \`Potential PIT(s) Detected, read: @.claude/skills/fdd/workflows/record.md\`
     }));
     process.exit(0);
   } else {
