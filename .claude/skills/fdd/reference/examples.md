@@ -2,26 +2,45 @@
 
 ## 归纳 Pit（来自真实错误）
 
-### 示例 1: SQL 注入防护 (rule)
+### 示例 1: 代码检查 (external + biome)
 
 ```json
 {
-  "title": "SQL injection: use parameterized queries",
+  "title": "Use biome to prevent console.log in production",
   "origin": "inductive",
   "scope": {"type": "permanent"},
-  "severity": "critical",
-  "tags": ["security", "database"],
-  "evidence": {"error_snippet": "SQL injection detected", "diff_summary": "Changed to parameterized query"},
-  "trigger": [{"kind": "rule", "pattern": "\\$\\{.*\\}.*(?:SELECT|INSERT|UPDATE|DELETE)", "scope": ["src/**"], "strength": "strong"}],
-  "replay": {"root_cause": "Template literals used to build SQL"},
-  "action": [{"level": "high", "kind": "transform", "steps": ["Use placeholder syntax", "Pass values separately"]}],
-  "verify": {"level": "V0", "checks": ["npm test"]},
-  "regression": {"repro": ["Input: '; DROP TABLE users; --"], "expected": "Should use parameterized input"},
-  "edge": {"negative_case": ["Static SQL without variables"], "expected": "Static SQL is safe"}
+  "severity": "medium",
+  "tags": ["code-quality"],
+  "evidence": {"error_snippet": "console.log found in production build"},
+  "trigger": [{"kind": "external", "tool": "biome", "ref": "biome.json#noConsoleLog", "strength": "strong"}],
+  "replay": {"root_cause": "Debug logs left in code"},
+  "action": [{"level": "low", "kind": "run", "steps": ["Remove console.log", "Run biome check"]}],
+  "verify": {"level": "V0", "checks": ["bun lint"]},
+  "regression": {"repro": ["Add console.log", "Run lint"], "expected": "Biome should catch it"},
+  "edge": {"negative_case": ["console.error for actual errors"], "expected": "console.error is allowed"}
 }
 ```
 
-### 示例 2: Schema 变更检测 (change)
+### 示例 2: Git Hook 检查 (external + husky)
+
+```json
+{
+  "title": "Version check before push",
+  "origin": "inductive",
+  "scope": {"type": "permanent"},
+  "severity": "high",
+  "tags": ["workflow", "release"],
+  "evidence": {"error_snippet": "Published old version to npm"},
+  "trigger": [{"kind": "external", "tool": "husky", "ref": ".husky/pre-push", "strength": "strong"}],
+  "replay": {"root_cause": "Forgot to update version before push"},
+  "action": [{"level": "low", "kind": "run", "steps": ["Update version", "git add", "git commit --amend"]}],
+  "verify": {"level": "V0", "checks": ["git push"]},
+  "regression": {"repro": ["Push without version update"], "expected": "Pre-push hook blocks"},
+  "edge": {"negative_case": ["Version already updated"], "expected": "Push succeeds"}
+}
+```
+
+### 示例 3: Schema 变更检测 (change)
 
 ```json
 {
@@ -31,7 +50,7 @@
   "severity": "high",
   "tags": ["database", "migration"],
   "evidence": {"error_snippet": "Column does not exist", "command": "npm run db:push"},
-  "trigger": [{"kind": "change", "when_changed": ["db/schema.*", "migrations/**"], "must_run": ["npm run db:generate"], "strength": "strong"}],
+  "trigger": [{"kind": "change", "when_changed": ["db/schema.*", "migrations/**"], "strength": "strong"}],
   "replay": {"root_cause": "Schema modified but migration not generated"},
   "action": [{"level": "medium", "kind": "run", "steps": ["npm run db:generate", "npm run db:migrate"]}],
   "verify": {"level": "V0", "checks": ["npm run db:check"]},
@@ -40,7 +59,7 @@
 }
 ```
 
-### 示例 3: 危险命令拦截 (command)
+### 示例 4: 危险命令拦截 (command)
 
 ```json
 {
@@ -63,7 +82,7 @@
 
 ## 演绎 Pit（预防性约束）
 
-### 示例 4: 技术栈约定 (ai-context)
+### 示例 5: 技术栈约定 (ai-context)
 
 ```json
 {
@@ -79,7 +98,7 @@
 }
 ```
 
-### 示例 5: Non-Goal 阻止 (command)
+### 示例 6: Non-Goal 阻止 (command)
 
 ```json
 {
@@ -95,7 +114,7 @@
 }
 ```
 
-### 示例 6: 文件保护 (protect)
+### 示例 7: 文件保护 (protect)
 
 ```json
 {

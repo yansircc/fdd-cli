@@ -23,8 +23,8 @@ created: 2024-01-15
 evidence:
   error_snippet: "Error: something went wrong"
 trigger:
-  - kind: rule
-    pattern: error
+  - kind: change
+    when_changed: ["src/**"]
     strength: strong
 replay:
   root_cause: Missing null check
@@ -238,8 +238,8 @@ title: Template
 
 		it("should parse trigger correctly", async () => {
 			const pitfalls = await listPitfalls(pitfallsDir);
-			expect(pitfalls[0].trigger[0].kind).toBe("rule");
-			expect(pitfalls[0].trigger[0].pattern).toBe("error");
+			expect(pitfalls[0].trigger[0].kind).toBe("change");
+			expect(pitfalls[0].trigger[0].when_changed).toEqual(["src/**"]);
 		});
 	});
 });

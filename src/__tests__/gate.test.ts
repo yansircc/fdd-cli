@@ -10,7 +10,9 @@ describe("checkGates", () => {
 		evidence: { error_snippet: "Error: something went wrong" },
 		regression: { repro: ["step 1", "step 2"], expected: "error occurs" },
 		edge: { negative_case: ["valid input"], expected: "no error" },
-		trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
+		trigger: [
+			{ kind: "change", when_changed: ["src/*.ts"], strength: "strong" },
+		],
 		replay: { root_cause: "Missing null check" },
 		action: [{ level: "low", kind: "transform", action: "Add null check" }],
 		verify: { level: "V0", checks: ["bun test"] },
@@ -167,13 +169,13 @@ describe("checkGates", () => {
 			const result = checkGates({
 				...validPitfall,
 				trigger: [
-					{ kind: "rule", pattern: "a", strength: "weak" },
-					{ kind: "dynamic", must_run: ["test"], strength: "weak" },
+					{ kind: "change", when_changed: ["a"], strength: "weak" },
+					{ kind: "protect", paths: ["b"], strength: "weak" },
 				],
 			});
 			expect(result.passed).toBe(true);
 			expect(result.warnings).toContain(
-				"Gate 4 warning: all triggers are weak - consider upgrading to rule/change/dynamic",
+				"Gate 4 warning: all triggers are weak - consider upgrading to external/change",
 			);
 		});
 
@@ -181,8 +183,8 @@ describe("checkGates", () => {
 			const result = checkGates({
 				...validPitfall,
 				trigger: [
-					{ kind: "rule", pattern: "a", strength: "strong" },
-					{ kind: "dynamic", must_run: ["test"], strength: "weak" },
+					{ kind: "change", when_changed: ["a"], strength: "strong" },
+					{ kind: "protect", paths: ["b"], strength: "weak" },
 				],
 			});
 			expect(result.passed).toBe(true);
@@ -195,8 +197,8 @@ describe("checkGates", () => {
 			const result = checkGates({
 				...validPitfall,
 				trigger: [
-					{ kind: "rule", pattern: "a", strength: "strong" },
-					{ kind: "dynamic", must_run: ["test"], strength: "strong" },
+					{ kind: "change", when_changed: ["a"], strength: "strong" },
+					{ kind: "protect", paths: ["b"], strength: "strong" },
 				],
 			});
 			expect(result.passed).toBe(true);
@@ -205,25 +207,27 @@ describe("checkGates", () => {
 	});
 
 	describe("Gate 5: Trigger field validation", () => {
-		it("should fail when rule trigger missing pattern", () => {
+		it("should fail when external trigger missing tool", () => {
 			const result = checkGates({
 				...validPitfall,
-				trigger: [{ kind: "rule", strength: "strong" }],
+				trigger: [
+					{ kind: "external", ref: ".husky/pre-push", strength: "strong" },
+				],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 5 failed: trigger[0] kind=rule requires pattern",
+				"Gate 5 failed: trigger[0] kind=external requires tool (husky|biome|scripts)",
 			);
 		});
 
-		it("should fail when dynamic trigger missing must_run", () => {
+		it("should fail when external trigger missing ref", () => {
 			const result = checkGates({
 				...validPitfall,
-				trigger: [{ kind: "dynamic", strength: "strong" }],
+				trigger: [{ kind: "external", tool: "husky", strength: "strong" }],
 			});
 			expect(result.passed).toBe(false);
 			expect(result.errors).toContain(
-				"Gate 5 failed: trigger[0] kind=dynamic requires must_run",
+				"Gate 5 failed: trigger[0] kind=external requires ref",
 			);
 		});
 
@@ -249,19 +253,16 @@ describe("checkGates", () => {
 			);
 		});
 
-		it("should pass with valid rule trigger", () => {
-			const result = checkGates({
-				...validPitfall,
-				trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
-			});
-			expect(result.passed).toBe(true);
-		});
-
-		it("should pass with valid dynamic trigger", () => {
+		it("should pass with valid external trigger", () => {
 			const result = checkGates({
 				...validPitfall,
 				trigger: [
-					{ kind: "dynamic", must_run: ["bun test"], strength: "strong" },
+					{
+						kind: "external",
+						tool: "husky",
+						ref: ".husky/pre-push",
+						strength: "strong",
+					},
 				],
 			});
 			expect(result.passed).toBe(true);
@@ -274,7 +275,6 @@ describe("checkGates", () => {
 					{
 						kind: "change",
 						when_changed: ["src/**"],
-						must_run: ["test"],
 						strength: "strong",
 					},
 				],

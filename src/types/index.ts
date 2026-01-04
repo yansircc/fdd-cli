@@ -34,9 +34,8 @@ export interface Scope {
 }
 export type TriggerStrength = "strong" | "weak";
 export type TriggerKind =
-	| "rule"
+	| "external"
 	| "change"
-	| "dynamic"
 	| "command"
 	| "protect"
 	| "ai-context";
@@ -62,12 +61,12 @@ export interface Evidence {
  */
 export interface TriggerRule {
 	kind: TriggerKind;
-	tool?: string;
+	tool?: string; // external: "husky" | "biome" | "scripts"
+	ref?: string; // external: path to rule (e.g., ".husky/pre-push", "biome.json#no-console")
 	pattern?: string;
 	scope?: string[];
 	exclude?: string[];
 	when_changed?: string[];
-	must_run?: string[];
 	strength: TriggerStrength;
 	// Command trigger specific fields
 	action?: CommandAction; // block or warn (default: block)

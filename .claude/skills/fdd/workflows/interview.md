@@ -102,18 +102,21 @@
 
 ---
 
-## 阶段 4: 评审（可选）
+## 阶段 4: 评审
 
 阶段 3 完成后，用 AskUserQuestion 询问 [评审] / [跳过]。
 
 用户选择 [评审] 后：
 
-### 1. 启动 subagent
+### 1. 启动 subagents
+
+同时启用 3 个 subagent，形成评审团。
 
 ```
 Task tool:
   subagent_type: general-purpose
   prompt: |
+    你是一个挑剔的评审员。
     阅读 .fdd/specs/{feature}/ 下的所有文档。
 
     任何陈述都是压缩过的，背后有隐含假设。
@@ -129,7 +132,7 @@ Task tool:
 
 ### 2. 转化为追问
 
-将 subagent 返回的问题列表，逐条用 AskUserQuestion 向用户确认。
+将 subagents 返回的问题列表，逐条用 AskUserQuestion 向用户确认。
 
 ### 3. 迭代
 

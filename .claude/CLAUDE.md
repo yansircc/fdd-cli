@@ -67,9 +67,8 @@ Feedback（反馈/归纳）
 
 | Kind | 用途 | 示例 |
 |------|------|------|
-| `rule` | Grep 模式匹配 | 检测代码反模式 |
+| `external` | 复用现有工具 | husky/biome/scripts |
 | `change` | Git 文件变更检测 | schema 变更时触发 |
-| `dynamic` | 运行 shell 命令 | 运行时检查 |
 | `command` | 拦截 shell 命令 | 阻止危险命令 |
 | `protect` | 保护文件不被 AI 修改 | 防止意外覆盖 |
 | `ai-context` | 向 AI 注入上下文 | 提醒历史问题 |

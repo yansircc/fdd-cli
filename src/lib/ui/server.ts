@@ -13,7 +13,7 @@ export async function startServer(
 	cwd: string,
 	options: ServerOptions = {},
 ): Promise<void> {
-	const startPort = options.port ?? 3000;
+	const startPort = options.port ?? 3088;
 	const shouldOpen = options.open ?? true;
 
 	// Find available port

@@ -1,9 +1,8 @@
 import type { Pitfall, TriggerRule } from "../../types/index.js";
 import { runAiContextTrigger } from "./ai-context.js";
 import { runChangeTrigger } from "./change.js";
-import { runDynamicTrigger } from "./dynamic.js";
+import { runExternalTrigger } from "./external.js";
 import { runProtectTrigger } from "./protect.js";
-import { runRuleTrigger } from "./rule.js";
 import type { CheckResult, TriggerResult } from "./types.js";
 
 // Re-export types and utilities
@@ -63,17 +62,26 @@ async function runSingleTrigger(
 
 	try {
 		switch (trigger.kind) {
-			case "rule":
-				return await runRuleTrigger(baseResult, trigger, cwd);
+			case "external":
+				return await runExternalTrigger(baseResult, trigger, cwd);
 			case "change":
 				return await runChangeTrigger(baseResult, trigger, cwd);
-			case "dynamic":
-				return await runDynamicTrigger(baseResult, trigger, cwd);
 			case "protect":
 				return await runProtectTrigger(baseResult, trigger, cwd);
 			case "ai-context":
 				return await runAiContextTrigger(baseResult, trigger, cwd);
 			default:
+				// Handle deprecated trigger kinds
+				if (
+					(trigger as { kind: string }).kind === "rule" ||
+					(trigger as { kind: string }).kind === "dynamic"
+				) {
+					return {
+						...baseResult,
+						triggered: false,
+						error: `Trigger kind "${(trigger as { kind: string }).kind}" is deprecated. Migrate to "external" with tool: biome/husky/scripts`,
+					};
+				}
 				return {
 					...baseResult,
 					triggered: false,

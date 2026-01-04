@@ -136,7 +136,7 @@ function formatTriggerSection(pitfall: Pitfall): string {
 			if (t.exclude) lines.push(`- 排除: ${t.exclude.join(", ")}`);
 			if (t.when_changed)
 				lines.push(`- 变更触发: ${t.when_changed.join(", ")}`);
-			if (t.must_run) lines.push(`- 必须运行: ${t.must_run.join(", ")}`);
+			if (t.ref) lines.push(`- 引用: ${t.ref}`);
 			return lines.join("\n");
 		})
 		.join("\n\n");

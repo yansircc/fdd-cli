@@ -13,7 +13,8 @@
 		"lint": "biome check .",
 		"lint:fix": "biome check --write --unsafe .",
 		"typecheck": "tsc --noEmit",
-		"prepare": "husky"
+		"prepare": "husky",
+		"prepublishOnly": "bun run build"
 	},
 	"dependencies": {
 		"@inquirer/prompts": "^8.1.0",

@@ -1,20 +1,29 @@
 # 触发器类型
 
-FDD 支持 6 种触发器。
+FDD 支持 5 种触发器。
 
-## rule - 静态代码匹配
+## external - 外部工具集成
 
 ```json
 {
-  "kind": "rule",
-  "pattern": "console\\.log",
-  "scope": ["src/**/*.ts"],
-  "exclude": ["**/*.test.ts"],
+  "kind": "external",
+  "tool": "husky",
+  "ref": ".husky/pre-push",
   "strength": "strong"
 }
 ```
 
-**适用**：检测反模式、禁用 API、硬编码敏感信息
+**支持的工具**：
+- `husky`: Git hooks（ref 格式：`.husky/{hook-name}`）
+- `biome`: Lint 规则（ref 格式：`biome.json#{rule-name}`）
+- `scripts`: npm scripts（ref 格式：`package.json#scripts.{name}`）
+
+**特点**：
+- 不参与 `fdd check`（由外部工具自己执行）
+- `fdd validate` 检查 ref 有效性
+- 创建 Pit 时检测工具是否安装
+
+**适用**：代码检查、Git hooks、自动化脚本
 
 ## change - Git 文件变更
 
@@ -22,24 +31,11 @@ FDD 支持 6 种触发器。
 {
   "kind": "change",
   "when_changed": ["db/schema.*", "migrations/**"],
-  "must_run": ["npm run db:generate"],
   "strength": "strong"
 }
 ```
 
 **适用**：Schema 变更验证、配置变更检查、依赖更新测试
-
-## dynamic - 运行时检查
-
-```json
-{
-  "kind": "dynamic",
-  "must_run": ["test -n \"$DATABASE_URL\"", "npm run typecheck"],
-  "strength": "strong"
-}
-```
-
-**适用**：环境变量检查、类型检查、运行时依赖验证
 
 ## command - 命令拦截
 

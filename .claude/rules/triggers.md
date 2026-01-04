@@ -2,23 +2,29 @@
 
 ## Trigger Types
 
-### rule
+### external
 
-Grep 模式匹配，检测代码反模式。
+复用现有工具（husky/biome/scripts）进行检测。
 
 ```yaml
 trigger:
-  - kind: rule
-    pattern: "console\\.log"
-    scope: ["src/**/*.ts"]
-    exclude: ["**/*.test.ts"]
+  - kind: external
+    tool: husky | biome | scripts
+    ref: .husky/pre-push | biome.json#no-console | package.json#scripts.check
+    strength: strong
 ```
 
-实现：`src/lib/trigger/rule.ts`
+实现：`src/lib/trigger/external.ts`
 
-关键函数：
-- `runRuleTrigger()` - 执行 grep 搜索
-- 使用 `Bun.spawn` 调用 grep
+**特点**：
+- 不参与 `fdd check`（由外部工具自己执行）
+- `fdd validate` 检查 ref 有效性
+- 创建 Pit 时检测工具是否安装
+
+**支持的工具**：
+- `husky`: Git hooks（.husky/*）
+- `biome`: Lint 规则（biome.json#rule-name）
+- `scripts`: npm scripts（package.json#scripts.name）
 
 ### change
 
@@ -27,7 +33,8 @@ Git 文件变更检测。
 ```yaml
 trigger:
   - kind: change
-    paths: ["prisma/schema.prisma"]
+    when_changed: ["prisma/schema.prisma"]
+    strength: strong
 ```
 
 实现：`src/lib/trigger/change.ts`
@@ -35,23 +42,6 @@ trigger:
 关键函数：
 - `runChangeTrigger()` - 检查 git diff
 - 支持 staged 和 unstaged 变更
-
-### dynamic
-
-运行 shell 命令进行检查。
-
-```yaml
-trigger:
-  - kind: dynamic
-    command: "npm run typecheck"
-    expect_failure: false
-```
-
-实现：`src/lib/trigger/dynamic.ts`
-
-关键函数：
-- `runDynamicTrigger()` - 执行命令
-- 检查退出码
 
 ### command
 
@@ -63,6 +53,7 @@ trigger:
     pattern: "rm -rf /"
     action: block
     message: "This command is dangerous!"
+    strength: strong
 ```
 
 实现：`src/lib/trigger/command.ts`
@@ -84,6 +75,7 @@ trigger:
       update: deny
       delete: deny
     message: "Use fdd add --json instead"
+    strength: strong
 ```
 
 实现：`src/lib/trigger/protect.ts`
@@ -101,7 +93,7 @@ trigger:
   - kind: ai-context
     when_touching: ["src/lib/database.ts"]
     context: "This area had SQL injection issues."
-    strength: strong  # strong | medium | weak
+    strength: strong
 ```
 
 实现：`src/lib/trigger/ai-context.ts`
@@ -115,11 +107,11 @@ trigger:
 ```typescript
 interface TriggerResult {
   triggered: boolean;
-  matches?: string[];      // rule: 匹配的行
+  matches?: string[];      // external: ref 信息
   changedFiles?: string[]; // change: 变更的文件
-  output?: string;         // dynamic: 命令输出
   blocked?: boolean;       // command: 是否阻止
   action?: 'block' | 'warn' | 'allow';
+  error?: string;          // 错误信息
 }
 ```
 
@@ -141,6 +133,7 @@ loadAllPitfalls()
 for each pitfall:
   for each trigger:
     runSingleTrigger(trigger)
+    (external 类型跳过，返回 triggered=false)
   ↓
 aggregateResults()
   ↓

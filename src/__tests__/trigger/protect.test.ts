@@ -54,8 +54,10 @@ describe("extractProtectRules", () => {
 			const pitfalls: Pitfall[] = [
 				{
 					id: "PIT-001",
-					title: "Rule trigger",
-					trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
+					title: "Change trigger",
+					trigger: [
+						{ kind: "change", when_changed: ["src/**"], strength: "strong" },
+					],
 				} as Pitfall,
 			];
 			const rules = extractProtectRules(pitfalls);

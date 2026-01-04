@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { getPaths, isInitialized } from "../lib/config.js";
+import { validateExternalRef } from "../lib/external/index.js";
 import { checkGates, formatGateResult } from "../lib/gate.js";
 import { listPitfalls } from "../lib/pitfall.js";
 
@@ -40,6 +41,23 @@ export async function validate(options: ValidateOptions = {}): Promise<void> {
 
 	for (const pitfall of toValidate) {
 		const result = checkGates(pitfall);
+
+		// Validate external refs (dead link detection)
+		if (result.passed && pitfall.trigger) {
+			for (const trigger of pitfall.trigger) {
+				if (trigger.kind === "external" && trigger.tool && trigger.ref) {
+					const refResult = await validateExternalRef(
+						cwd,
+						trigger.tool,
+						trigger.ref,
+					);
+					if (!refResult.valid) {
+						result.passed = false;
+						result.errors.push(`Dead ref: ${refResult.error}`);
+					}
+				}
+			}
+		}
 
 		if (result.passed) {
 			passCount++;

@@ -1,5 +1,6 @@
 import chalk from "chalk";
 import { getPaths } from "../../lib/config.js";
+import { detectTool } from "../../lib/external/index.js";
 import { syncAllHooks } from "../../lib/hooks/index.js";
 import { createPitfall } from "../../lib/pitfall.js";
 import { validatePitfallInput } from "../../lib/schema.js";
@@ -16,6 +17,17 @@ export async function addFromJson(
 
 		// Validate JSON with Zod schema
 		const data = validatePitfallInput(jsonInput);
+
+		// Validate external triggers - check if tools are installed
+		for (const trigger of data.trigger) {
+			if (trigger.kind === "external" && trigger.tool) {
+				const toolName = trigger.tool as "husky" | "biome" | "scripts";
+				const detection = detectTool(toolName, cwd);
+				if (!detection.installed) {
+					throw new Error(detection.error);
+				}
+			}
+		}
 
 		const result = await createPitfall(paths.pits, data);
 

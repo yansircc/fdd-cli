@@ -53,20 +53,13 @@ const EvidenceSchema = z
 // Trigger Rule
 const TriggerRuleSchema = z
 	.object({
-		kind: z.enum([
-			"rule",
-			"change",
-			"dynamic",
-			"command",
-			"protect",
-			"ai-context",
-		]),
-		tool: z.string().optional(),
+		kind: z.enum(["external", "change", "command", "protect", "ai-context"]),
+		tool: z.enum(["husky", "biome", "scripts"]).optional(),
+		ref: z.string().optional(), // external: path to rule
 		pattern: z.string().optional(),
 		scope: z.array(z.string()).optional(),
 		exclude: z.array(z.string()).optional(),
 		when_changed: z.array(z.string()).optional(),
-		must_run: z.array(z.string()).optional(),
 		strength: TriggerStrengthSchema,
 		action: CommandActionSchema.optional(),
 		message: z.string().optional(),
@@ -84,13 +77,11 @@ const TriggerRuleSchema = z
 	})
 	.refine(
 		(data) => {
-			if (data.kind === "rule" && !data.pattern) return false;
+			// external: requires tool and ref
+			if (data.kind === "external") {
+				if (!data.tool || !data.ref) return false;
+			}
 			if (data.kind === "command" && !data.pattern) return false;
-			if (
-				data.kind === "dynamic" &&
-				(!data.must_run || data.must_run.length === 0)
-			)
-				return false;
 			if (
 				data.kind === "change" &&
 				(!data.when_changed || data.when_changed.length === 0)
@@ -109,7 +100,7 @@ const TriggerRuleSchema = z
 		},
 		{
 			message:
-				"trigger missing required field: rule/command needs pattern, dynamic needs must_run, change needs when_changed, protect needs paths, ai-context needs when_touching and context",
+				"trigger missing required field: external needs tool and ref, command needs pattern, change needs when_changed, protect needs paths, ai-context needs when_touching and context",
 		},
 	);
 

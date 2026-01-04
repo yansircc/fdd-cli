@@ -1,0 +1,29 @@
+#!/bin/sh
+
+# 检查 package.json 版本是否超过 npm 已发布版本
+local_ver=$(node -p "require('./package.json').version")
+npm_ver=$(npm view fdd-cli version 2>/dev/null || echo "0.0.0")
+
+# 使用 node 比较 semver（避免依赖 npx semver）
+is_greater=$(node -e "
+const semver = (v) => v.split('.').map(Number);
+const [a, b] = [semver('$local_ver'), semver('$npm_ver')];
+const gt = a[0] > b[0] || (a[0] === b[0] && a[1] > b[1]) || (a[0] === b[0] && a[1] === b[1] && a[2] > b[2]);
+process.exit(gt ? 0 : 1);
+" && echo "yes" || echo "no")
+
+if [ "$is_greater" = "no" ]; then
+  echo ""
+  echo "🚫 FDD: 版本号未更新！"
+  echo ""
+  echo "   本地版本: $local_ver"
+  echo "   npm 版本: $npm_ver"
+  echo ""
+  echo "   修复方法："
+  echo "   1. 更新 package.json version"
+  echo "   2. git add package.json"
+  echo "   3. git commit --amend --no-edit"
+  echo "   4. git push"
+  echo ""
+  exit 1
+fi

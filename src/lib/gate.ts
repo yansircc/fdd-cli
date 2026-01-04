@@ -64,7 +64,7 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 
 		if (allWeak && pitfall.trigger.length > 0) {
 			warnings.push(
-				"Gate 4 warning: all triggers are weak - consider upgrading to rule/change/dynamic",
+				"Gate 4 warning: all triggers are weak - consider upgrading to external/change",
 			);
 		} else if (hasWeakTrigger) {
 			warnings.push(
@@ -79,11 +79,16 @@ export function checkGates(pitfall: Partial<Pitfall>): GateCheckResult {
 			const t = pitfall.trigger[i];
 			const prefix = `Gate 5 failed: trigger[${i}]`;
 
-			if (t.kind === "rule" && !t.pattern) {
-				errors.push(`${prefix} kind=rule requires pattern`);
-			}
-			if (t.kind === "dynamic" && (!t.must_run || t.must_run.length === 0)) {
-				errors.push(`${prefix} kind=dynamic requires must_run`);
+			// External trigger validation
+			if (t.kind === "external") {
+				if (!t.tool) {
+					errors.push(
+						`${prefix} kind=external requires tool (husky|biome|scripts)`,
+					);
+				}
+				if (!t.ref) {
+					errors.push(`${prefix} kind=external requires ref`);
+				}
 			}
 			if (
 				t.kind === "change" &&

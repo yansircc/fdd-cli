@@ -10,7 +10,9 @@ describe("validatePitfallInput", () => {
 		severity: "medium",
 		tags: ["test"],
 		evidence: { error_snippet: "Error: something went wrong" },
-		trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
+		trigger: [
+			{ kind: "change", when_changed: ["src/*.ts"], strength: "strong" },
+		],
 		replay: { root_cause: "Missing null check" },
 		action: [{ level: "low", kind: "transform", action: "Add null check" }],
 		verify: { level: "V0", checks: ["bun test"] },
@@ -69,22 +71,43 @@ describe("validatePitfallInput", () => {
 	});
 
 	describe("Trigger validation", () => {
-		it("should pass rule trigger with pattern", () => {
+		it("should pass external trigger with tool and ref", () => {
 			const input = {
 				...validPitfall,
-				trigger: [{ kind: "rule", pattern: "error", strength: "strong" }],
+				trigger: [
+					{
+						kind: "external",
+						tool: "husky",
+						ref: ".husky/pre-push",
+						strength: "strong",
+					},
+				],
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.trigger[0].kind).toBe("rule");
+			expect(result.trigger[0].kind).toBe("external");
+			expect(result.trigger[0].tool).toBe("husky");
+			expect(result.trigger[0].ref).toBe(".husky/pre-push");
 		});
 
-		it("should fail rule trigger without pattern", () => {
+		it("should fail external trigger without tool", () => {
 			const input = {
 				...validPitfall,
-				trigger: [{ kind: "rule", strength: "strong" }],
+				trigger: [
+					{ kind: "external", ref: ".husky/pre-push", strength: "strong" },
+				],
 			};
 			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
-				"rule/command needs pattern",
+				"external needs tool and ref",
+			);
+		});
+
+		it("should fail external trigger without ref", () => {
+			const input = {
+				...validPitfall,
+				trigger: [{ kind: "external", tool: "husky", strength: "strong" }],
+			};
+			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
+				"external needs tool and ref",
 			);
 		});
 
@@ -111,38 +134,7 @@ describe("validatePitfallInput", () => {
 				trigger: [{ kind: "command", action: "block", strength: "strong" }],
 			};
 			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
-				"rule/command needs pattern",
-			);
-		});
-
-		it("should pass dynamic trigger with must_run", () => {
-			const input = {
-				...validPitfall,
-				trigger: [
-					{ kind: "dynamic", must_run: ["bun test"], strength: "strong" },
-				],
-			};
-			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.trigger[0].kind).toBe("dynamic");
-		});
-
-		it("should fail dynamic trigger without must_run", () => {
-			const input = {
-				...validPitfall,
-				trigger: [{ kind: "dynamic", strength: "strong" }],
-			};
-			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
-				"dynamic needs must_run",
-			);
-		});
-
-		it("should fail dynamic trigger with empty must_run", () => {
-			const input = {
-				...validPitfall,
-				trigger: [{ kind: "dynamic", must_run: [], strength: "strong" }],
-			};
-			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
-				"dynamic needs must_run",
+				"command needs pattern",
 			);
 		});
 
@@ -506,7 +498,7 @@ describe("validatePitfallInput", () => {
 		it("should include field path in error", () => {
 			const input = {
 				...validPitfall,
-				trigger: [{ kind: "rule", strength: "strong" }],
+				trigger: [{ kind: "external", strength: "strong" }],
 			};
 			try {
 				validatePitfallInput(JSON.stringify(input));
