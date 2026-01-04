@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": ".*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/hooks/fdd-stop.cjs",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
+  }
+}

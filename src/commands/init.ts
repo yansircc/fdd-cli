@@ -82,11 +82,14 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log(chalk.gray("    ├── skills/"));
 	console.log(chalk.gray("    │   └── fdd/"));
 	console.log(chalk.gray("    │       ├── SKILL.md"));
-	console.log(chalk.gray("    │       ├── stop.md"));
-	console.log(chalk.gray("    │       ├── create.md"));
-	console.log(chalk.gray("    │       ├── triggers.md"));
-	console.log(chalk.gray("    │       ├── gates.md"));
-	console.log(chalk.gray("    │       └── examples.md"));
+	console.log(chalk.gray("    │       ├── workflows/"));
+	console.log(chalk.gray("    │       │   ├── interview.md"));
+	console.log(chalk.gray("    │       │   └── record.md"));
+	console.log(chalk.gray("    │       └── reference/"));
+	console.log(chalk.gray("    │           ├── concepts.md"));
+	console.log(chalk.gray("    │           ├── triggers.md"));
+	console.log(chalk.gray("    │           ├── gates.md"));
+	console.log(chalk.gray("    │           └── examples.md"));
 
 	const anyHooksGenerated =
 		hooksResult.protect.generated ||
@@ -205,12 +208,26 @@ async function copySkillDirectory(destDir: string): Promise<void> {
 		return;
 	}
 
-	// Copy all files in the skill directory
-	const files = await readdir(srcDir);
-	for (const file of files) {
-		const srcPath = join(srcDir, file);
-		const destPath = join(destDir, file);
-		const content = await readFile(srcPath, "utf-8");
-		await writeFile(destPath, content, "utf-8");
+	// Recursively copy all files and subdirectories
+	await copyDirRecursive(srcDir, destDir);
+}
+
+async function copyDirRecursive(
+	srcDir: string,
+	destDir: string,
+): Promise<void> {
+	await mkdir(destDir, { recursive: true });
+
+	const entries = await readdir(srcDir, { withFileTypes: true });
+	for (const entry of entries) {
+		const srcPath = join(srcDir, entry.name);
+		const destPath = join(destDir, entry.name);
+
+		if (entry.isDirectory()) {
+			await copyDirRecursive(srcPath, destPath);
+		} else {
+			const content = await readFile(srcPath, "utf-8");
+			await writeFile(destPath, content, "utf-8");
+		}
 	}
 }
