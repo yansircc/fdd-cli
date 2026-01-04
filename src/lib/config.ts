@@ -66,6 +66,7 @@ export function getPaths(cwd: string = process.cwd()) {
 	return {
 		root,
 		pits: join(root, "pits"),
+		specs: join(root, "specs"),
 		config: join(root, "config.yaml"),
 		readme: join(root, "README.md"),
 		claude: {

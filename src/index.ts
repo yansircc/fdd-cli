@@ -8,6 +8,7 @@ import { guard } from "./commands/guard.js";
 import { init } from "./commands/init.js";
 import { installHook } from "./commands/install-hook.js";
 import { list } from "./commands/list.js";
+import { ui } from "./commands/ui.js";
 import { validate } from "./commands/validate.js";
 
 const program = new Command();
@@ -76,5 +77,14 @@ program
 	.option("--shell <shell>", "Shell type (zsh/bash)", "zsh")
 	.option("--uninstall", "Remove the hook instead of installing")
 	.action((options) => installHook(options));
+
+program
+	.command("ui")
+	.description("Start a local server to view specs in browser")
+	.option("-p, --port <port>", "Port to listen on", (v) =>
+		Number.parseInt(v, 10),
+	)
+	.option("--no-open", "Don't open browser automatically")
+	.action((options) => ui(options));
 
 program.parse();
