@@ -131,7 +131,7 @@ function addPreToolUseHook(
 		hooks: [
 			{
 				type: "command",
-				command: `node ${HOOKS_DIR}/${hookFile}`,
+				command: `node "$CLAUDE_PROJECT_DIR/${HOOKS_DIR}/${hookFile}"`,
 				timeout,
 			},
 		],
@@ -153,7 +153,7 @@ function addPostToolUseHook(
 		hooks: [
 			{
 				type: "command",
-				command: `node ${HOOKS_DIR}/${hookFile}`,
+				command: `node "$CLAUDE_PROJECT_DIR/${HOOKS_DIR}/${hookFile}"`,
 				timeout,
 			},
 		],
@@ -174,7 +174,7 @@ function addStopHook(
 		hooks: [
 			{
 				type: "command",
-				command: `node ${HOOKS_DIR}/${hookFile}`,
+				command: `node "$CLAUDE_PROJECT_DIR/${HOOKS_DIR}/${hookFile}"`,
 				timeout,
 			},
 		],
