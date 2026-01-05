@@ -25,11 +25,11 @@ export type { SyncAllResult, SyncResult } from "./types.js";
  * Called after: fdd add, fdd init
  */
 export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
-	const pitfallsDir = join(cwd, ".fdd", "pitfalls");
+	const pitsDir = join(cwd, ".fdd", "pits");
 
 	let pitfalls: Awaited<ReturnType<typeof listPitfalls>> = [];
-	if (existsSync(pitfallsDir)) {
-		pitfalls = await listPitfalls(pitfallsDir);
+	if (existsSync(pitsDir)) {
+		pitfalls = await listPitfalls(pitsDir);
 	}
 
 	// Sync all hook types
