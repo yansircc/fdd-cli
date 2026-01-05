@@ -38,7 +38,7 @@ export type TriggerKind =
 	| "change"
 	| "command"
 	| "protect"
-	| "ai-context";
+	| "inject-context";
 export type ProtectPermission = "deny" | "allow";
 export type CommandAction = "block" | "warn";
 export type VerifyLevel = "V0" | "V1" | "V2" | "V3";

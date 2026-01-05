@@ -53,7 +53,13 @@ const EvidenceSchema = z
 // Trigger Rule
 const TriggerRuleSchema = z
 	.object({
-		kind: z.enum(["external", "change", "command", "protect", "ai-context"]),
+		kind: z.enum([
+			"external",
+			"change",
+			"command",
+			"protect",
+			"inject-context",
+		]),
 		tool: z.enum(["husky", "biome", "scripts"]).optional(),
 		ref: z.string().optional(), // external: path to rule
 		pattern: z.string().optional(),
@@ -90,7 +96,7 @@ const TriggerRuleSchema = z
 			if (data.kind === "protect" && (!data.paths || data.paths.length === 0))
 				return false;
 			if (
-				data.kind === "ai-context" &&
+				data.kind === "inject-context" &&
 				(!data.when_touching ||
 					data.when_touching.length === 0 ||
 					!data.context)
@@ -100,7 +106,7 @@ const TriggerRuleSchema = z
 		},
 		{
 			message:
-				"trigger missing required field: external needs tool and ref, command needs pattern, change needs when_changed, protect needs paths, ai-context needs when_touching and context",
+				"trigger missing required field: external needs tool and ref, command needs pattern, change needs when_changed, protect needs paths, inject-context needs when_touching and context",
 		},
 	);
 

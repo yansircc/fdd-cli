@@ -2,7 +2,7 @@ import type { Pitfall, TriggerRule } from "../../types/index.js";
 import { pitfallFilename } from "../id.js";
 import type { BaseTriggerResult, TriggerResult } from "./types.js";
 
-export interface AiContextRule {
+export interface InjectContextRule {
 	pitfallId: string;
 	pitfallTitle: string;
 	pitfallFilename: string;
@@ -13,15 +13,17 @@ export interface AiContextRule {
 }
 
 /**
- * Extract all ai-context rules from a list of pitfalls
+ * Extract all inject-context rules from a list of pitfalls
  */
-export function extractAiContextRules(pitfalls: Pitfall[]): AiContextRule[] {
-	const rules: AiContextRule[] = [];
+export function extractInjectContextRules(
+	pitfalls: Pitfall[],
+): InjectContextRule[] {
+	const rules: InjectContextRule[] = [];
 
 	for (const pitfall of pitfalls) {
 		for (let i = 0; i < (pitfall.trigger || []).length; i++) {
 			const trigger = pitfall.trigger[i];
-			if (trigger.kind !== "ai-context") continue;
+			if (trigger.kind !== "inject-context") continue;
 			if (!trigger.when_touching || trigger.when_touching.length === 0)
 				continue;
 			if (!trigger.context) continue;
@@ -42,17 +44,17 @@ export function extractAiContextRules(pitfalls: Pitfall[]): AiContextRule[] {
 }
 
 /**
- * Run ai-context trigger (for fdd check command - informational only)
- * Returns triggered=false since ai-context triggers are passive
- * They only act when Claude Code receives a prompt via hooks
+ * Run inject-context trigger (for fdd check command - informational only)
+ * Returns triggered=false since inject-context triggers are passive
+ * They only act when Claude Code executes Edit/Write/MultiEdit via PreToolUse hook
  */
-export async function runAiContextTrigger(
+export async function runInjectContextTrigger(
 	baseResult: BaseTriggerResult,
 	trigger: TriggerRule,
 	_cwd: string,
 ): Promise<TriggerResult> {
-	// AI Context triggers are passive - they don't actively scan
-	// They only inject context when Claude Code receives a prompt
+	// Inject Context triggers are passive - they don't actively scan
+	// They only inject context when Claude Code executes Edit/Write/MultiEdit
 	return {
 		...baseResult,
 		triggered: false,

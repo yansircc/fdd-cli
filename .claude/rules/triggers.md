@@ -84,23 +84,33 @@ trigger:
 - `runProtectTrigger()` - 检查文件操作
 - 生成 Claude Code protect hook
 
-### ai-context
+### inject-context
 
-向 AI 注入上下文。
+在 AI 编辑文件前注入上下文。
 
 ```yaml
 trigger:
-  - kind: ai-context
+  - kind: inject-context
     when_touching: ["src/lib/database.ts"]
     context: "This area had SQL injection issues."
     strength: strong
 ```
 
-实现：`src/lib/trigger/ai-context.ts`
+实现：`src/lib/trigger/inject-context.ts`
+
+**工作原理**：
+- 使用 PreToolUse hook 监听 Edit/Write/MultiEdit 操作
+- 第一次编辑时 deny + 注入 context，AI 看到后重试
+- 第二次编辑时 allow（状态文件避免循环）
 
 关键函数：
-- `runAiContextTrigger()` - 匹配文件路径
-- 生成 Claude Code context hook
+- `runInjectContextTrigger()` - 匹配文件路径
+- 生成 Claude Code PreToolUse hook
+
+**状态管理**：
+- 状态文件：`.claude/hooks/.inject-state.json`
+- Key 格式：`${sessionId}:${filePath}`
+- 同一 session 同一文件只警告一次
 
 ## TriggerResult 结构
 

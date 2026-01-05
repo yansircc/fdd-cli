@@ -185,12 +185,12 @@ describe("validatePitfallInput", () => {
 			);
 		});
 
-		it("should pass ai-context trigger with when_touching and context", () => {
+		it("should pass inject-context trigger with when_touching and context", () => {
 			const input = {
 				...validPitfall,
 				trigger: [
 					{
-						kind: "ai-context",
+						kind: "inject-context",
 						when_touching: ["src/db/**"],
 						context: "Use parameterized queries",
 						strength: "strong",
@@ -198,38 +198,38 @@ describe("validatePitfallInput", () => {
 				],
 			};
 			const result = validatePitfallInput(JSON.stringify(input));
-			expect(result.trigger[0].kind).toBe("ai-context");
+			expect(result.trigger[0].kind).toBe("inject-context");
 		});
 
-		it("should fail ai-context trigger without when_touching", () => {
+		it("should fail inject-context trigger without when_touching", () => {
 			const input = {
 				...validPitfall,
 				trigger: [
 					{
-						kind: "ai-context",
+						kind: "inject-context",
 						context: "Use parameterized queries",
 						strength: "strong",
 					},
 				],
 			};
 			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
-				"ai-context needs when_touching and context",
+				"inject-context needs when_touching and context",
 			);
 		});
 
-		it("should fail ai-context trigger without context", () => {
+		it("should fail inject-context trigger without context", () => {
 			const input = {
 				...validPitfall,
 				trigger: [
 					{
-						kind: "ai-context",
+						kind: "inject-context",
 						when_touching: ["src/db/**"],
 						strength: "strong",
 					},
 				],
 			};
 			expect(() => validatePitfallInput(JSON.stringify(input))).toThrow(
-				"ai-context needs when_touching and context",
+				"inject-context needs when_touching and context",
 			);
 		});
 
@@ -545,7 +545,7 @@ describe("validatePitfallInput", () => {
 				tags: ["test"],
 				trigger: [
 					{
-						kind: "ai-context",
+						kind: "inject-context",
 						when_touching: ["src/**"],
 						context: "Test context",
 						strength: "strong",

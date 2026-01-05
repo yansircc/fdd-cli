@@ -55,15 +55,10 @@ export async function ensureAllHookSettings(
 		);
 	}
 
-	// Configure UserPromptSubmit for context hooks
+	// Configure PreToolUse for inject-context hooks (Edit|Write|MultiEdit)
+	// Injects context into Claude before editing files matching inject-context rules
 	if (flags.context) {
-		addUserPromptSubmitHook(settings, HOOK_FILES.context);
-	}
-
-	// Configure PreToolUse for context-pre hooks (Write|Edit|MultiEdit)
-	// This alerts user via systemMessage when AI edits files matching ai-context rules
-	if (flags.contextPre) {
-		addPreToolUseHook(settings, "Write|Edit|MultiEdit", HOOK_FILES.contextPre);
+		addPreToolUseHook(settings, "Edit|Write|MultiEdit", HOOK_FILES.context);
 	}
 
 	// Configure Stop hook for quality gates
@@ -155,27 +150,6 @@ function addPostToolUseHook(
 
 	settings.hooks.PostToolUse.push({
 		matcher,
-		hooks: [
-			{
-				type: "command",
-				command: `node ${HOOKS_DIR}/${hookFile}`,
-				timeout,
-			},
-		],
-	});
-}
-
-function addUserPromptSubmitHook(
-	// biome-ignore lint/suspicious/noExplicitAny: settings structure is dynamic
-	settings: any,
-	hookFile: string,
-	timeout = 5,
-): void {
-	if (!settings.hooks.UserPromptSubmit) settings.hooks.UserPromptSubmit = [];
-	if (hasHookConfigured(settings, "UserPromptSubmit", hookFile)) return;
-
-	settings.hooks.UserPromptSubmit.push({
-		matcher: ".*",
 		hooks: [
 			{
 				type: "command",

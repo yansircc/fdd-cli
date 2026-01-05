@@ -1,7 +1,7 @@
 import type { Pitfall, TriggerRule } from "../../types/index.js";
-import { runAiContextTrigger } from "./ai-context.js";
 import { runChangeTrigger } from "./change.js";
 import { runExternalTrigger } from "./external.js";
+import { runInjectContextTrigger } from "./inject-context.js";
 import { runProtectTrigger } from "./protect.js";
 import type { CheckResult, TriggerResult } from "./types.js";
 
@@ -13,7 +13,10 @@ export type {
 } from "./types.js";
 export { checkCommandAgainstTriggers } from "./command.js";
 export { extractProtectRules, type ProtectRule } from "./protect.js";
-export { extractAiContextRules, type AiContextRule } from "./ai-context.js";
+export {
+	extractInjectContextRules,
+	type InjectContextRule,
+} from "./inject-context.js";
 
 /**
  * Run all triggers for a pitfall
@@ -68,8 +71,8 @@ async function runSingleTrigger(
 				return await runChangeTrigger(baseResult, trigger, cwd);
 			case "protect":
 				return await runProtectTrigger(baseResult, trigger, cwd);
-			case "ai-context":
-				return await runAiContextTrigger(baseResult, trigger, cwd);
+			case "inject-context":
+				return await runInjectContextTrigger(baseResult, trigger, cwd);
 			default:
 				// Handle deprecated trigger kinds
 				if (
@@ -80,6 +83,13 @@ async function runSingleTrigger(
 						...baseResult,
 						triggered: false,
 						error: `Trigger kind "${(trigger as { kind: string }).kind}" is deprecated. Migrate to "external" with tool: biome/husky/scripts`,
+					};
+				}
+				if ((trigger as { kind: string }).kind === "ai-context") {
+					return {
+						...baseResult,
+						triggered: false,
+						error: `Trigger kind "ai-context" is deprecated. Migrate to "inject-context"`,
 					};
 				}
 				return {
