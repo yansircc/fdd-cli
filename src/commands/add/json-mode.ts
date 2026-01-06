@@ -1,4 +1,4 @@
-import { existsSync, unlinkSync } from "node:fs";
+import { existsSync, readdirSync, unlinkSync } from "node:fs";
 import { join } from "node:path";
 import chalk from "chalk";
 import { getPaths } from "../../lib/config.js";
@@ -7,7 +7,8 @@ import { syncAllHooks } from "../../lib/hooks/index.js";
 import { createPitfall } from "../../lib/pitfall.js";
 import { validatePitfallInput } from "../../lib/schema.js";
 
-const EXAMPLE_PIT_FILE = "pit-000-example-protect-pitfalls.md";
+// Pattern to match example pit files (pit-00x-example-*.md)
+const EXAMPLE_PIT_PATTERN = /^pit-00\d-example-.*\.md$/;
 
 /**
  * Add pitfall from JSON (for AI agents)
@@ -35,10 +36,14 @@ export async function addFromJson(
 
 		const result = await createPitfall(paths.pits, data);
 
-		// Remove example pit file on first real pit creation
-		const examplePitPath = join(paths.pits, EXAMPLE_PIT_FILE);
-		if (existsSync(examplePitPath)) {
-			unlinkSync(examplePitPath);
+		// Remove all example pit files on first real pit creation
+		if (existsSync(paths.pits)) {
+			const files = readdirSync(paths.pits);
+			for (const file of files) {
+				if (EXAMPLE_PIT_PATTERN.test(file)) {
+					unlinkSync(join(paths.pits, file));
+				}
+			}
 		}
 
 		// Sync all hooks after adding a pitfall

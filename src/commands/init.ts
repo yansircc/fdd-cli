@@ -55,11 +55,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	await copyTemplate("config.yaml", paths.config);
 	await copyTemplate("README.md", paths.readme);
 
-	// Copy example pitfall (demonstrates protect trigger)
-	await copyTemplate(
-		"pitfall-example.md",
-		join(paths.pits, "pit-000-example-protect-pitfalls.md"),
-	);
+	// Copy example pitfalls (one for each trigger type)
+	await copyExamplePits(paths.pits);
 
 	// Copy FDD skill files
 	await copySkillDirectory(paths.claude.fddSkill);
@@ -76,8 +73,8 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	console.log(chalk.gray("  .fdd/"));
 	console.log(chalk.gray("    ├── pits/"));
 	console.log(
-		chalk.gray("    │   └── pit-000-example-protect-pitfalls.md ") +
-			chalk.dim("(示例，可删除)"),
+		chalk.gray("    │   └── pit-00x-example-*.md ") +
+			chalk.dim("(5 个示例，首次 fdd add 时自动删除)"),
 	);
 	console.log(chalk.gray("    ├── config.yaml"));
 	console.log(chalk.gray("    └── README.md"));
@@ -169,6 +166,37 @@ function installShellHook(): boolean {
 	appendFileSync(rcPath, `\n${ZSH_HOOK}\n`, "utf-8");
 	console.log(chalk.green("✓ Command guard hook installed in ~/.zshrc"));
 	return true;
+}
+
+async function copyExamplePits(pitsDir: string): Promise<void> {
+	// Try multiple possible template locations
+	const possiblePaths = [
+		join(TEMPLATES_DIR, "pits-examples"), // src/templates (dev mode)
+		join(__dirname, "..", "..", "templates", "pits-examples"), // templates/ (npm installed)
+		join(__dirname, "..", "..", "..", "templates", "pits-examples"), // fallback
+	];
+
+	let srcDir: string | null = null;
+	for (const path of possiblePaths) {
+		if (existsSync(path)) {
+			srcDir = path;
+			break;
+		}
+	}
+
+	if (!srcDir) {
+		console.warn(chalk.yellow("Example pits not found"));
+		return;
+	}
+
+	// Copy all example pit files
+	const entries = await readdir(srcDir);
+	for (const entry of entries) {
+		if (entry.endsWith(".md")) {
+			const content = await readFile(join(srcDir, entry), "utf-8");
+			await writeFile(join(pitsDir, entry), content, "utf-8");
+		}
+	}
 }
 
 async function copyTemplate(name: string, dest: string): Promise<void> {
