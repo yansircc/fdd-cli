@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { readdir } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { join } from "node:path";
 import { getPaths } from "../config.js";
 import {
@@ -103,7 +103,7 @@ async function listSpecs(cwd: string): Promise<SpecSummary[]> {
 		if (!existsSync(specPath)) continue;
 
 		// Extract title from SPEC.md
-		const content = await Bun.file(specPath).text();
+		const content = await readFile(specPath, "utf-8");
 		const titleMatch = content.match(/^#\s+(.+)/m);
 		const title = titleMatch ? titleMatch[1] : entry.name;
 
@@ -134,7 +134,7 @@ async function getSpec(cwd: string, name: string): Promise<SpecDetail | null> {
 	for (const sectionName of sectionOrder) {
 		const filePath = join(specDir, `${sectionName}.md`);
 		if (existsSync(filePath)) {
-			const content = await Bun.file(filePath).text();
+			const content = await readFile(filePath, "utf-8");
 			sections.push({ name: sectionName, content });
 		}
 	}
@@ -161,7 +161,7 @@ async function parseRelatedPits(
 		return [];
 	}
 
-	const content = await Bun.file(specPath).text();
+	const content = await readFile(specPath, "utf-8");
 	const pits: { id: string; title: string; path: string }[] = [];
 
 	// Find Related Pits section

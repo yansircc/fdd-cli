@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -424,9 +426,8 @@ export async function getVendorScript(
 
 			for (const path of possiblePaths) {
 				try {
-					const file = Bun.file(path);
-					if (await file.exists()) {
-						return await file.text();
+					if (existsSync(path)) {
+						return await readFile(path, "utf-8");
 					}
 				} catch {}
 			}
@@ -468,9 +469,8 @@ export async function getVendorScript(
 
 			for (const path of possiblePaths) {
 				try {
-					const file = Bun.file(path);
-					if (await file.exists()) {
-						return await file.text();
+					if (existsSync(path)) {
+						return await readFile(path, "utf-8");
 					}
 				} catch {}
 			}

@@ -1,3 +1,10 @@
+import { spawn } from "node:child_process";
+import {
+	type IncomingMessage,
+	type ServerResponse,
+	createServer,
+} from "node:http";
+import { createServer as createNetServer } from "node:net";
 import { networkInterfaces } from "node:os";
 import { handleRequest } from "./routes.js";
 
@@ -19,13 +26,44 @@ export async function startServer(
 	// Find available port
 	const port = await findAvailablePort(startPort);
 
-	// Start Bun HTTP server
-	const server = Bun.serve({
-		port,
-		fetch(req) {
-			return handleRequest(req, cwd);
+	// Start HTTP server using Node.js http module
+	const server = createServer(
+		async (req: IncomingMessage, res: ServerResponse) => {
+			try {
+				// Convert Node.js request to Web Request
+				const url = new URL(req.url || "/", `http://localhost:${port}`);
+				const headers = new Headers();
+				for (const [key, value] of Object.entries(req.headers)) {
+					if (value) {
+						headers.set(key, Array.isArray(value) ? value.join(", ") : value);
+					}
+				}
+
+				const webRequest = new Request(url.toString(), {
+					method: req.method,
+					headers,
+				});
+
+				// Handle with our router
+				const response = await handleRequest(webRequest, cwd);
+
+				// Convert Web Response to Node.js response
+				res.statusCode = response.status;
+				response.headers.forEach((value, key) => {
+					res.setHeader(key, value);
+				});
+
+				const body = await response.arrayBuffer();
+				res.end(Buffer.from(body));
+			} catch (error) {
+				console.error("Server error:", error);
+				res.statusCode = 500;
+				res.end("Internal Server Error");
+			}
 		},
-	});
+	);
+
+	server.listen(port);
 
 	// Get local IP for LAN sharing
 	const localIp = getLocalIp();
@@ -67,23 +105,23 @@ async function findAvailablePort(startPort: number): Promise<number> {
 }
 
 /**
- * Check if a port is available
+ * Check if a port is available using Node.js net module
  */
 async function isPortAvailable(port: number): Promise<boolean> {
 	return new Promise((resolve) => {
-		const server = Bun.serve({
-			port,
-			fetch() {
-				return new Response("test");
-			},
+		const server = createNetServer();
+
+		server.once("error", () => {
+			resolve(false);
 		});
 
-		try {
-			server.stop();
-			resolve(true);
-		} catch {
-			resolve(false);
-		}
+		server.once("listening", () => {
+			server.close(() => {
+				resolve(true);
+			});
+		});
+
+		server.listen(port);
 	});
 }
 
@@ -128,10 +166,12 @@ function openBrowser(url: string): void {
 			args = [url];
 		}
 
-		Bun.spawn([command, ...args], {
-			stdout: "ignore",
-			stderr: "ignore",
+		// Use Node.js child_process.spawn
+		const child = spawn(command, args, {
+			stdio: "ignore",
+			detached: true,
 		});
+		child.unref();
 	} catch {
 		// Silent fail - headless environment
 	}
