@@ -202,13 +202,26 @@ export async function listPitfalls(
 	const pitfalls: Pitfall[] = [];
 
 	for (const file of mdFiles) {
-		const content = await readFile(join(pitfallsDir, file), "utf-8");
-		const { data } = matter(content);
-		// Normalize created date to string (gray-matter parses dates as Date objects)
-		if (data.created instanceof Date) {
-			data.created = data.created.toISOString().split("T")[0];
+		try {
+			const content = await readFile(join(pitfallsDir, file), "utf-8");
+			const { data } = matter(content);
+
+			// Skip invalid files without required id field
+			if (!data.id) {
+				console.warn(
+					`Warning: Skipping invalid pit file: ${file} (missing id)`,
+				);
+				continue;
+			}
+
+			// Normalize created date to string (gray-matter parses dates as Date objects)
+			if (data.created instanceof Date) {
+				data.created = data.created.toISOString().split("T")[0];
+			}
+			pitfalls.push(data as Pitfall);
+		} catch (error) {
+			console.warn(`Warning: Failed to parse pit file: ${file}`);
 		}
-		pitfalls.push(data as Pitfall);
 	}
 
 	// Apply filters

@@ -63,7 +63,10 @@ function processToolCall(input) {
   const cwd = process.cwd();
 
   const filePath = tool_input?.file_path || tool_input?.path || "";
-  if (!filePath) process.exit(0);
+  if (!filePath) {
+    outputAllow();
+    return;
+  }
 
   const relativePath = filePath.startsWith("/")
     ? path.relative(cwd, filePath)
@@ -86,13 +89,34 @@ function processToolCall(input) {
     const permission = rule.permissions[operation];
     if (permission === "deny") {
       const message = rule.message ||
-        `[FDD] File "${relativePath}" is protected by ${rule.pitfallId}: ${rule.pitfallTitle}`;
-      console.error(`\n🚫 ${message}\n`);
-      console.error(`   Operation: ${operation}`);
-      console.error(`   Pitfall: ${rule.pitfallId}\n`);
-      process.exit(2);
+        `[FDD] File "${relativePath}" is protected by ${rule.pitfallId}`;
+      outputDeny(`🚫 ${message}\n\nOperation: ${operation}\nPitfall: ${rule.pitfallId} - ${rule.pitfallTitle}`);
+      return;
     }
   }
 
+  outputAllow();
+}
+
+function outputAllow() {
+  const output = {
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "allow"
+    }
+  };
+  console.log(JSON.stringify(output));
+  process.exit(0);
+}
+
+function outputDeny(reason) {
+  const output = {
+    hookSpecificOutput: {
+      hookEventName: "PreToolUse",
+      permissionDecision: "deny",
+      permissionDecisionReason: reason
+    }
+  };
+  console.log(JSON.stringify(output));
   process.exit(0);
 }
