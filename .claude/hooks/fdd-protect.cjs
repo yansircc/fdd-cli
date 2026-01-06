@@ -29,6 +29,21 @@ const PROTECT_RULES = [
       "delete": "allow"
     },
     "message": "请使用 fdd add --json 命令创建 pitfall，而不是直接写入文件"
+  },
+  {
+    "pitfallId": "PIT-004",
+    "pitfallTitle": "AI 应使用 fdd add 而不是直接写入 .fdd/pits/",
+    "triggerIndex": 0,
+    "paths": [
+      ".fdd/pits/**"
+    ],
+    "exclude": [],
+    "permissions": {
+      "create": "deny",
+      "update": "deny",
+      "delete": "allow"
+    },
+    "message": "使用 fdd add --json 创建 Pit，不要直接写入文件"
   }
 ];
 
