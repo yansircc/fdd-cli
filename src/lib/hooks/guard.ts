@@ -3,15 +3,14 @@
  * Intercepts Bash commands and checks against command triggers
  */
 
-import { existsSync } from "node:fs";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Pitfall } from "../../types/index.js";
 import { HOOKS_DIR, HOOK_FILES, type SyncResult } from "./types.js";
 
 /**
  * Sync guard hooks
- * Generated if there are any command triggers
+ * Always generates hook file (no command triggers = pass-through)
  */
 export async function syncGuardHook(
 	cwd: string,
@@ -19,17 +18,6 @@ export async function syncGuardHook(
 ): Promise<SyncResult> {
 	const hooksDir = join(cwd, HOOKS_DIR);
 	const hookPath = join(hooksDir, HOOK_FILES.guard);
-
-	const hasCommandTriggers = pitfalls.some((p) =>
-		p.trigger?.some((t) => t.kind === "command"),
-	);
-
-	if (!hasCommandTriggers) {
-		if (existsSync(hookPath)) {
-			await unlink(hookPath);
-		}
-		return { hooksPath: hookPath, rulesCount: 0, generated: false };
-	}
 
 	await mkdir(hooksDir, { recursive: true });
 	await writeFile(hookPath, generateScript(), "utf-8");

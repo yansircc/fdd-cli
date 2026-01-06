@@ -6,8 +6,7 @@
  * to inject context before Edit/Write/MultiEdit operations
  */
 
-import { existsSync } from "node:fs";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Pitfall } from "../../types/index.js";
 import {
@@ -18,6 +17,7 @@ import { HOOKS_DIR, HOOK_FILES, type SyncResult } from "./types.js";
 
 /**
  * Sync inject-context hooks
+ * Always generates hook file (empty rules = pass-through)
  */
 export async function syncContextHook(
 	cwd: string,
@@ -27,13 +27,6 @@ export async function syncContextHook(
 	const hookPath = join(hooksDir, HOOK_FILES.context);
 
 	const rules = extractInjectContextRules(pitfalls);
-
-	if (rules.length === 0) {
-		if (existsSync(hookPath)) {
-			await unlink(hookPath);
-		}
-		return { hooksPath: hookPath, rulesCount: 0, generated: false };
-	}
 
 	await mkdir(hooksDir, { recursive: true });
 	await writeFile(hookPath, generateScript(rules), "utf-8");

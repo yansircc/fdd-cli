@@ -1,9 +1,13 @@
+import { existsSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
 import chalk from "chalk";
 import { getPaths } from "../../lib/config.js";
 import { detectTool } from "../../lib/external/index.js";
 import { syncAllHooks } from "../../lib/hooks/index.js";
 import { createPitfall } from "../../lib/pitfall.js";
 import { validatePitfallInput } from "../../lib/schema.js";
+
+const EXAMPLE_PIT_FILE = "pit-000-example-protect-pitfalls.md";
 
 /**
  * Add pitfall from JSON (for AI agents)
@@ -30,6 +34,12 @@ export async function addFromJson(
 		}
 
 		const result = await createPitfall(paths.pits, data);
+
+		// Remove example pit file on first real pit creation
+		const examplePitPath = join(paths.pits, EXAMPLE_PIT_FILE);
+		if (existsSync(examplePitPath)) {
+			unlinkSync(examplePitPath);
+		}
 
 		// Sync all hooks after adding a pitfall
 		const syncResult = await syncAllHooks(cwd);

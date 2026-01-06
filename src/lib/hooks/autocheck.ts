@@ -3,15 +3,14 @@
  * Runs fdd check after file modifications
  */
 
-import { existsSync } from "node:fs";
-import { mkdir, unlink, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { Pitfall } from "../../types/index.js";
 import { HOOKS_DIR, HOOK_FILES, type SyncResult } from "./types.js";
 
 /**
  * Sync autocheck hooks
- * Generated if there are any pitfalls to check
+ * Always generates hook file (no pitfalls = pass-through)
  */
 export async function syncAutocheckHook(
 	cwd: string,
@@ -19,13 +18,6 @@ export async function syncAutocheckHook(
 ): Promise<SyncResult> {
 	const hooksDir = join(cwd, HOOKS_DIR);
 	const hookPath = join(hooksDir, HOOK_FILES.autocheck);
-
-	if (pitfalls.length === 0) {
-		if (existsSync(hookPath)) {
-			await unlink(hookPath);
-		}
-		return { hooksPath: hookPath, rulesCount: 0, generated: false };
-	}
 
 	await mkdir(hooksDir, { recursive: true });
 	await writeFile(hookPath, generateScript(), "utf-8");
