@@ -252,9 +252,10 @@ function ensureGitignore(cwd: string): void {
 	}
 
 	// Append entry
-	const newContent = content.endsWith("\n") || content === ""
-		? `${content}${GITIGNORE_ENTRY}\n`
-		: `${content}\n${GITIGNORE_ENTRY}\n`;
+	const newContent =
+		content.endsWith("\n") || content === ""
+			? `${content}${GITIGNORE_ENTRY}\n`
+			: `${content}\n${GITIGNORE_ENTRY}\n`;
 
 	writeFileSync(gitignorePath, newContent, "utf-8");
 }
