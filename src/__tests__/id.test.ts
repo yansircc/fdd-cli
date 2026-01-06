@@ -51,8 +51,8 @@ describe("pitfallFilename", () => {
 		);
 	});
 
-	it("should handle Chinese titles (removed)", () => {
-		expect(pitfallFilename("PIT-002", "配置错误")).toBe("pit-002-.md");
+	it("should use untitled for Chinese-only titles", () => {
+		expect(pitfallFilename("PIT-002", "配置错误")).toBe("pit-002-untitled.md");
 	});
 
 	it("should lowercase the ID", () => {
@@ -67,7 +67,7 @@ describe("ruleFilename", () => {
 		);
 	});
 
-	it("should handle Chinese titles (removed)", () => {
-		expect(ruleFilename("RULE-002", "禁止硬编码")).toBe("rule-002-.md");
+	it("should use untitled for Chinese-only titles", () => {
+		expect(ruleFilename("RULE-002", "禁止硬编码")).toBe("rule-002-untitled.md");
 	});
 });

@@ -257,6 +257,7 @@ export async function listPitfalls(
 
 /**
  * Read a single pitfall by ID
+ * Uses exact ID matching with pattern: {id}-{slug}.md
  */
 export async function getPitfallById(
 	pitfallsDir: string,
@@ -267,9 +268,13 @@ export async function getPitfallById(
 	}
 
 	const files = await readdir(pitfallsDir);
-	const matchingFile = files.find((f) =>
-		f.toLowerCase().startsWith(id.toLowerCase()),
-	);
+	// Match pattern: {id}-{slug}.md (id followed by hyphen and slug)
+	const idLower = id.toLowerCase();
+	const matchingFile = files.find((f) => {
+		const fLower = f.toLowerCase();
+		// Must start with id followed by hyphen (exact id match)
+		return fLower.startsWith(`${idLower}-`) && fLower.endsWith(".md");
+	});
 
 	if (!matchingFile) {
 		return null;
