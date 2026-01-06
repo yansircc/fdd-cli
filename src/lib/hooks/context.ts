@@ -90,8 +90,12 @@ function handlePreToolUse(data) {
     return;
   }
 
-  // Normalize file path (remove leading ./ if present)
-  const normalizedPath = filePath.replace(/^\\.\\//g, "");
+  // Normalize file path to relative path
+  const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
+  let normalizedPath = filePath.replace(/^\\.\\//g, "");
+  if (path.isAbsolute(normalizedPath)) {
+    normalizedPath = path.relative(projectDir, normalizedPath);
+  }
 
   // Find matching rules
   const matchedRules = findMatchingRules(normalizedPath);

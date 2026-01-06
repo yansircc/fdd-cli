@@ -66,7 +66,7 @@ process.stdin.on("end", () => {
 
 function processToolCall(input) {
   const { tool_input } = input;
-  const cwd = process.cwd();
+  const projectDir = process.env.CLAUDE_PROJECT_DIR || process.cwd();
 
   const filePath = tool_input?.file_path || tool_input?.path || "";
   if (!filePath) {
@@ -74,11 +74,13 @@ function processToolCall(input) {
     return;
   }
 
-  const relativePath = filePath.startsWith("/")
-    ? path.relative(cwd, filePath)
-    : filePath;
+  // Normalize to relative path
+  let relativePath = filePath;
+  if (path.isAbsolute(filePath)) {
+    relativePath = path.relative(projectDir, filePath);
+  }
 
-  const isCreate = !fs.existsSync(path.resolve(cwd, relativePath));
+  const isCreate = !fs.existsSync(path.resolve(projectDir, relativePath));
   const operation = isCreate ? "create" : "update";
 
   for (const rule of PROTECT_RULES) {
