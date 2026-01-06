@@ -100,13 +100,13 @@ function handlePreToolUse(data) {
     return;
   }
 
-  // Check state - have we already intercepted this file in this session?
-  const sessionId = data.session_id || "default";
-  const stateKey = \`\${sessionId}:\${normalizedPath}\`;
+  // Check state - have we already intercepted this file?
+  // Using pure path as key (no session isolation - once warned, always remembered)
+  const stateKey = normalizedPath;
   const state = loadState();
 
   if (state[stateKey]) {
-    // Already intercepted in this session, allow
+    // Already intercepted, allow
     outputAllow();
     return;
   }

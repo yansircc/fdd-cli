@@ -109,8 +109,9 @@ trigger:
 
 **状态管理**：
 - 状态文件：`.claude/hooks/.inject-state.json`
-- Key 格式：`${sessionId}:${filePath}`
-- 同一 session 同一文件只警告一次
+- Key 格式：`${filePath}`（纯路径）
+- SessionStart hook 在新 session 开始时清理状态文件
+- 效果：每个 session 第一次编辑时提醒，之后不重复
 
 ## TriggerResult 结构
 

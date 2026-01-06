@@ -82,7 +82,7 @@
 
 ## 演绎 Pit（预防性约束）
 
-### 示例 5: 技术栈约定 (ai-context)
+### 示例 5: 技术栈约定 (inject-context)
 
 ```json
 {
@@ -91,7 +91,7 @@
   "scope": {"type": "permanent"},
   "severity": "medium",
   "tags": ["convention"],
-  "trigger": [{"kind": "ai-context", "when_touching": ["src/**"], "context": "Use dayjs for dates, not moment. Format: YYYY/MM/DD", "strength": "strong"}],
+  "trigger": [{"kind": "inject-context", "when_touching": ["src/**"], "context": "Use dayjs for dates, not moment. Format: YYYY/MM/DD", "strength": "strong"}],
   "replay": {"root_cause": "AI may use wrong date library"},
   "action": [{"level": "low", "kind": "read", "doc": "See context.md for date handling"}],
   "verify": {"level": "V3", "fallback": {"level": "V3", "self_proof": ["Preventive constraint"]}}

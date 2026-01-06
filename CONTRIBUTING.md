@@ -69,7 +69,7 @@ Each trigger type is independently implemented in `src/lib/trigger/`:
 | `dynamic.ts` | `dynamic` | Shell command execution |
 | `command.ts` | `command` | Command interception |
 | `protect.ts` | `protect` | File protection |
-| `ai-context.ts` | `ai-context` | AI context injection |
+| `inject-context.ts` | `inject-context` | AI context injection |
 
 ### Hooks System
 

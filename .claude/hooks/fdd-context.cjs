@@ -13,37 +13,16 @@ const { minimatch } = require("minimatch");
 
 const INJECT_CONTEXT_RULES = [
   {
-    "pitfallId": "PIT-004",
-    "pitfallTitle": "Test inject-context",
-    "pitfallFilename": "pit-004-test-inject-context.md",
+    "pitfallId": "PIT-001",
+    "pitfallTitle": "marked.js 渲染需要 sanitize 防止 XSS",
+    "pitfallFilename": "pit-001-marked-js-sanitize-xss.md",
     "triggerIndex": 0,
     "whenTouching": [
-      "src/lib/id.ts"
+      "src/commands/ui/**",
+      "src/lib/ui/**"
     ],
     "exclude": [],
-    "context": "测试警告！"
-  },
-  {
-    "pitfallId": "PIT-005",
-    "pitfallTitle": "Test inject-context 2",
-    "pitfallFilename": "pit-005-test-inject-context-2.md",
-    "triggerIndex": 0,
-    "whenTouching": [
-      "src/lib/id.ts"
-    ],
-    "exclude": [],
-    "context": "测试警告2！"
-  },
-  {
-    "pitfallId": "PIT-006",
-    "pitfallTitle": "Test inject-context 3",
-    "pitfallFilename": "pit-006-test-inject-context-3.md",
-    "triggerIndex": 0,
-    "whenTouching": [
-      "src/lib/id.ts"
-    ],
-    "exclude": [],
-    "context": "测试警告3！"
+    "context": "使用 marked.js 渲染用户内容时必须 sanitize，pit 中的 error_snippet 可能包含恶意脚本"
   }
 ];
 
@@ -88,13 +67,13 @@ function handlePreToolUse(data) {
     return;
   }
 
-  // Check state - have we already intercepted this file in this session?
-  const sessionId = data.session_id || "default";
-  const stateKey = `${sessionId}:${normalizedPath}`;
+  // Check state - have we already intercepted this file?
+  // Using pure path as key (no session isolation - once warned, always remembered)
+  const stateKey = normalizedPath;
   const state = loadState();
 
   if (state[stateKey]) {
-    // Already intercepted in this session, allow
+    // Already intercepted, allow
     outputAllow();
     return;
   }

@@ -11,6 +11,7 @@ export const HOOK_FILES = {
 	autocheck: "fdd-autocheck.cjs",
 	guard: "fdd-guard.cjs",
 	stop: "fdd-stop.cjs",
+	sessionInit: "fdd-session-init.cjs",
 } as const;
 
 export interface SyncResult {
@@ -25,6 +26,7 @@ export interface SyncAllResult {
 	autocheck: SyncResult;
 	guard: SyncResult;
 	stop: SyncResult;
+	sessionInit: SyncResult;
 }
 
 export interface HookFlags {
@@ -33,4 +35,5 @@ export interface HookFlags {
 	autocheck: boolean;
 	guard: boolean;
 	stop: boolean;
+	sessionInit: boolean;
 }

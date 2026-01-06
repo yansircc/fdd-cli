@@ -2,7 +2,7 @@
  * 场景 5: 修改敏感文件需要提醒
  *
  * 背景: 这个文件之前出过问题，修改时需要特别注意
- * 预期: 应创建 ai-context trigger，当修改此文件时注入上下文提醒
+ * 预期: 应创建 inject-context trigger，当修改此文件时注入上下文提醒
  *
  * 历史问题:
  * - 曾经因为修改 hook 逻辑导致无限循环
@@ -11,7 +11,7 @@
  * 测试方法:
  * 1. 修改此文件
  * 2. stop hook 触发
- * 3. 由于不能设计确定的 trigger，应记录为 ai-context
+ * 3. 由于不能设计确定的 trigger，应记录为 inject-context
  */
 
 export interface Hook {

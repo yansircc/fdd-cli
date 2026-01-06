@@ -26,7 +26,7 @@
 - 输出 `注意: [title] @.fdd/pits/pit-xxx.md`
 - 直接引用 pitfall 文件作为上下文
 
-从 `ai-context` 类型触发器生成。
+从 `inject-context` 类型触发器生成。
 
 ### Protect Hook
 
@@ -45,6 +45,19 @@
 输出：`.claude/hooks/fdd-guard.cjs`
 
 从 `command` 类型触发器生成。硬性拦截，直接阻止命令执行。
+
+### Session Init Hook
+
+新 session 启动时清理 inject-context 状态文件。
+
+生成器：`src/lib/hooks/session-init.ts`
+输出：`.claude/hooks/fdd-session-init.cjs`
+
+**工作原理**：
+- SessionStart 事件触发时执行
+- 删除 `.claude/hooks/.inject-state.json`
+- 确保每个新 session 开始时状态是干净的
+- 配合 inject-context hook 实现"每 session 提醒一次"
 
 ## Skill 引用链
 

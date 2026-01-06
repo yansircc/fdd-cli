@@ -66,6 +66,11 @@ export async function ensureAllHookSettings(
 		addStopHook(settings, HOOK_FILES.stop, 30);
 	}
 
+	// Configure SessionStart hook for clearing inject-context state
+	if (flags.sessionInit) {
+		addSessionStartHook(settings, HOOK_FILES.sessionInit);
+	}
+
 	await mkdir(join(cwd, ".claude"), { recursive: true });
 	await writeFile(settingsPath, JSON.stringify(settings, null, 2), "utf-8");
 }
@@ -176,6 +181,24 @@ function addStopHook(
 				type: "command",
 				command: `node "$CLAUDE_PROJECT_DIR/${HOOKS_DIR}/${hookFile}"`,
 				timeout,
+			},
+		],
+	});
+}
+
+function addSessionStartHook(
+	// biome-ignore lint/suspicious/noExplicitAny: settings structure is dynamic
+	settings: any,
+	hookFile: string,
+): void {
+	if (!settings.hooks.SessionStart) settings.hooks.SessionStart = [];
+	if (hasHookConfigured(settings, "SessionStart", hookFile)) return;
+
+	settings.hooks.SessionStart.push({
+		hooks: [
+			{
+				type: "command",
+				command: `node "$CLAUDE_PROJECT_DIR/${HOOKS_DIR}/${hookFile}"`,
 			},
 		],
 	});

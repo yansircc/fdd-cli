@@ -69,7 +69,7 @@ fdd validate                # Validate gate checks
 | `dynamic` | Run shell commands | Runtime checks |
 | `command` | Intercept shell commands | Block dangerous commands |
 | `protect` | Protect files from AI edits | Prevent accidental overwrites |
-| `ai-context` | Inject context for AI | Remind AI of past issues |
+| `inject-context` | Inject context for AI | Remind AI of past issues |
 
 ## Claude Code Integration
 

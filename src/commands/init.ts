@@ -67,6 +67,9 @@ export async function init(options: InitOptions = {}): Promise<void> {
 	// Initialize all hooks (will be empty if no pitfalls exist)
 	const hooksResult = await syncAllHooks(cwd);
 
+	// Ensure .inject-state.json is in .gitignore
+	ensureGitignore(cwd);
+
 	console.log(chalk.green("✓ FDD initialized successfully!"));
 	console.log();
 	console.log("Created:");
@@ -230,4 +233,28 @@ async function copyDirRecursive(
 			await writeFile(destPath, content, "utf-8");
 		}
 	}
+}
+
+const GITIGNORE_ENTRY = ".claude/hooks/.inject-state.json";
+
+function ensureGitignore(cwd: string): void {
+	const gitignorePath = join(cwd, ".gitignore");
+
+	// Read existing .gitignore or create empty
+	let content = "";
+	if (existsSync(gitignorePath)) {
+		content = readFileSync(gitignorePath, "utf-8");
+	}
+
+	// Check if entry already exists
+	if (content.includes(GITIGNORE_ENTRY)) {
+		return;
+	}
+
+	// Append entry
+	const newContent = content.endsWith("\n") || content === ""
+		? `${content}${GITIGNORE_ENTRY}\n`
+		: `${content}\n${GITIGNORE_ENTRY}\n`;
+
+	writeFileSync(gitignorePath, newContent, "utf-8");
 }

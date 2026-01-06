@@ -85,13 +85,6 @@ async function runSingleTrigger(
 						error: `Trigger kind "${(trigger as { kind: string }).kind}" is deprecated. Migrate to "external" with tool: biome/husky/scripts`,
 					};
 				}
-				if ((trigger as { kind: string }).kind === "ai-context") {
-					return {
-						...baseResult,
-						triggered: false,
-						error: `Trigger kind "ai-context" is deprecated. Migrate to "inject-context"`,
-					};
-				}
 				return {
 					...baseResult,
 					triggered: false,

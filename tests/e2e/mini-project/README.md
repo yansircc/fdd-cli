@@ -10,7 +10,7 @@
 | `src/buggy-publish.ts` | 忘记 build 就 publish | `command` |
 | `src/buggy-schema.ts` | 类型变更没跑 typecheck | `change` |
 | `src/buggy-config.ts` | 直接写入配置文件 | `protect` |
-| `src/buggy-hooks.ts` | 修改敏感文件需要提醒 | `ai-context` |
+| `src/buggy-hooks.ts` | 修改敏感文件需要提醒 | `inject-context` |
 | `src/buggy-env.ts` | 缺少环境变量检查 | `dynamic` |
 
 ## 测试流程

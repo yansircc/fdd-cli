@@ -19,7 +19,7 @@ src/__tests__/
     ├── dynamic.test.ts
     ├── command.test.ts
     ├── protect.test.ts
-    └── ai-context.test.ts
+    └── inject-context.test.ts
 ```
 
 ### E2E 测试

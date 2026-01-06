@@ -38,7 +38,7 @@ fdd init
 | 2 | `src/buggy-publish.ts` | `command` |
 | 3 | `src/buggy-schema.ts` | `change` |
 | 4 | `src/buggy-config.ts` | `protect` |
-| 5 | `src/buggy-hooks.ts` | `ai-context` |
+| 5 | `src/buggy-hooks.ts` | `inject-context` |
 | 6 | `src/buggy-env.ts` | `dynamic` |
 
 ---

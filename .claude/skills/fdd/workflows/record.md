@@ -56,7 +56,7 @@ AI 根据上下文准备：
 1. Trigger 类型？
    - rule（代码匹配）
    - change（文件变更）
-   - ai-context（上下文提醒）
+   - inject-context（上下文提醒）
    - protect（文件保护）
 
 2. 匹配范围？（如 src/**/*.ts）
@@ -142,7 +142,7 @@ AI 根据上下文准备：
   "title": "简短描述",
   "origin": "deductive",
   "scope": {"type": "permanent"},
-  "trigger": [{"kind": "ai-context", "when_touching": ["src/**"], "context": "..."}],
+  "trigger": [{"kind": "inject-context", "when_touching": ["src/**"], "context": "..."}],
   "replay": {"root_cause": "..."},
   "verify": {"level": "V3", "fallback": {"self_proof": ["..."]}}
 }

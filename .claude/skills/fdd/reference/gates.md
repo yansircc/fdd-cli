@@ -60,7 +60,7 @@
 | dynamic | must_run |
 | change | when_changed |
 | protect | paths |
-| ai-context | when_touching, context |
+| inject-context | when_touching, context |
 
 ## Gate 6: Replay Required
 
@@ -95,4 +95,4 @@
 
 ## Trigger 优先原则
 
-按成本效益排序：rule > change > protect > command > dynamic > ai-context
+按成本效益排序：rule > change > protect > command > dynamic > inject-context

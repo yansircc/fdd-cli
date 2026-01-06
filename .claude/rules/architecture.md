@@ -35,7 +35,7 @@ lib/
 每种触发器类型独立实现：
 - `index.ts` - 调度器，路由到具体实现
 - `types.ts` - 类型定义
-- `rule.ts`, `change.ts`, `dynamic.ts`, `command.ts`, `protect.ts`, `ai-context.ts`
+- `rule.ts`, `change.ts`, `dynamic.ts`, `command.ts`, `protect.ts`, `inject-context.ts`
 
 ### Hooks 模块 (`src/lib/hooks/`)
 

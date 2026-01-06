@@ -69,11 +69,11 @@ FDD 支持 5 种触发器。
 
 **适用**：保护 Pit 文件、生产配置、关键文件
 
-## ai-context - AI 上下文注入
+## inject-context - AI 上下文注入
 
 ```json
 {
-  "kind": "ai-context",
+  "kind": "inject-context",
   "when_touching": ["src/db/**", "src/auth/**"],
   "context": "This area had security issues. Use parameterized queries.",
   "strength": "strong"

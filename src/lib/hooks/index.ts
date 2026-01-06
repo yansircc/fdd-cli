@@ -10,6 +10,7 @@ import { syncAutocheckHook } from "./autocheck.js";
 import { syncContextHook } from "./context.js";
 import { syncGuardHook } from "./guard.js";
 import { syncProtectHook } from "./protect.js";
+import { syncSessionInitHook } from "./session-init.js";
 import {
 	ensureAllHookSettings,
 	ensureProtectHookSettings,
@@ -38,6 +39,7 @@ export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
 	const autocheck = await syncAutocheckHook(cwd, pitfalls);
 	const guard = await syncGuardHook(cwd, pitfalls);
 	const stop = await syncStopHook(cwd, pitfalls);
+	const sessionInit = await syncSessionInitHook(cwd);
 
 	// Update settings with all hooks
 	await ensureAllHookSettings(cwd, {
@@ -46,9 +48,10 @@ export async function syncAllHooks(cwd: string): Promise<SyncAllResult> {
 		autocheck: autocheck.generated,
 		guard: guard.generated,
 		stop: stop.generated,
+		sessionInit: sessionInit.generated,
 	});
 
-	return { protect, context, autocheck, guard, stop };
+	return { protect, context, autocheck, guard, stop, sessionInit };
 }
 
 /**

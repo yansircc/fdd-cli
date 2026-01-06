@@ -71,7 +71,7 @@ Feedback（反馈/归纳）
 | `change` | Git 文件变更检测 | schema 变更时触发 |
 | `command` | 拦截 shell 命令 | 阻止危险命令 |
 | `protect` | 保护文件不被 AI 修改 | 防止意外覆盖 |
-| `ai-context` | 向 AI 注入上下文 | 提醒历史问题 |
+| `inject-context` | 向 AI 注入上下文 | 提醒历史问题 |
 
 ### Gate Checks
 
