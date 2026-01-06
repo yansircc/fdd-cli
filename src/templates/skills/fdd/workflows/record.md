@@ -1,5 +1,11 @@
 # 记录 Pit
 
+> **⚠️ 必须使用 CLI 创建 Pit，禁止直接写入 `.fdd/pits/` 目录**
+>
+> ```bash
+> fdd add --json '<JSON>'
+> ```
+
 ## 入口判断
 
 | 来源 | origin | 特点 |
@@ -91,7 +97,17 @@ AI 根据上下文准备：
 {验证方式}
 ```
 
-用户确认后执行 `fdd add --json`。
+用户确认后，使用 Bash 工具执行：
+
+```bash
+fdd add --json '{"title": "...", ...完整JSON...}'
+```
+
+**禁止直接写入 `.fdd/pits/` 目录！** CLI 会自动处理：
+- 验证 JSON 格式
+- 生成 Pit ID
+- 创建 `.md` 文件
+- 同步 Claude Code hooks
 
 ---
 
@@ -104,7 +120,7 @@ AI 根据上下文准备：
 ```markdown
 | Pit | 纠正什么 |
 |-----|----------|
-| [pit-name](../../pits/pit-name.json) | 简述偏差 |
+| [PIT-xxx-slug](../../pits/pit-xxx-slug.md) | 简述偏差 |
 ```
 
 **判断标准**：
@@ -115,7 +131,9 @@ AI 根据上下文准备：
 
 ---
 
-## JSON 格式
+## JSON 格式（传给 `fdd add --json` 的参数）
+
+> 这是 CLI 参数格式，不是文件格式。CLI 会自动转换为 `.md` 文件。
 
 ### 归纳 Pit
 
